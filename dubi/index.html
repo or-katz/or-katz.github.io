@@ -866,11 +866,11 @@ function throwDeliveryItem(type) {
                 targetCustomer.served = true;
                 targetCustomer.holding = type;
                 score += 1;
-                showMessage('!מסירה מושלמת', 1000);
+                showMessage('מסירה מושלמת!', 1000);
             } else {
                 targetCustomer.served = true;
                 targetCustomer.holding = 'wrong'; 
-                showMessage('!הוא לא הזמין את זה', 1500);
+                showMessage('הוא לא הזמין את זה!', 1500);
             }
         } else {
             // אם לא היה לקוח, הפוך לאוכל שנפל לכביש
@@ -880,7 +880,7 @@ function throwDeliveryItem(type) {
                 x: targetX,
                 y: targetY
             });
-            showMessage('!פספסת, נפל לכביש', 1500);
+            showMessage('פספסת, נפל לכביש!', 1500);
         }
         
         updateTopUI();
