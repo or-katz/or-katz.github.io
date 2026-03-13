@@ -46,16 +46,16 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100">
 
-    <div class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-lg border border-gray-100">
+    <div class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-lg border border-gray-100 relative">
         
-        <header class="text-center mb-8 relative">
-            <!-- כפתור התקנה (מוסתר כברירת מחדל, מופיע לפי תנאי הדפדפן) -->
-            <button id="installBtn" class="hidden absolute top-0 right-0 md:-mt-4 md:-mr-4 flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs font-bold shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                Install App
-            </button>
+        <!-- כפתור התקנה (גלוי תמיד) -->
+        <button id="installBtn" class="absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs font-bold shadow-sm z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            Install App
+        </button>
 
-            <h1 class="text-3xl font-bold text-gray-800 mb-2 mt-6">Phonotactic Password Generator</h1>
+        <header class="text-center mb-8 relative mt-4">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Phonotactic Password Generator</h1>
             <p class="text-gray-500 text-sm">Generates highly readable, syntactically perfect passwords. No double letters, easy to pronounce.</p>
         </header>
 
@@ -104,7 +104,16 @@
     </div>
 
     <script>
-        // --- PWA Installation Logic ---
+        // --- PWA Installation Logic & Virtual Service Worker ---
+        
+        // יצירת Service Worker וירטואלי כדי לרצות את חוקי ההתקנה של Chrome/Edge
+        if ('serviceWorker' in navigator) {
+            const swCode = `self.addEventListener('fetch', function(event) {});`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => console.log('SW registration ignored'));
+        }
+
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
 
@@ -112,32 +121,39 @@
             const userAgent = window.navigator.userAgent.toLowerCase();
             return /iphone|ipad|ipod/.test(userAgent);
         };
-        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
 
-        // תפיסת אירוע ההתקנה בדפדפנים תומכים (Chrome, Edge, אנדרואיד) - פועל רק בשרת מאובטח
+        // הסתרת הכפתור אם האפליקציה כבר מותקנת ורצה במסך מלא
+        if (isInStandaloneMode()) {
+            installBtn.style.display = 'none';
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            installBtn.classList.remove('hidden');
+            deferredPrompt = e; // שומרים את האירוע המקורי של הדפדפן
         });
 
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
+                // הדפדפן מוכן להתקנה - מציגים את חלון ההתקנה המקורי
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    installBtn.classList.add('hidden');
+                    installBtn.style.display = 'none';
                 }
                 deferredPrompt = null;
-            } else if (isIos() && !isInStandaloneMode()) {
-                // הצגת הסבר למשתמשי אייפון
-                alert('To install on iPhone/iPad:\n\n1. Tap the "Share" icon at the bottom of Safari.\n2. Scroll down and tap "Add to Home Screen".');
+            } else {
+                // אם הדפדפן לא תומך בהקפצה אוטומטית (כמו ספארי), מציגים הוראות
+                if (isIos()) {
+                    alert('To install on iPhone/iPad:\n\n1. Tap the "Share" icon at the bottom of Safari.\n2. Scroll down and tap "Add to Home Screen".');
+                } else {
+                    alert('To install this app:\n\nOpen your browser menu (the three dots) and select "Install" or "Add to Home Screen".');
+                }
             }
         });
 
-        // הצגת כפתור ייעודי למשתמשי אייפון (מכיוון שאפל לא תומכת ב-beforeinstallprompt)
+        // שינוי אייקון למשתמשי אייפון לנוחות
         if (isIos() && !isInStandaloneMode()) {
-            installBtn.classList.remove('hidden');
             installBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> iOS Install';
         }
 
