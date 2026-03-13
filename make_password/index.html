@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Password Generator</title>
+    
+    <!-- PWA Setup & App Meta Tags -->
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PassGen">
+    
+    <!-- App Icons (Embedded High-Quality SVG) -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
+
+    <!-- Web App Manifest (Embedded) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Password Generator","short_name":"PassGen","start_url":".","display":"standalone","background_color":"#f3f4f6","theme_color":"#4f46e5","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Roboto+Mono:wght@500;700&display=swap');
@@ -34,15 +49,15 @@
     <div class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-lg border border-gray-100">
         
         <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Password Generator</h1>
-            <p class="text-gray-500 text-sm">Random Word Password Generator</p>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Phonotactic Password Generator</h1>
+            <p class="text-gray-500 text-sm">Generates highly readable, syntactically perfect passwords. No double letters, easy to pronounce.</p>
         </header>
 
-        <!-- תצוגת המילה -->
+        <!-- אזור תצוגת הסיסמה -->
         <div class="bg-gray-50 rounded-2xl p-8 mb-6 text-center border-2 border-indigo-50 shadow-inner relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-purple-500"></div>
             
-            <p id="wordOutput" class="word-display font-bold text-indigo-900 tracking-tighter break-words w-full mx-auto py-6" dir="ltr">
+            <p id="wordOutput" class="word-display font-bold text-indigo-900 tracking-tighter break-words w-full mx-auto py-6">
                 Welcome
             </p>
         </div>
@@ -55,43 +70,52 @@
             </button>
         </div>
 
-        <!-- פקדים -->
+        <!-- פקדים ובקרות -->
         <div class="space-y-4">
             <div class="flex flex-col gap-3 mb-4">
                 <div class="flex justify-between items-center">
-                    <label class="text-sm font-bold text-gray-700">Final length (number of characters):</label>
-                    <span id="lengthValue" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100 shadow-sm">7</span>
+                    <label class="text-sm font-bold text-gray-700">Password Length (characters):</label>
+                    <span id="lengthValue" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100 shadow-sm">8</span>
                 </div>
-                <input type="range" id="lengthSlider" min="3" max="20" value="7" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                <!-- ברירת מחדל שונתה ל-8 -->
+                <input type="range" id="lengthSlider" min="4" max="25" value="8" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
             </div>
 
             <div id="specialCharsWrapper" class="flex items-center gap-2 mb-2">
-                <input type="checkbox" id="specialCharsCheckbox" checked class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                <label for="specialCharsCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer">Allow separators and special symbuls (? ! $ * _ -)</label>
+                <input type="checkbox" id="specialCharsCheckbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="specialCharsCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer">Include separators (@ # % & ? ! * - _ + =)</label>
             </div>
 
             <div class="flex items-center gap-2 mb-4">
-                <input type="checkbox" id="numbersCheckbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                <label for="numbersCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer">Add number (0-999)</label>
+                <input type="checkbox" id="numbersCheckbox" checked class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="numbersCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer">Append random numbers (0-999)</label>
             </div>
 
             <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-300 text-lg">
-                Create a new password ✨
+                Generate Password ✨
             </button>
         </div>
 
     </div>
 
     <script>
-        // --- מאגרי מידע מסוננים ---
-        const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'z'];
-        const vowels = ['a', 'e', 'i', 'o', 'u', 'y']; 
-        const initialBlends = ['bl', 'br', 'ch', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr', 'sh', 'sl', 'sm', 'sn', 'sp', 'st', 'str', 'th', 'tr', 'wh', 'ph', 'qu'];
-        const finalBlends = ['ch', 'ck', 'ft', 'ld', 'nd', 'ng', 'nk', 'nt', 'ph', 'rd', 'rk', 'rt', 'sh', 'sk', 'sp', 'st', 'th', 'mp'];
+        // --- מילונים מסוננים קפדנית (ללא אותיות כפולות כלל) ---
         
-        // סינון קידומות וסיומות שיהיו לפחות 2 תווים
-        const prefixes = ['re', 'un', 'in', 'ex', 'de', 'pro', 'con', 'pre', 'over', 'sub', 'dis', 'mis'];
-        const suffixes = ['tion', 'ing', 'er', 'ment', 'able', 'ness', 'ous', 'ify', 'ity', 'ish', 'ic'];
+        const vowels = ['a', 'e', 'i', 'o', 'u', 'y']; 
+        // ללא ee, oo
+        const vowelPairs = ['ea', 'ou', 'ai', 'oa', 'ie', 'ei', 'au', 'ay', 'ey', 'oi', 'oy'];
+        
+        const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'x', 'z'];
+        // ללא 3 עיצורים ברצף, ללא כפילויות
+        const initialBlends = ['bl', 'br', 'ch', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr', 'sh', 'sl', 'sm', 'sn', 'sp', 'st', 'th', 'tr', 'wh', 'ph', 'qu', 'sw', 'tw'];
+        const medialBlends = ['ch', 'sh', 'th', 'ph', 'st', 'nd', 'nt', 'ng', 'rt', 'lt', 'rm', 'rn', 'mb', 'mp'];
+        const finalBlends = ['ch', 'ck', 'ft', 'ld', 'nd', 'ng', 'nk', 'nt', 'ph', 'rd', 'rk', 'rt', 'sh', 'sk', 'sp', 'st', 'th', 'mp', 'rn', 'rm'];
+        
+        const prefixes = ['re', 'un', 'in', 'ex', 'de', 'pro', 'con', 'pre', 'over', 'sub', 'dis', 'mis', 'out', 'en', 'mega', 'cyber', 'neo', 'retro', 'astro'];
+        // ללא ness, less (מכילות ss)
+        const suffixes = ['tion', 'ing', 'er', 'ment', 'able', 'ous', 'ify', 'ity', 'ish', 'ic', 'dom', 'ful', 'ism', 'ship', 'punk', 'wave', 'logy'];
+
+        // --- פונקציות עזר ---
 
         function getRandom(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
@@ -101,154 +125,167 @@
             return Math.random() * 100 < percentage;
         }
 
-        // פונקציית ולידציה לוגית מורחבת
-        function isLogical(text) {
+        function isVowel(char) {
+            return ['a','e','i','o','u','y'].includes(char.toLowerCase());
+        }
+
+        // --- מנגנון וידוא לוגיקה תחבירית מורחב וקפדני ---
+        function isLogicalFinal(text) {
             const lower = text.toLowerCase();
             
-            // 1. איסור על תווים בודדים (כל הברה חייבת להיות 2+)
-            if (text.length < 2) return false;
+            // 1. איסור מוחלט על כל אות כפולה
+            if (/([a-z])\1/i.test(lower)) return false;
+            
+            // 2. איסור על 3 עיצורים רצופים (מבטיח קריאות והגייה קלה)
+            if (/[^aeiouy]{3,}/i.test(lower)) return false;
+            
+            // 3. איסור על 3 תנועות רצופות
+            if (/[aeiouy]{3,}/i.test(lower)) return false;
+            
+            // 4. מניעת סיומות בעייתיות להגייה
+            if (/[vjqx]$/i.test(lower)) return false;
 
-            // 2. איסור על אותיות זהות צמודות (מניעת aa, ss וכו')
-            for (let i = 0; i < lower.length - 1; i++) {
-                if (lower[i] === lower[i+1] && lower[i] >= 'a' && lower[i] <= 'z') return false;
-            }
-
-            // 3. צירופי אותיות בלתי אפשריים או לא טבעיים באנגלית
+            // 5. מניעת רצפים קשים פונטית 
             const illegalPairs = [
-                'cj', 'vj', 'qc', 'qg', 'qk', 'qv', 'qw', 'qx', 'qz', 'jj', 'kk', 'vv', 'ww', 'xx', 'yy', 'zz', 
-                'hh', 'pp', 'dd', 'bb', 'gg', 'tt', 'cc', 'mm', 'nn', 'rr', 'ff', 'pq', 'zk', 'zh', 'wp', 'bf'
+                'cj', 'vj', 'qc', 'qg', 'qk', 'qv', 'qw', 'qx', 'qz', 
+                'hh', 'pq', 'zk', 'zh', 'wp', 'bf', 'hx', 'xj', 'zx', 'cv', 'mx',
+                'xw', 'wx', 'jw', 'wj', 'kg', 'gk', 'pb', 'bp', 'td', 'dt', 'cg', 'gc',
+                'sz', 'zs', 'iy', 'yi', 'uy', 'yu'
             ];
             for (let pair of illegalPairs) {
                 if (lower.includes(pair)) return false;
             }
 
-            // 4. חוקי עיצורים ותנועות רצופים (מניעת רצפים בלתי קריאים)
-            const vowelMatch = lower.match(/[aeiouy]{3,}/); // לא יותר מ-2 תנועות רצופות
-            if (vowelMatch) return false;
-
-            const consMatch = lower.match(/[^aeiouy]{4,}/); // לא יותר מ-3 עיצורים רצופים
-            if (consMatch) return false;
-
-            // 5. חוק ה-Q (חובה Qu)
-            if (lower.includes('q') && !lower.includes('qu')) return false;
-            if (lower.endsWith('q')) return false;
-
-            // 6. סיומות לא חוקיות
-            if (/[fvj]$/.test(lower)) return false; 
-
             return true;
         }
 
-        function generateSyllable(isLastSyllable = false) {
-            let attempts = 0;
-            while (attempts < 100) {
-                attempts++;
-                let onset = '';
-                let nucleus = getRandom(vowels);
-                let coda = '';
+        // --- מנוע הרכבת החלקים לפי State Machine ---
+        function generateRandomSequence(targetL) {
+            let seq = "";
+            let usePrefix = targetL >= 6 ? chance(25) : false;
+            let useSuffix = targetL >= 6 ? chance(25) : false;
+            
+            let currentType = chance(50) ? 'V' : 'C';
 
-                const onsetType = Math.random();
-                if (onsetType < 0.2) onset = '';
-                else if (onsetType < 0.6) onset = getRandom(consonants);
-                else onset = getRandom(initialBlends);
-
-                const codaType = Math.random();
-                if (codaType < 0.3) coda = '';
-                else if (codaType < 0.7) {
-                    coda = getRandom(consonants);
-                    if (isLastSyllable && coda === 'v') coda = 've';
-                    if (isLastSyllable && coda === 'j') coda = 'ge';
-                } else coda = getRandom(finalBlends);
-
-                let syl = onset + nucleus + coda;
-                // וידוא שהברה היא לפחות 2 תווים והיא לוגית
-                if (syl.length >= 2 && isLogical(syl)) return syl;
+            if (usePrefix) {
+                let p = getRandom(prefixes);
+                seq += p;
+                currentType = isVowel(p.slice(-1)) ? 'C' : 'V';
             }
-            return "ba"; // Fallback בטוח
+
+            let bodyTarget = targetL - (useSuffix ? 4 : 0); 
+            if (bodyTarget < 1) bodyTarget = 1;
+
+            while (seq.length < bodyTarget) {
+                if (currentType === 'V') {
+                    seq += getRandom([...vowels, ...vowels, ...vowels, ...vowelPairs]); 
+                    currentType = 'C';
+                } else {
+                    let isFirst = (seq.length === 0);
+                    if (isFirst) {
+                        seq += getRandom([...consonants, ...consonants, ...initialBlends]);
+                    } else {
+                        seq += getRandom([...consonants, ...consonants, ...medialBlends, ...finalBlends]);
+                    }
+                    currentType = 'V';
+                }
+            }
+
+            if (useSuffix) {
+                let s = getRandom(suffixes);
+                let sStartsVowel = isVowel(s[0]);
+                if (currentType === 'V' && sStartsVowel) seq += getRandom(consonants);
+                else if (currentType === 'C' && !sStartsVowel) seq += getRandom(vowels);
+                seq += s;
+            }
+
+            return seq.replace(/q(?!u)/g, 'qu');
         }
 
+        function getPartTargetingLength(targetL) {
+            if (targetL <= 0) return "";
+            if (targetL === 1) return getRandom(vowels); 
+            
+            let attempts = 0;
+            while (attempts < 10000) {
+                attempts++;
+                let part = generateRandomSequence(targetL);
+                if (part.length === targetL && isLogicalFinal(part)) {
+                    return part;
+                }
+            }
+            
+            // גיבוי למקרה חירום (סופר קריא: C-V-C-V ללא אותיות כפולות)
+            let fb = "";
+            let cleanConsonants = ['b','d','f','g','h','k','l','m','n','p','r','s','t','v','z'];
+            for(let i=0; i<targetL; i++) {
+                if (i%2 === 0) {
+                    let nextC = getRandom(cleanConsonants);
+                    while(fb.endsWith(nextC)) nextC = getRandom(cleanConsonants);
+                    fb += nextC;
+                } else {
+                    let nextV = getRandom(vowels);
+                    while(fb.endsWith(nextV)) nextV = getRandom(vowels);
+                    fb += nextV;
+                }
+            }
+            return fb;
+        }
+
+        // --- הפונקציה הראשית שמרכיבה את כל הסיסמה ---
         function generateWord() {
-            const fullTargetLength = parseInt(document.getElementById('lengthSlider').value, 10);
+            let totalLen = parseInt(document.getElementById('lengthSlider').value, 10);
             const includeSpecialChars = document.getElementById('specialCharsCheckbox').checked;
             const includeNumbers = document.getElementById('numbersCheckbox').checked;
             
-            let attempts = 0;
-            
-            while (attempts < 5000) {
-                attempts++;
-                
-                let numberStr = '';
-                if (includeNumbers) {
-                    let maxNum = fullTargetLength > 6 ? 1000 : (fullTargetLength > 4 ? 100 : 10);
-                    numberStr = Math.floor(Math.random() * maxNum).toString();
-                }
+            let numStr = "";
 
-                let wordTargetLength = fullTargetLength - numberStr.length;
+            // שלב 1: הוספת מספרים בסוף
+            if (includeNumbers) {
+                let digits = 0;
+                if (totalLen >= 10) digits = 3;
+                else if (totalLen >= 7) digits = 2;
+                else digits = 1;
                 
-                // וודא שנשאר מקום למילה של לפחות 3 תווים (אם לא, נקצר את המספר)
-                if (wordTargetLength < 3 && includeNumbers) {
-                    numberStr = numberStr.slice(0, 1);
-                    wordTargetLength = fullTargetLength - numberStr.length;
-                }
-
-                const isSpecialShown = fullTargetLength >= 5;
-                let minSyllables = Math.max(1, Math.floor(wordTargetLength / 4));
-                let maxSyllables = Math.max(1, Math.ceil(wordTargetLength / 2));
-                
-                if (includeSpecialChars && isSpecialShown && wordTargetLength >= 5) {
-                    minSyllables = Math.max(2, minSyllables);
+                // הבטחת מקום למילה (לפחות 4 תווים אם יש מפרידים, אחרת 3)
+                if (totalLen - digits < (includeSpecialChars && totalLen >= 6 ? 4 : 3)) {
+                    digits = 1;
                 }
                 
-                let syllableCount = Math.floor(Math.random() * (maxSyllables - minSyllables + 1)) + minSyllables;
-                
-                let parts = [];
-                let separator = '';
-
-                if (isSpecialShown && wordTargetLength >= 5 && includeSpecialChars) {
-                    separator = getRandom(['?', '!', '$', '*', '-', '_']);
+                for(let i=0; i<digits; i++) {
+                    numStr += Math.floor(Math.random() * 10).toString();
                 }
-
-                // הוספת קידומת
-                if (wordTargetLength > 5 && chance(30)) {
-                    parts.push(getRandom(prefixes));
-                    syllableCount--; 
-                }
-
-                // הוספת הברות
-                for (let i = 0; i < Math.max(1, syllableCount); i++) {
-                    parts.push(generateSyllable(i === Math.max(1, syllableCount) - 1));
-                }
-
-                // הוספת סיומת
-                if (wordTargetLength > 6 && chance(40)) {
-                    parts.push(getRandom(suffixes));
-                }
-
-                // וידוא שיש לפחות 2 חלקים אם ביקשו מפרידים
-                if (includeSpecialChars && isSpecialShown && wordTargetLength >= 5 && parts.length < 2) {
-                    continue;
-                }
-
-                let wordPart = parts.join(separator);
-                
-                // בדיקות לוגיות סופיות על המילה המחוברת
-                if (!isLogical(wordPart)) continue;
-                
-                // בדיקת מפריד
-                if (includeSpecialChars && isSpecialShown && wordTargetLength >= 5 && !wordPart.includes(separator)) {
-                    continue;
-                }
-                
-                if (wordPart.length === wordTargetLength) {
-                    let finalResult = wordPart.charAt(0).toUpperCase() + wordPart.slice(1) + numberStr;
-                    if (finalResult.length === fullTargetLength) {
-                        return { text: finalResult };
-                    }
-                }
+                totalLen -= digits; 
             }
-            return { text: "Sturdy" }; // Fallback לוגי
+
+            let separator = "";
+            // שלב 2: שילוב מפרידים (מוצג ופעיל רק מ-6 תווים ומעלה)
+            if (includeSpecialChars && totalLen >= 5 && document.getElementById('lengthSlider').value >= 6) {
+                // מגוון רחב של מפרידים
+                separator = getRandom(['@', '#', '%', '&', '+', '=', '?', '!', '$', '*', '-', '_']);
+                totalLen -= 1; 
+            }
+
+            let resultWord = "";
+            
+            // שלב 3: הרכבת חלקי המילה
+            if (separator !== "") {
+                let p1Len = Math.floor(totalLen / 2);
+                let p2Len = totalLen - p1Len;
+                
+                let p1 = getPartTargetingLength(p1Len);
+                let p2 = getPartTargetingLength(p2Len);
+                resultWord = p1 + separator + p2;
+            } else {
+                resultWord = getPartTargetingLength(totalLen);
+            }
+
+            resultWord = resultWord.charAt(0).toUpperCase() + resultWord.slice(1);
+            return { text: resultWord + numStr };
         }
 
+        // --- חיבור לממשק המשתמש (UI) ---
+        
         const generateBtn = document.getElementById('generateBtn');
         const wordOutput = document.getElementById('wordOutput');
         const lengthSlider = document.getElementById('lengthSlider');
@@ -260,7 +297,8 @@
         const copyBtnLabel = document.getElementById('copyBtnLabel');
 
         function toggleSpecialCharsVisibility(val) {
-            if (val < 5) {
+            // האפשרות מוסתרת (אך שומרת על המקום) כאשר האורך קטן מ-6
+            if (val < 6) {
                 specialCharsWrapper.style.visibility = 'hidden';
                 specialCharsWrapper.style.pointerEvents = 'none';
             } else {
@@ -286,8 +324,8 @@
             void wordOutput.offsetWidth;
             
             wordOutput.className = 'word-display font-bold text-indigo-900 tracking-tighter break-words w-full mx-auto py-6';
-            if (result.text.length <= 8) wordOutput.classList.add('text-5xl', 'md:text-6xl');
-            else if (result.text.length <= 14) wordOutput.classList.add('text-4xl', 'md:text-5xl');
+            if (result.text.length <= 10) wordOutput.classList.add('text-5xl', 'md:text-6xl');
+            else if (result.text.length <= 18) wordOutput.classList.add('text-4xl', 'md:text-5xl');
             else wordOutput.classList.add('text-3xl', 'md:text-4xl');
             
             wordOutput.textContent = result.text;
@@ -305,7 +343,7 @@
             try {
                 if (document.execCommand('copy')) {
                     const originalText = copyBtnLabel.textContent;
-                    copyBtnLabel.textContent = "הועתק!";
+                    copyBtnLabel.textContent = "Copied!";
                     copyBtn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
                     setTimeout(() => {
                         copyBtnLabel.textContent = originalText;
