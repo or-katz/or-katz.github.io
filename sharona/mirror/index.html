@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ממיר לכתב מראה - הרמוניה מעוקלת</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Assistant:wght@400;700;800&family=Fredoka:wght@400;600;700&family=Heebo:wght@400;700;900&family=Karantina:wght@300;400;700&family=Rubik:wght@400;700;900&family=Suez+One&family=Varela+Round&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .mirror-effect {
+            transform: scaleX(-1);
+        }
+
+        .straight-text {
+            display: block;
+            width: 100%;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.2;
+            transition: font-size 0.2s ease, font-family 0.2s ease;
+        }
+        
+        body {
+            height: 100dvh; 
+            overflow: hidden;
+            font-family: 'Assistant', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            width: 100%;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col text-gray-800">
+    
+    <main class="flex-1 min-h-0 flex flex-col relative p-4 md:p-8 overflow-hidden">
+        <div class="text-center mb-2 flex-shrink-0 z-10 flex justify-between items-center w-full px-2">
+            <h1 class="text-gray-400 text-xs md:text-sm font-medium tracking-wide">תצוגת כתב מראה</h1>
+            <button id="clearBtnTop" class="text-gray-400 hover:text-rose-500 transition-colors bg-white rounded-full p-1.5 shadow-sm border border-gray-100" title="נקה מסך">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+        
+        <!-- תצוגה: טקסט ישר -->
+        <div id="straight-view" class="flex-1 overflow-y-auto flex flex-col items-center justify-center w-full pb-4 transition-all duration-300">
+            <p id="output-straight" class="mirror-effect straight-text font-black text-indigo-600 drop-shadow-md text-center opacity-20 transition-opacity duration-300" style="font-family: 'Heebo', sans-serif; font-size: 4rem;">כתב מראה</p>
+        </div>
+
+        <!-- תצוגה: טקסט מעוקל (SVG) -->
+        <div id="curved-view" class="hidden absolute inset-0 pt-10 pb-4 flex items-center justify-center overflow-hidden pointer-events-none transition-all duration-300">
+            <svg viewBox="0 0 1000 1000" class="mirror-effect w-full h-full max-h-[80vh] opacity-20 transition-opacity duration-300" id="svg-container">
+                <defs id="svg-defs"></defs>
+                <g id="svg-text-group" font-family="'Heebo', sans-serif" font-weight="900" font-size="80" fill="#4f46e5" dir="rtl"></g>
+            </svg>
+        </div>
+    </main>
+
+    <!-- אזור ההגדרות -->
+    <footer class="bg-white shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.1)] p-3 md:p-6 rounded-t-3xl border-t border-gray-200 flex-shrink-0 z-20 relative">
+        <div class="max-w-4xl mx-auto w-full flex flex-col gap-3">
+            
+            <textarea id="input" rows="3" 
+                class="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-indigo-500 transition-colors text-base md:text-lg resize-none bg-gray-50 focus:bg-white shadow-inner outline-none font-medium leading-relaxed"
+                placeholder="הכנס טקסט והוא יתהפך למעלה...
+(ניתן לרדת שורה עם Enter)"></textarea>
+            
+            <!-- סרגל כלי בינה מלאכותית (Gemini API) -->
+            <div class="flex flex-wrap items-center gap-2 px-1">
+                <span class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">AI ✨</span>
+                <button id="ai-improve" class="text-xs md:text-sm bg-gradient-to-r from-blue-100 to-indigo-100 text-indigo-700 hover:from-blue-200 hover:to-indigo-200 px-3 py-1.5 rounded-lg transition-all font-bold shadow-sm border border-indigo-200/50 hover:shadow">✨ שפר ניסוח</button>
+                <button id="ai-greet" class="text-xs md:text-sm bg-gradient-to-r from-purple-100 to-fuchsia-100 text-purple-700 hover:from-purple-200 hover:to-fuchsia-200 px-3 py-1.5 rounded-lg transition-all font-bold shadow-sm border border-purple-200/50 hover:shadow">✨ נסח ברכה</button>
+                <button id="ai-rhyme" class="text-xs md:text-sm bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 hover:from-emerald-200 hover:to-teal-200 px-3 py-1.5 rounded-lg transition-all font-bold shadow-sm border border-emerald-200/50 hover:shadow">✨ חרוזים</button>
+                <span id="ai-status" class="text-xs font-bold text-indigo-500 hidden animate-pulse mr-auto">חושב...</span>
+            </div>
+
+            <div class="flex flex-col gap-3 bg-gray-50 p-3 md:p-4 rounded-xl border border-gray-100">
+                
+                <div class="grid grid-cols-2 gap-4 items-center">
+                    <div class="flex flex-col gap-1">
+                        <label for="font-select" class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider">סגנון גופן</label>
+                        <select id="font-select" class="text-sm border border-gray-300 rounded-lg p-1.5 bg-white focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer">
+                            <option value="'Heebo', sans-serif" style="font-family: 'Heebo', sans-serif;">היבו (Heebo)</option>
+                            <option value="'Rubik', sans-serif" style="font-family: 'Rubik', sans-serif;">רוביק (Rubik)</option>
+                            <option value="'Varela Round', sans-serif" style="font-family: 'Varela Round', sans-serif;">ורלה (Varela)</option>
+                            <option value="'Fredoka', sans-serif" style="font-family: 'Fredoka', sans-serif;">פרדוקה (Fredoka - עגול)</option>
+                            <option value="'Amatic SC', cursive" style="font-family: 'Amatic SC', cursive; font-size: 1.2em;">אמטיק (Amatic - כתב יד)</option>
+                            <option value="'Karantina', cursive" style="font-family: 'Karantina', cursive; font-size: 1.2em;">קרנטינה (Karantina - סמן)</option>
+                            <option value="'Suez One', serif" style="font-family: 'Suez One', serif;">סואץ (Suez One - עבה)</option>
+                            <option value="'Assistant', sans-serif" style="font-family: 'Assistant', sans-serif;">אסיסטנט (Assistant)</option>
+                            <option value="system-ui, sans-serif">רגיל (מערכת)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between items-center">
+                            <label for="size-slider" class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider">גודל טקסט</label>
+                            <span id="size-value" class="text-[10px] text-indigo-500 font-bold">בינוני</span>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <span class="text-xs text-gray-400">A</span>
+                            <input type="range" id="size-slider" min="1" max="10" value="5">
+                            <span class="text-base font-bold text-gray-400">A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <div class="relative">
+                                <input type="checkbox" id="curve-toggle" class="sr-only">
+                                <div class="block bg-gray-300 w-10 h-5 md:h-6 rounded-full transition-colors group-hover:bg-gray-400 toggle-bg"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-3 h-3 md:w-4 md:h-4 rounded-full transition-transform toggle-dot shadow-sm"></div>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700 select-none">עקם את הטקסט</span>
+                        </label>
+                    </div>
+
+                    <div id="radius-container" class="hidden flex items-center gap-3 pt-1">
+                        <span class="text-[10px] md:text-xs text-gray-500 font-medium whitespace-nowrap">קשת רחבה</span>
+                        <input type="range" id="radius-slider" min="0" max="100" value="40">
+                        <span class="text-[10px] md:text-xs text-gray-500 font-medium whitespace-nowrap">עיגול סגור</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const inputEl = document.getElementById('input');
+        const outputStraightEl = document.getElementById('output-straight');
+        const svgDefs = document.getElementById('svg-defs');
+        const svgTextGroup = document.getElementById('svg-text-group');
+        const straightView = document.getElementById('straight-view');
+        const curvedView = document.getElementById('curved-view');
+        const svgContainer = document.getElementById('svg-container');
+        const curveToggle = document.getElementById('curve-toggle');
+        const toggleBg = document.querySelector('.toggle-bg');
+        const toggleDot = document.querySelector('.toggle-dot');
+        const radiusContainer = document.getElementById('radius-container');
+        const radiusSlider = document.getElementById('radius-slider');
+        const clearBtnTop = document.getElementById('clearBtnTop');
+        const fontSelect = document.getElementById('font-select');
+        const sizeSlider = document.getElementById('size-slider');
+        const sizeValueDisplay = document.getElementById('size-value');
+
+        // פונקציה לבניית קשתות קונצנטריות
+        const renderCurvedText = (text, isEmpty) => {
+            svgDefs.innerHTML = '';
+            svgTextGroup.innerHTML = '';
+
+            if (isEmpty) {
+                renderSingleCurvedLine('כתב מראה', 0);
+                svgContainer.classList.add('opacity-20');
+                return;
+            }
+
+            svgContainer.classList.remove('opacity-20');
+            const lines = text.split('\n');
+            
+            lines.forEach((lineText, index) => {
+                if(lineText.trim() === '') return; 
+                renderSingleCurvedLine(lineText, index);
+            });
+        };
+
+        const renderSingleCurvedLine = (lineText, lineIndex) => {
+            const sizeLevel = parseInt(sizeSlider.value);
+            const curvatureValue = parseInt(radiusSlider.value);
+            
+            const svgFontSize = 20 + (sizeLevel * 14);
+            
+            // חישוב הרדיוס הבסיסי של השורה העליונה ביותר
+            const baseRadius = 150 + (100 - curvatureValue) * 40;
+            
+            // מרווח בין השורות
+            const lineSpacing = svgFontSize * 1.2;
+            
+            // --- אלגוריתם המעגלים הקונצנטריים (הרמוניה מושלמת) ---
+            // 1. קביעת נקודת המרכז הווירטואלית המשותפת (Center Y) לכל הקשתות
+            const baseTopY = 300 + (svgFontSize * 1.2);
+            const CY = baseTopY + baseRadius; // המרכז נמצא למטה מתחת לטקסט
+            
+            // 2. הפחתת הרדיוס ככל שיורדים שורה, כדי להתקרב למרכז ולהישאר מקבילים
+            // שימוש ב-Math.max כדי למנוע קריסה של ה-SVG במקרה של המון שורות
+            const currentRadius = Math.max(10, baseRadius - (lineIndex * lineSpacing));
+            
+            // 3. חישוב נקודת ההתחלה והסיום של הקשת הנוכחית על בסיס הרדיוס המוקטן ונקודת המרכז המשותפת
+            const currentTopY = CY - currentRadius;
+            const currentBottomY = CY + currentRadius;
+
+            const pathId = `curve-path-line-${lineIndex}`;
+
+            const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            pathElement.setAttribute("id", pathId);
+            pathElement.setAttribute("fill", "transparent");
+            const d = `
+                M 500, ${currentBottomY} 
+                A ${currentRadius}, ${currentRadius} 0 0, 1 500, ${currentTopY} 
+                A ${currentRadius}, ${currentRadius} 0 0, 1 500, ${currentBottomY}
+            `;
+            pathElement.setAttribute("d", d.trim());
+            svgDefs.appendChild(pathElement);
+
+            const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            const textPathElement = document.createElementNS("http://www.w3.org/2000/svg", "textPath");
+            textPathElement.setAttribute("href", `#${pathId}`);
+            textPathElement.setAttribute("startOffset", "50%");
+            textPathElement.setAttribute("text-anchor", "middle");
+            textPathElement.setAttribute("class", "drop-shadow-md");
+            textPathElement.textContent = lineText;
+
+            textElement.appendChild(textPathElement);
+            svgTextGroup.appendChild(textElement);
+        };
+
+        const updateText = () => {
+            const text = inputEl.value;
+            const isTextEmpty = !text.trim();
+            const placeholder = 'כתב מראה';
+            
+            outputStraightEl.textContent = isTextEmpty ? placeholder : text;
+            outputStraightEl.classList.toggle('opacity-20', isTextEmpty);
+            
+            if (curveToggle.checked) {
+                renderCurvedText(text, isTextEmpty);
+            }
+
+            if (!isTextEmpty && !curveToggle.checked) {
+                straightView.scrollTop = straightView.scrollHeight;
+            }
+        };
+
+        const updateFont = () => {
+            const selectedFont = fontSelect.value;
+            outputStraightEl.style.fontFamily = selectedFont;
+            svgTextGroup.setAttribute('font-family', selectedFont);
+            
+            // התאמת עובי הגופן (משקל) לגופני כתב יד שנוטים להיות דקים יותר
+            if(selectedFont.includes('Amatic') || selectedFont.includes('Karantina') || selectedFont.includes('Fredoka')) {
+                svgTextGroup.setAttribute('font-weight', '700');
+            } else {
+                 svgTextGroup.setAttribute('font-weight', '900');
+            }
+            
+            // גודל הפונטים הללו קצת שונה, אז נרענן את הציור
+            if (curveToggle.checked) {
+                renderCurvedText(inputEl.value, !inputEl.value.trim());
+            }
+        };
+
+        const updateSizeAndPath = () => {
+            const sizeLevel = parseInt(sizeSlider.value);
+            
+            let sizeLabel = "בינוני";
+            if(sizeLevel <= 3) sizeLabel = "קטן";
+            if(sizeLevel >= 8) sizeLabel = "ענק";
+            sizeValueDisplay.textContent = sizeLabel;
+
+            const straightSizeRem = 1.5 + (sizeLevel * 0.65); 
+            outputStraightEl.style.fontSize = `${straightSizeRem}rem`;
+
+            const svgFontSize = 20 + (sizeLevel * 14);
+            svgTextGroup.setAttribute('font-size', svgFontSize);
+            
+            if (curveToggle.checked) {
+                renderCurvedText(inputEl.value, !inputEl.value.trim());
+            }
+        };
+
+        const handleToggle = () => {
+            const isCurved = curveToggle.checked;
+            
+            if (isCurved) {
+                toggleBg.classList.replace('bg-gray-300', 'bg-indigo-500');
+                toggleBg.classList.replace('group-hover:bg-gray-400', 'group-hover:bg-indigo-600');
+                toggleDot.style.transform = 'translateX(-100%)';
+                
+                straightView.classList.add('hidden');
+                curvedView.classList.remove('hidden');
+                radiusContainer.classList.remove('hidden');
+                
+                renderCurvedText(inputEl.value, !inputEl.value.trim());
+            } else {
+                toggleBg.classList.replace('bg-indigo-500', 'bg-gray-300');
+                toggleBg.classList.replace('group-hover:bg-indigo-600', 'group-hover:bg-gray-400');
+                toggleDot.style.transform = 'translateX(0)';
+                
+                straightView.classList.remove('hidden');
+                curvedView.classList.add('hidden');
+                radiusContainer.classList.add('hidden');
+            }
+            
+            updateText();
+        };
+
+        const clearText = () => {
+            inputEl.value = '';
+            updateText();
+            inputEl.focus();
+        };
+
+        // --- שילוב Gemini API - בינה מלאכותית ---
+        const apiKey = ""; // מפתח ה-API מוזרק אוטומטית על ידי סביבת ההרצה
+        const aiGreetBtn = document.getElementById('ai-greet');
+        const aiRhymeBtn = document.getElementById('ai-rhyme');
+        const aiImproveBtn = document.getElementById('ai-improve');
+        const aiStatus = document.getElementById('ai-status');
+
+        async function generateAIContent(promptText) {
+            // תצוגת טעינה
+            aiStatus.textContent = "✨ חושב...";
+            aiStatus.classList.remove('hidden', 'text-rose-500');
+            aiStatus.classList.add('text-indigo-500', 'animate-pulse');
+            
+            // חסימת כפתורים למניעת כפילויות
+            aiGreetBtn.disabled = true; aiRhymeBtn.disabled = true; aiImproveBtn.disabled = true;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            // מנגנון Exponential Backoff למקרה של עומס ברשת
+            let retries = 5;
+            let delay = 1000;
+            let resultText = "";
+
+            while (retries > 0) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }] }],
+                            systemInstruction: { parts: [{ text: "אתה עוזר חכם באפליקציה ליצירת ברכות ואומנות בכתב מראה. ענה רק בעברית, בצורה קצרה (עד 4 שורות). החזר רק את הטקסט המבוקש ללא שום הקדמות או מרכאות, רק הטקסט נטו כדי שהמשתמש יראה אותו כפי שהוא במסך." }] }
+                        })
+                    });
+                    if (!response.ok) throw new Error("שגיאת רשת");
+                    const data = await response.json();
+                    resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    break; 
+                } catch (error) {
+                    retries--;
+                    if (retries === 0) {
+                        resultText = "שגיאה: לא הצלחתי להתחבר ל-AI כרגע.";
+                        aiStatus.classList.remove('text-indigo-500', 'animate-pulse');
+                        aiStatus.classList.add('text-rose-500');
+                        aiStatus.textContent = resultText;
+                        aiGreetBtn.disabled = false; aiRhymeBtn.disabled = false; aiImproveBtn.disabled = false;
+                        return null;
+                    }
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+            
+            aiStatus.classList.add('hidden');
+            aiGreetBtn.disabled = false; aiRhymeBtn.disabled = false; aiImproveBtn.disabled = false;
+            
+            return resultText.replace(/```/g, '').trim();
+        }
+
+        const handleAIGeneration = async (type) => {
+            const currentText = inputEl.value.trim();
+            let prompt = "";
+            
+            if (type === 'greet') {
+                prompt = `כתוב ברכה קצרה ומרגשת (עד 3 שורות) בנושא או למישהו: "${currentText || 'אירוע משמח כלשהו'}".`;
+            } else if (type === 'rhyme') {
+                prompt = `הפוך את הטקסט הבא לשיר קצר וחמוד בחרוזים (עד 4 שורות): "${currentText || 'שלום עולם'}".`;
+            } else if (type === 'improve') {
+                prompt = `שפר את הניסוח של הטקסט הבא, תקן שגיאות אם יש, והפוך אותו לברור, יפה ופואטי יותר: "${currentText || 'שלום'}". אם זה רק מילה אחת, תן לה הקשר מעניין.`;
+            }
+
+            const generatedText = await generateAIContent(prompt);
+            if (generatedText) {
+                inputEl.value = generatedText;
+                // עדכון התצוגה העליונה בזמן אמת עם התשובה של ג'מיני
+                updateText();
+                // אם הטקסט המעוקל פתוח - יש לרענן את הציור
+                if (curveToggle.checked) {
+                    renderCurvedText(inputEl.value, !inputEl.value.trim());
+                }
+                inputEl.focus();
+            }
+        };
+
+        // מאזינים לכפתורי ה-AI
+        aiGreetBtn.addEventListener('click', () => handleAIGeneration('greet'));
+        aiRhymeBtn.addEventListener('click', () => handleAIGeneration('rhyme'));
+        aiImproveBtn.addEventListener('click', () => handleAIGeneration('improve'));
+        // --- סוף שילוב Gemini API ---
+
+        inputEl.addEventListener('input', updateText);
+        curveToggle.addEventListener('change', handleToggle);
+        radiusSlider.addEventListener('input', updateSizeAndPath);
+        sizeSlider.addEventListener('input', updateSizeAndPath);
+        clearBtnTop.addEventListener('click', clearText);
+        fontSelect.addEventListener('change', updateFont);
+
+        document.addEventListener('dblclick', function(event) {
+            event.preventDefault();
+        }, { passive: false });
+
+        updateFont();
+        updateSizeAndPath();
+        updateText();
+        handleToggle();
+    </script>
+</body>
+</html>
