@@ -29,7 +29,6 @@
     overflow-x: hidden;
   }
 
-  /* Header */
   .header {
     background: var(--surface);
     padding: 12px 16px;
@@ -58,11 +57,9 @@
     color: var(--text-muted);
   }
 
-  /* Screens */
   .screen { display: none; }
   .screen.active { display: flex; flex-direction: column; }
 
-  /* Camera Screen */
   #cameraScreen {
     height: calc(100dvh - 53px);
     position: relative;
@@ -153,7 +150,6 @@
     background: var(--surface2);
   }
 
-  /* Upload fallback */
   #uploadFallback {
     flex: 1;
     display: flex;
@@ -164,16 +160,8 @@
     gap: 16px;
   }
 
-  #uploadFallback .upload-icon {
-    font-size: 64px;
-    opacity: 0.5;
-  }
-
-  #uploadFallback p {
-    color: var(--text-muted);
-    text-align: center;
-    line-height: 1.5;
-  }
+  #uploadFallback .upload-icon { font-size: 64px; opacity: 0.5; }
+  #uploadFallback p { color: var(--text-muted); text-align: center; line-height: 1.5; }
 
   .upload-btn {
     padding: 14px 32px;
@@ -186,10 +174,7 @@
     cursor: pointer;
   }
 
-  /* Crop Screen */
-  #cropScreen {
-    height: calc(100dvh - 53px);
-  }
+  #cropScreen { height: calc(100dvh - 53px); }
 
   #cropContainer {
     flex: 1;
@@ -254,10 +239,7 @@
   .btn-confirm { background: var(--primary); color: #fff; }
   .btn-auto { background: var(--success); color: #fff; }
 
-  /* Pages Screen */
-  #pagesScreen {
-    min-height: calc(100dvh - 53px);
-  }
+  #pagesScreen { min-height: calc(100dvh - 53px); }
 
   .pages-grid {
     display: grid;
@@ -278,12 +260,7 @@
   }
 
   .page-card:active { transform: scale(0.97); }
-
-  .page-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .page-card img { width: 100%; height: 100%; object-fit: cover; }
 
   .page-card .page-num {
     position: absolute;
@@ -326,7 +303,6 @@
 
   .empty-state .icon { font-size: 48px; opacity: 0.4; }
 
-  /* Bottom Bar */
   .bottom-bar {
     padding: 12px 16px;
     background: var(--surface);
@@ -354,7 +330,6 @@
   .btn-save { background: var(--success); color: #fff; }
   .btn-save:disabled { opacity: 0.5; }
 
-  /* Settings panel */
   .settings-panel {
     padding: 16px;
     background: var(--surface);
@@ -368,14 +343,8 @@
     padding: 10px 0;
   }
 
-  .settings-row + .settings-row {
-    border-top: 1px solid var(--surface2);
-  }
-
-  .settings-row label {
-    font-size: 14px;
-    color: var(--text-muted);
-  }
+  .settings-row + .settings-row { border-top: 1px solid var(--surface2); }
+  .settings-row label { font-size: 14px; color: var(--text-muted); }
 
   .settings-row select {
     background: var(--surface2);
@@ -386,7 +355,6 @@
     font-size: 14px;
   }
 
-  /* Toggle switch */
   .toggle {
     position: relative;
     width: 48px;
@@ -419,7 +387,47 @@
   .toggle input:checked + .slider { background: var(--primary); }
   .toggle input:checked + .slider::after { transform: translateX(20px); }
 
-  /* Processing overlay */
+  .bw-options {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0;
+  }
+
+  .bw-options.open {
+    max-height: 200px;
+    padding: 8px 0 0 0;
+  }
+
+  .bw-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .bw-mode-btn {
+    padding: 10px 8px;
+    border: 2px solid var(--surface2);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .bw-mode-btn.active {
+    border-color: var(--primary);
+    color: var(--text);
+    background: rgba(37, 99, 235, 0.15);
+  }
+
+  .bw-mode-btn .mode-label { display: block; font-size: 13px; margin-bottom: 2px; }
+  .bw-mode-btn .mode-desc { display: block; font-size: 10px; font-weight: 400; opacity: 0.7; }
+
   .processing-overlay {
     position: fixed;
     inset: 0;
@@ -445,7 +453,6 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Toast */
   .toast {
     position: fixed;
     bottom: 80px;
@@ -468,7 +475,6 @@
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
   <h1>Scan for Free</h1>
   <div class="page-count" id="pageCount">0 pages</div>
@@ -514,18 +520,38 @@
   <div class="settings-panel">
     <div class="settings-row">
       <label>Quality</label>
-      <select id="qualitySelect">
+      <select id="qualitySelect" onchange="reprocessPages()">
         <option value="low">Low (fast, small)</option>
         <option value="medium" selected>Medium</option>
         <option value="high">High (best quality)</option>
       </select>
     </div>
-    <div class="settings-row">
+    <div class="settings-row" style="flex-wrap:wrap;">
       <label>Black &amp; White</label>
       <label class="toggle">
-        <input type="checkbox" id="bwToggle" onchange="reprocessPages()">
+        <input type="checkbox" id="bwToggle" onchange="toggleBW()">
         <span class="slider"></span>
       </label>
+      <div class="bw-options" id="bwOptions">
+        <div class="bw-mode-grid">
+          <button class="bw-mode-btn active" data-mode="light" onclick="selectBWMode(this)">
+            <span class="mode-label">Light</span>
+            <span class="mode-desc">Preserve details</span>
+          </button>
+          <button class="bw-mode-btn" data-mode="standard" onclick="selectBWMode(this)">
+            <span class="mode-label">Standard</span>
+            <span class="mode-desc">Balanced</span>
+          </button>
+          <button class="bw-mode-btn" data-mode="strong" onclick="selectBWMode(this)">
+            <span class="mode-label">Strong</span>
+            <span class="mode-desc">High contrast</span>
+          </button>
+          <button class="bw-mode-btn" data-mode="extra" onclick="selectBWMode(this)">
+            <span class="mode-label">Extra Strong</span>
+            <span class="mode-desc">Text only</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="pages-grid" id="pagesGrid"></div>
@@ -539,31 +565,29 @@
   </div>
 </div>
 
-<!-- Hidden elements -->
 <input type="file" id="fileInput" accept="image/*" capture="environment" multiple style="display:none" onchange="handleFileInput(event)">
 <canvas id="processCanvas" style="display:none"></canvas>
 
-<!-- Processing overlay -->
 <div class="processing-overlay hidden" id="processingOverlay">
   <div class="spinner"></div>
   <p id="processingText">Processing...</p>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 const { jsPDF } = window.jspdf;
 
 // State
-let pages = [];           // { original: ImageData, cropped: dataURL, corners: [...] }
-let currentImage = null;  // HTMLImageElement being cropped
+let pages = [];
+let currentImage = null;
 let currentImageData = null;
-let corners = [];         // [{x,y}, ...] in image coordinates
+let corners = [];
 let stream = null;
 let facingMode = 'environment';
 let draggingCorner = -1;
 let detectionInterval = null;
+let bwMode = 'light'; // light, standard, strong, extra
 
 // DOM refs
 const video = document.getElementById('video');
@@ -626,11 +650,9 @@ function capturePhoto() {
 function handleFileInput(e) {
   const files = Array.from(e.target.files);
   if (files.length === 0) return;
-  // Process first file, queue rest
   const reader = new FileReader();
   reader.onload = () => loadImageForCrop(reader.result);
   reader.readAsDataURL(files[0]);
-  // Store remaining for batch
   if (files.length > 1) {
     window._pendingFiles = files.slice(1);
   }
@@ -662,9 +684,7 @@ function startEdgeDetection() {
       overlayCtx.scale(scaleX, scaleY);
       overlayCtx.beginPath();
       overlayCtx.moveTo(detected[0].x, detected[0].y);
-      for (let i = 1; i < 4; i++) {
-        overlayCtx.lineTo(detected[i].x, detected[i].y);
-      }
+      for (let i = 1; i < 4; i++) overlayCtx.lineTo(detected[i].x, detected[i].y);
       overlayCtx.closePath();
       overlayCtx.strokeStyle = '#22c55e';
       overlayCtx.lineWidth = 3 / scaleX;
@@ -673,7 +693,7 @@ function startEdgeDetection() {
       overlayCtx.fill();
       overlayCtx.restore();
     }
-  }, 300);
+  }, 400);
 }
 
 function stopEdgeDetection() {
@@ -683,11 +703,11 @@ function stopEdgeDetection() {
   }
 }
 
-// ========== Document Detection ==========
+// ========== Document Detection (color-based) ==========
 
 function detectDocument(imageData, w, h) {
   // Downscale for performance
-  const scale = 0.25;
+  const scale = 0.2;
   const sw = Math.floor(w * scale);
   const sh = Math.floor(h * scale);
 
@@ -704,156 +724,208 @@ function detectDocument(imageData, w, h) {
   sCtx.drawImage(tempCanvas, 0, 0, sw, sh);
 
   const sData = sCtx.getImageData(0, 0, sw, sh);
-  const gray = toGrayscale(sData);
-  const blurred = gaussianBlur(gray, sw, sh);
-  const edges = cannySimple(blurred, sw, sh);
-  const contour = findLargestQuad(edges, sw, sh);
+  const d = sData.data;
 
-  if (!contour) return null;
+  // Step 1: Build a "paper likelihood" map
+  // Paper is typically bright and low-saturation (white/off-white)
+  // We score each pixel based on brightness and low saturation
+  const paperMap = new Uint8Array(sw * sh);
 
-  // Scale back
-  return contour.map(p => ({
-    x: Math.round(p.x / scale),
-    y: Math.round(p.y / scale)
-  }));
-}
+  // First pass: compute brightness stats to find adaptive threshold
+  let brightSum = 0;
+  let brightCount = 0;
+  const brightness = new Uint8Array(sw * sh);
 
-function toGrayscale(imageData) {
-  const d = imageData.data;
-  const gray = new Uint8Array(d.length / 4);
-  for (let i = 0; i < gray.length; i++) {
+  for (let i = 0; i < sw * sh; i++) {
     const j = i * 4;
-    gray[i] = Math.round(0.299 * d[j] + 0.587 * d[j+1] + 0.114 * d[j+2]);
-  }
-  return gray;
-}
-
-function gaussianBlur(gray, w, h) {
-  const kernel = [1, 4, 6, 4, 1];
-  const kSum = 16;
-  const temp = new Uint8Array(gray.length);
-  const out = new Uint8Array(gray.length);
-
-  // Horizontal
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let sum = 0;
-      for (let k = -2; k <= 2; k++) {
-        const xx = Math.min(w - 1, Math.max(0, x + k));
-        sum += gray[y * w + xx] * kernel[k + 2];
-      }
-      temp[y * w + x] = sum / kSum;
-    }
+    const r = d[j], g = d[j+1], b = d[j+2];
+    const lum = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+    brightness[i] = lum;
+    brightSum += lum;
+    brightCount++;
   }
 
-  // Vertical
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let sum = 0;
-      for (let k = -2; k <= 2; k++) {
-        const yy = Math.min(h - 1, Math.max(0, y + k));
-        sum += temp[yy * w + x] * kernel[k + 2];
-      }
-      out[y * w + x] = sum / kSum;
-    }
-  }
+  const avgBrightness = brightSum / brightCount;
 
-  return out;
-}
-
-function cannySimple(gray, w, h) {
-  // Sobel edge detection with thresholding
-  const edges = new Uint8Array(w * h);
-  const magnitudes = new Float32Array(w * h);
-
-  for (let y = 1; y < h - 1; y++) {
-    for (let x = 1; x < w - 1; x++) {
-      const gx = -gray[(y-1)*w+(x-1)] - 2*gray[y*w+(x-1)] - gray[(y+1)*w+(x-1)]
-                 + gray[(y-1)*w+(x+1)] + 2*gray[y*w+(x+1)] + gray[(y+1)*w+(x+1)];
-      const gy = -gray[(y-1)*w+(x-1)] - 2*gray[(y-1)*w+x] - gray[(y-1)*w+(x+1)]
-                 + gray[(y+1)*w+(x-1)] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+(x+1)];
-      magnitudes[y * w + x] = Math.sqrt(gx * gx + gy * gy);
-    }
-  }
-
-  // Adaptive threshold using Otsu's method on magnitudes
+  // Compute brightness histogram to find the paper cluster
   const hist = new Array(256).fill(0);
-  let maxMag = 0;
-  for (let i = 0; i < magnitudes.length; i++) {
-    if (magnitudes[i] > maxMag) maxMag = magnitudes[i];
-  }
-  if (maxMag === 0) return edges;
+  for (let i = 0; i < brightness.length; i++) hist[brightness[i]]++;
 
-  for (let i = 0; i < magnitudes.length; i++) {
-    const bin = Math.min(255, Math.floor((magnitudes[i] / maxMag) * 255));
-    hist[bin]++;
-  }
-
-  let total = w * h;
+  // Use Otsu's method to separate paper from background
+  const total = sw * sh;
   let sum = 0;
   for (let i = 0; i < 256; i++) sum += i * hist[i];
 
-  let sumB = 0, wB = 0, wF = 0, maxVar = 0, threshold = 128;
+  let sumB = 0, wB = 0, maxVar = 0, otsuThresh = 128;
   for (let i = 0; i < 256; i++) {
     wB += hist[i];
     if (wB === 0) continue;
-    wF = total - wB;
+    const wF = total - wB;
     if (wF === 0) break;
     sumB += i * hist[i];
     const mB = sumB / wB;
     const mF = (sum - sumB) / wF;
     const v = wB * wF * (mB - mF) * (mB - mF);
-    if (v > maxVar) { maxVar = v; threshold = i; }
+    if (v > maxVar) { maxVar = v; otsuThresh = i; }
   }
 
-  const tVal = (threshold / 255) * maxMag;
+  // The paper threshold: use Otsu but bias towards the brighter class
+  // Paper should be brighter than average
+  const paperThresh = Math.max(otsuThresh, Math.min(avgBrightness * 0.8, 120));
 
-  for (let i = 0; i < magnitudes.length; i++) {
-    edges[i] = magnitudes[i] > tVal ? 255 : 0;
-  }
+  for (let i = 0; i < sw * sh; i++) {
+    const j = i * 4;
+    const r = d[j], g = d[j+1], b = d[j+2];
+    const lum = brightness[i];
 
-  return edges;
-}
+    // Saturation check: paper is low saturation
+    const maxC = Math.max(r, g, b);
+    const minC = Math.min(r, g, b);
+    const saturation = maxC > 0 ? (maxC - minC) / maxC : 0;
 
-function findLargestQuad(edges, w, h) {
-  // Use Hough-like line detection, then find intersections
-  // Simplified approach: find contour points and fit quadrilateral
-
-  // Collect edge points
-  const points = [];
-  const step = 2;
-  for (let y = 0; y < h; y += step) {
-    for (let x = 0; x < w; x += step) {
-      if (edges[y * w + x] === 255) {
-        points.push({ x, y });
-      }
+    // Paper: bright + low saturation
+    if (lum >= paperThresh && saturation < 0.4) {
+      paperMap[i] = 255;
     }
   }
 
-  if (points.length < 20) return null;
+  // Step 2: Morphological cleanup - close small gaps, remove noise
+  const cleaned = morphClose(morphOpen(paperMap, sw, sh, 2), sw, sh, 3);
 
-  // Find convex hull
-  const hull = convexHull(points);
+  // Step 3: Find largest connected component (the paper)
+  const labels = new Int32Array(sw * sh);
+  const componentSizes = {};
+  let nextLabel = 1;
+
+  for (let y = 0; y < sh; y++) {
+    for (let x = 0; x < sw; x++) {
+      const idx = y * sw + x;
+      if (cleaned[idx] === 0 || labels[idx] !== 0) continue;
+      // BFS flood fill
+      const label = nextLabel++;
+      const queue = [idx];
+      let size = 0;
+      labels[idx] = label;
+      while (queue.length > 0) {
+        const ci = queue.pop();
+        size++;
+        const cx = ci % sw;
+        const cy = (ci - cx) / sw;
+        const neighbors = [
+          cy > 0 ? ci - sw : -1,
+          cy < sh - 1 ? ci + sw : -1,
+          cx > 0 ? ci - 1 : -1,
+          cx < sw - 1 ? ci + 1 : -1
+        ];
+        for (const ni of neighbors) {
+          if (ni >= 0 && cleaned[ni] === 255 && labels[ni] === 0) {
+            labels[ni] = label;
+            queue.push(ni);
+          }
+        }
+      }
+      componentSizes[label] = size;
+    }
+  }
+
+  // Find largest component
+  let bestLabel = 0, bestSize = 0;
+  for (const [label, size] of Object.entries(componentSizes)) {
+    if (size > bestSize) { bestSize = size; bestLabel = parseInt(label); }
+  }
+
+  if (bestSize < sw * sh * 0.03) return null; // Too small
+  if (bestSize > sw * sh * 0.95) return null; // Too large (fills whole image)
+
+  // Step 4: Extract boundary points of the largest component
+  const borderPoints = [];
+  const step = 1;
+  for (let y = 0; y < sh; y += step) {
+    for (let x = 0; x < sw; x += step) {
+      const idx = y * sw + x;
+      if (labels[idx] !== bestLabel) continue;
+      // Check if it's a border pixel
+      const isBorder = (
+        x === 0 || x === sw - 1 || y === 0 || y === sh - 1 ||
+        labels[(y-1) * sw + x] !== bestLabel ||
+        labels[(y+1) * sw + x] !== bestLabel ||
+        labels[y * sw + (x-1)] !== bestLabel ||
+        labels[y * sw + (x+1)] !== bestLabel
+      );
+      if (isBorder) borderPoints.push({ x, y });
+    }
+  }
+
+  if (borderPoints.length < 10) return null;
+
+  // Step 5: Convex hull -> simplify to quad
+  const hull = convexHull(borderPoints);
   if (hull.length < 4) return null;
 
-  // Simplify hull to 4 points using Douglas-Peucker
   let quad = simplifyToQuad(hull);
   if (!quad || quad.length !== 4) return null;
 
-  // Validate: area should be significant portion of image
+  // Validate aspect ratio and area
   const area = quadArea(quad);
-  const imgArea = w * h;
-  if (area < imgArea * 0.05 || area > imgArea * 0.98) return null;
+  const imgArea = sw * sh;
+  if (area < imgArea * 0.03 || area > imgArea * 0.97) return null;
 
-  // Order points: TL, TR, BR, BL
   quad = orderPoints(quad);
-  return quad;
+
+  // Scale back to original coordinates
+  return quad.map(p => ({
+    x: Math.round(p.x / scale),
+    y: Math.round(p.y / scale)
+  }));
+}
+
+function morphOpen(map, w, h, radius) {
+  // Erode then dilate (removes small bright spots)
+  return dilate(erode(map, w, h, radius), w, h, radius);
+}
+
+function morphClose(map, w, h, radius) {
+  // Dilate then erode (fills small dark gaps)
+  return erode(dilate(map, w, h, radius), w, h, radius);
+}
+
+function erode(map, w, h, radius) {
+  const out = new Uint8Array(w * h);
+  for (let y = radius; y < h - radius; y++) {
+    for (let x = radius; x < w - radius; x++) {
+      let allSet = true;
+      outer:
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          if (map[(y + dy) * w + (x + dx)] === 0) { allSet = false; break outer; }
+        }
+      }
+      out[y * w + x] = allSet ? 255 : 0;
+    }
+  }
+  return out;
+}
+
+function dilate(map, w, h, radius) {
+  const out = new Uint8Array(w * h);
+  for (let y = radius; y < h - radius; y++) {
+    for (let x = radius; x < w - radius; x++) {
+      let anySet = false;
+      outer:
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          if (map[(y + dy) * w + (x + dx)] === 255) { anySet = true; break outer; }
+        }
+      }
+      out[y * w + x] = anySet ? 255 : 0;
+    }
+  }
+  return out;
 }
 
 function convexHull(points) {
   if (points.length < 3) return points;
   points.sort((a, b) => a.x - b.x || a.y - b.y);
-
   const cross = (O, A, B) => (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
   const lower = [];
   for (const p of points) {
@@ -872,12 +944,9 @@ function convexHull(points) {
 }
 
 function simplifyToQuad(hull) {
-  // Find 4 points on hull that form the largest area quadrilateral
-  // Use the approach of finding the point furthest from each side
   if (hull.length < 4) return null;
   if (hull.length === 4) return hull;
 
-  // Douglas-Peucker simplification targeting 4 points
   let epsilon = 1;
   let result = hull;
   while (result.length > 4 && epsilon < 500) {
@@ -886,12 +955,10 @@ function simplifyToQuad(hull) {
   }
 
   if (result.length < 4) {
-    // Went too far, back off
     epsilon /= 1.5;
     result = douglasPeucker(hull, epsilon / 1.5);
   }
 
-  // If still more than 4, pick the 4 with max area
   if (result.length > 4) {
     let bestArea = 0, bestQuad = null;
     for (let i = 0; i < result.length; i++) {
@@ -913,22 +980,18 @@ function simplifyToQuad(hull) {
 
 function douglasPeucker(points, epsilon) {
   if (points.length <= 2) return points;
-
   let maxDist = 0, maxIdx = 0;
   const first = points[0];
   const last = points[points.length - 1];
-
   for (let i = 1; i < points.length - 1; i++) {
     const d = pointLineDistance(points[i], first, last);
     if (d > maxDist) { maxDist = d; maxIdx = i; }
   }
-
   if (maxDist > epsilon) {
     const left = douglasPeucker(points.slice(0, maxIdx + 1), epsilon);
     const right = douglasPeucker(points.slice(maxIdx), epsilon);
     return left.slice(0, -1).concat(right);
   }
-
   return [first, last];
 }
 
@@ -956,18 +1019,13 @@ function orderPoints(pts) {
     y: pts.reduce((s, p) => s + p.y, 0) / 4
   };
   pts.sort((a, b) => Math.atan2(a.y - center.y, a.x - center.x) - Math.atan2(b.y - center.y, b.x - center.x));
-
-  // Find top-left (smallest x+y sum)
   let minSum = Infinity, minIdx = 0;
   for (let i = 0; i < 4; i++) {
     const s = pts[i].x + pts[i].y;
     if (s < minSum) { minSum = s; minIdx = i; }
   }
-  // Rotate so TL is first
   const ordered = [];
-  for (let i = 0; i < 4; i++) {
-    ordered.push(pts[(minIdx + i) % 4]);
-  }
+  for (let i = 0; i < 4; i++) ordered.push(pts[(minIdx + i) % 4]);
   return ordered;
 }
 
@@ -981,10 +1039,8 @@ function loadImageForCrop(dataURL) {
     cropImage.src = dataURL;
     showScreen('cropScreen');
 
-    // Wait for layout
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Detect document edges
         processCanvas.width = img.width;
         processCanvas.height = img.height;
         processCtx.drawImage(img, 0, 0);
@@ -995,7 +1051,6 @@ function loadImageForCrop(dataURL) {
         if (detected) {
           corners = detected;
         } else {
-          // Default to 5% margin
           const m = 0.05;
           corners = [
             { x: img.width * m, y: img.height * m },
@@ -1018,12 +1073,10 @@ function getImageDisplayRect() {
   const ch = container.clientHeight;
   const iw = currentImage.width;
   const ih = currentImage.height;
-  const scale = Math.min(cw / iw, ch / ih);
-  const dw = iw * scale;
-  const dh = ih * scale;
-  const ox = (cw - dw) / 2;
-  const oy = (ch - dh) / 2;
-  return { ox, oy, dw, dh, scale };
+  const sc = Math.min(cw / iw, ch / ih);
+  const dw = iw * sc;
+  const dh = ih * sc;
+  return { ox: (cw - dw) / 2, oy: (ch - dh) / 2, dw, dh, scale: sc };
 }
 
 function imageToScreen(p) {
@@ -1043,32 +1096,24 @@ function drawCropOverlay() {
   const container = document.getElementById('cropContainer');
   cropCanvas.width = container.clientWidth;
   cropCanvas.height = container.clientHeight;
-
   cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
 
-  // Dark overlay
   cropCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
 
-  // Cut out the selected area
   const screenCorners = corners.map(c => imageToScreen(c));
   cropCtx.save();
   cropCtx.globalCompositeOperation = 'destination-out';
   cropCtx.beginPath();
   cropCtx.moveTo(screenCorners[0].x, screenCorners[0].y);
-  for (let i = 1; i < 4; i++) {
-    cropCtx.lineTo(screenCorners[i].x, screenCorners[i].y);
-  }
+  for (let i = 1; i < 4; i++) cropCtx.lineTo(screenCorners[i].x, screenCorners[i].y);
   cropCtx.closePath();
   cropCtx.fill();
   cropCtx.restore();
 
-  // Draw border
   cropCtx.beginPath();
   cropCtx.moveTo(screenCorners[0].x, screenCorners[0].y);
-  for (let i = 1; i < 4; i++) {
-    cropCtx.lineTo(screenCorners[i].x, screenCorners[i].y);
-  }
+  for (let i = 1; i < 4; i++) cropCtx.lineTo(screenCorners[i].x, screenCorners[i].y);
   cropCtx.closePath();
   cropCtx.strokeStyle = '#2563eb';
   cropCtx.lineWidth = 2;
@@ -1082,7 +1127,6 @@ function positionHandles() {
     document.getElementById('handleBR'),
     document.getElementById('handleBL')
   ];
-
   corners.forEach((c, i) => {
     const sp = imageToScreen(c);
     handles[i].style.left = sp.x + 'px';
@@ -1090,38 +1134,26 @@ function positionHandles() {
   });
 }
 
-// Corner dragging
 function setupCornerDragging() {
   const handles = document.querySelectorAll('.corner-handle');
-
   const getPos = (e) => {
     const t = e.touches ? e.touches[0] : e;
-    const container = document.getElementById('cropContainer');
-    const rect = container.getBoundingClientRect();
+    const rect = document.getElementById('cropContainer').getBoundingClientRect();
     return { x: t.clientX - rect.left, y: t.clientY - rect.top };
   };
-
   handles.forEach(h => {
-    const startDrag = (e) => {
-      e.preventDefault();
-      draggingCorner = parseInt(h.dataset.corner);
-    };
+    const startDrag = (e) => { e.preventDefault(); draggingCorner = parseInt(h.dataset.corner); };
     h.addEventListener('mousedown', startDrag);
     h.addEventListener('touchstart', startDrag, { passive: false });
   });
-
   const onMove = (e) => {
     if (draggingCorner < 0) return;
     e.preventDefault();
-    const pos = getPos(e);
-    const imgPos = screenToImage(pos);
-    corners[draggingCorner] = imgPos;
+    corners[draggingCorner] = screenToImage(getPos(e));
     drawCropOverlay();
     positionHandles();
   };
-
   const onEnd = () => { draggingCorner = -1; };
-
   document.addEventListener('mousemove', onMove);
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('mouseup', onEnd);
@@ -1137,7 +1169,7 @@ function autoDetect() {
     positionHandles();
     showToast('Document edges detected');
   } else {
-    showToast('Could not detect edges');
+    showToast('Could not detect document');
   }
 }
 
@@ -1148,14 +1180,12 @@ function cancelCrop() {
 
 async function confirmCrop() {
   showProcessing('Cropping & processing...');
-
   await new Promise(r => setTimeout(r, 50));
 
-  // Perspective transform
   const cropped = perspectiveTransform(currentImage, corners);
   const bw = document.getElementById('bwToggle').checked;
   const quality = document.getElementById('qualitySelect').value;
-  const finalURL = processImage(cropped, bw, quality);
+  const finalURL = processImage(cropped, bw, bwMode, quality);
 
   pages.push({
     original: currentImage.src,
@@ -1167,7 +1197,6 @@ async function confirmCrop() {
   hideProcessing();
   showToast('Page added');
 
-  // Check for pending files
   if (window._pendingFiles && window._pendingFiles.length > 0) {
     const file = window._pendingFiles.shift();
     const reader = new FileReader();
@@ -1182,7 +1211,6 @@ async function confirmCrop() {
 // ========== Perspective Transform ==========
 
 function perspectiveTransform(img, pts) {
-  // Calculate output dimensions from the quadrilateral
   const widthTop = Math.sqrt((pts[1].x - pts[0].x) ** 2 + (pts[1].y - pts[0].y) ** 2);
   const widthBottom = Math.sqrt((pts[2].x - pts[3].x) ** 2 + (pts[2].y - pts[3].y) ** 2);
   const heightLeft = Math.sqrt((pts[3].x - pts[0].x) ** 2 + (pts[3].y - pts[0].y) ** 2);
@@ -1191,7 +1219,6 @@ function perspectiveTransform(img, pts) {
   const outW = Math.round(Math.max(widthTop, widthBottom));
   const outH = Math.round(Math.max(heightLeft, heightRight));
 
-  // Source canvas
   const srcCanvas = document.createElement('canvas');
   srcCanvas.width = img.width;
   srcCanvas.height = img.height;
@@ -1199,30 +1226,24 @@ function perspectiveTransform(img, pts) {
   srcCtx.drawImage(img, 0, 0);
   const srcData = srcCtx.getImageData(0, 0, img.width, img.height);
 
-  // Output canvas
   const outCanvas = document.createElement('canvas');
   outCanvas.width = outW;
   outCanvas.height = outH;
   const outCtx = outCanvas.getContext('2d');
   const outData = outCtx.createImageData(outW, outH);
 
-  // Compute perspective transform matrix
   const src = [pts[0].x, pts[0].y, pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y];
   const dst = [0, 0, outW, 0, outW, outH, 0, outH];
-  const matrix = computePerspectiveMatrix(dst, src); // inverse: from dest to source
+  const matrix = computePerspectiveMatrix(dst, src);
 
-  // Map each output pixel to source
   for (let y = 0; y < outH; y++) {
     for (let x = 0; x < outW; x++) {
       const d = matrix[6] * x + matrix[7] * y + 1;
       const sx = (matrix[0] * x + matrix[1] * y + matrix[2]) / d;
       const sy = (matrix[3] * x + matrix[4] * y + matrix[5]) / d;
-
-      // Bilinear interpolation
       const x0 = Math.floor(sx), y0 = Math.floor(sy);
       const x1 = x0 + 1, y1 = y0 + 1;
       const fx = sx - x0, fy = sy - y0;
-
       if (x0 >= 0 && x1 < img.width && y0 >= 0 && y1 < img.height) {
         const idx = (y * outW + x) * 4;
         for (let c = 0; c < 4; c++) {
@@ -1244,96 +1265,261 @@ function perspectiveTransform(img, pts) {
 }
 
 function computePerspectiveMatrix(src, dst) {
-  // Solve 8x8 system for perspective transform
-  // src -> dst mapping: given 4 point correspondences
-  const A = [];
-  const b = [];
-
+  const A = [], b = [];
   for (let i = 0; i < 4; i++) {
     const sx = src[i * 2], sy = src[i * 2 + 1];
     const dx = dst[i * 2], dy = dst[i * 2 + 1];
-
     A.push([sx, sy, 1, 0, 0, 0, -dx * sx, -dx * sy]);
     b.push(dx);
     A.push([0, 0, 0, sx, sy, 1, -dy * sx, -dy * sy]);
     b.push(dy);
   }
-
-  // Gaussian elimination
   const n = 8;
   const aug = A.map((row, i) => [...row, b[i]]);
-
   for (let col = 0; col < n; col++) {
     let maxRow = col;
     for (let row = col + 1; row < n; row++) {
       if (Math.abs(aug[row][col]) > Math.abs(aug[maxRow][col])) maxRow = row;
     }
     [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
-
     const pivot = aug[col][col];
-    if (Math.abs(pivot) < 1e-10) return [1, 0, 0, 0, 1, 0, 0, 0]; // identity fallback
+    if (Math.abs(pivot) < 1e-10) return [1, 0, 0, 0, 1, 0, 0, 0];
     for (let j = col; j <= n; j++) aug[col][j] /= pivot;
-
     for (let row = 0; row < n; row++) {
       if (row === col) continue;
       const factor = aug[row][col];
       for (let j = col; j <= n; j++) aug[row][j] -= factor * aug[col][j];
     }
   }
-
   return aug.map(row => row[n]);
 }
 
-// ========== Image Processing ==========
+// ========== Image Processing (B&W modes) ==========
 
-function processImage(canvas, bw, quality) {
+function processImage(canvas, bw, mode, quality) {
   if (bw) {
     const ctx = canvas.getContext('2d');
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const w = canvas.width;
+    const h = canvas.height;
+    const imgData = ctx.getImageData(0, 0, w, h);
     const d = imgData.data;
 
-    // Adaptive threshold for clean B&W
-    const gray = new Uint8Array(canvas.width * canvas.height);
+    // Convert to grayscale
+    const gray = new Uint8Array(w * h);
     for (let i = 0; i < gray.length; i++) {
       const j = i * 4;
       gray[i] = Math.round(0.299 * d[j] + 0.587 * d[j+1] + 0.114 * d[j+2]);
     }
 
-    // Local adaptive threshold
-    const blockSize = Math.max(15, Math.floor(Math.min(canvas.width, canvas.height) / 40) | 1);
-    const C = 10;
+    // Step 1: Noise reduction (bilateral-like filter for light/standard, stronger for strong/extra)
+    const denoised = (mode === 'strong' || mode === 'extra')
+      ? medianFilter(gray, w, h, 2)
+      : (mode === 'standard' ? medianFilter(gray, w, h, 1) : gray);
 
-    // Integral image
-    const integral = new Float64Array((canvas.width + 1) * (canvas.height + 1));
-    for (let y = 1; y <= canvas.height; y++) {
+    // Step 2: Contrast enhancement
+    const enhanced = enhanceContrast(denoised, w, h, mode);
+
+    // Step 3: Adaptive threshold with mode-specific parameters
+    const params = {
+      light:    { blockDiv: 20, C: 5,  minBlock: 25 },
+      standard: { blockDiv: 30, C: 10, minBlock: 19 },
+      strong:   { blockDiv: 40, C: 15, minBlock: 15 },
+      extra:    { blockDiv: 50, C: 22, minBlock: 11 }
+    }[mode] || { blockDiv: 30, C: 10, minBlock: 19 };
+
+    let blockSize = Math.max(params.minBlock, Math.floor(Math.min(w, h) / params.blockDiv));
+    if (blockSize % 2 === 0) blockSize++;
+
+    // Build integral image
+    const integral = new Float64Array((w + 1) * (h + 1));
+    for (let y = 1; y <= h; y++) {
       let rowSum = 0;
-      for (let x = 1; x <= canvas.width; x++) {
-        rowSum += gray[(y-1) * canvas.width + (x-1)];
-        integral[y * (canvas.width+1) + x] = integral[(y-1) * (canvas.width+1) + x] + rowSum;
+      for (let x = 1; x <= w; x++) {
+        rowSum += enhanced[(y-1) * w + (x-1)];
+        integral[y * (w+1) + x] = integral[(y-1) * (w+1) + x] + rowSum;
       }
     }
 
     const half = Math.floor(blockSize / 2);
+    const C = params.C;
+
     for (let i = 0; i < gray.length; i++) {
-      const x = i % canvas.width;
-      const y = Math.floor(i / canvas.width);
+      const x = i % w;
+      const y = (i - x) / w;
       const x1 = Math.max(0, x - half);
       const y1 = Math.max(0, y - half);
-      const x2 = Math.min(canvas.width, x + half + 1);
-      const y2 = Math.min(canvas.height, y + half + 1);
+      const x2 = Math.min(w, x + half + 1);
+      const y2 = Math.min(h, y + half + 1);
       const area = (x2 - x1) * (y2 - y1);
-      const sum = integral[y2*(canvas.width+1)+x2] - integral[y1*(canvas.width+1)+x2]
-                - integral[y2*(canvas.width+1)+x1] + integral[y1*(canvas.width+1)+x1];
+      const sum = integral[y2*(w+1)+x2] - integral[y1*(w+1)+x2]
+                - integral[y2*(w+1)+x1] + integral[y1*(w+1)+x1];
       const mean = sum / area;
-      const val = gray[i] > mean - C ? 255 : 0;
+      const val = enhanced[i] > mean - C ? 255 : 0;
       const j = i * 4;
       d[j] = d[j+1] = d[j+2] = val;
     }
+
+    // Step 4: Post-processing cleanup for strong/extra modes
+    if (mode === 'strong' || mode === 'extra') {
+      // Remove isolated black pixels (salt noise in white areas)
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const j = (y * w + x) * 4;
+          if (d[j] === 0) {
+            // Count white neighbors
+            let whiteNeighbors = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dy === 0 && dx === 0) continue;
+                if (d[((y+dy) * w + (x+dx)) * 4] === 255) whiteNeighbors++;
+              }
+            }
+            if (whiteNeighbors >= 7) {
+              d[j] = d[j+1] = d[j+2] = 255;
+            }
+          }
+        }
+      }
+    }
+
+    if (mode === 'extra') {
+      // Also remove isolated white pixels in dark areas (pepper noise in text)
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const j = (y * w + x) * 4;
+          if (d[j] === 255) {
+            let blackNeighbors = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dy === 0 && dx === 0) continue;
+                if (d[((y+dy) * w + (x+dx)) * 4] === 0) blackNeighbors++;
+              }
+            }
+            if (blackNeighbors >= 7) {
+              d[j] = d[j+1] = d[j+2] = 0;
+            }
+          }
+        }
+      }
+    }
+
     ctx.putImageData(imgData, 0, 0);
   }
 
-  const jpegQuality = { low: 0.5, medium: 0.75, high: 0.92 }[quality] || 0.75;
+  const jpegQuality = { low: 0.5, medium: 0.75, high: 0.95 }[quality] || 0.75;
   return canvas.toDataURL('image/jpeg', jpegQuality);
+}
+
+function medianFilter(gray, w, h, radius) {
+  const out = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const vals = [];
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const ny = Math.min(h - 1, Math.max(0, y + dy));
+          const nx = Math.min(w - 1, Math.max(0, x + dx));
+          vals.push(gray[ny * w + nx]);
+        }
+      }
+      vals.sort((a, b) => a - b);
+      out[y * w + x] = vals[vals.length >> 1];
+    }
+  }
+  return out;
+}
+
+function enhanceContrast(gray, w, h, mode) {
+  const out = new Uint8Array(w * h);
+
+  // CLAHE-like local contrast enhancement
+  // Strength varies by mode
+  const tileSize = Math.max(32, Math.floor(Math.min(w, h) / 8));
+  const tilesX = Math.ceil(w / tileSize);
+  const tilesY = Math.ceil(h / tileSize);
+
+  // For light mode: minimal enhancement, just normalize
+  if (mode === 'light') {
+    let min = 255, max = 0;
+    for (let i = 0; i < gray.length; i++) {
+      if (gray[i] < min) min = gray[i];
+      if (gray[i] > max) max = gray[i];
+    }
+    const range = max - min || 1;
+    for (let i = 0; i < gray.length; i++) {
+      out[i] = Math.round(((gray[i] - min) / range) * 255);
+    }
+    return out;
+  }
+
+  // For standard/strong/extra: compute per-tile histograms and equalize
+  const clipLimit = { standard: 3.0, strong: 2.0, extra: 1.5 }[mode] || 3.0;
+
+  // Build tile lookup tables
+  const tileLUTs = [];
+  for (let ty = 0; ty < tilesY; ty++) {
+    tileLUTs[ty] = [];
+    for (let tx = 0; tx < tilesX; tx++) {
+      const x0 = tx * tileSize;
+      const y0 = ty * tileSize;
+      const x1 = Math.min(w, x0 + tileSize);
+      const y1 = Math.min(h, y0 + tileSize);
+
+      // Histogram
+      const hist = new Array(256).fill(0);
+      const tilePixels = (x1 - x0) * (y1 - y0);
+      for (let y = y0; y < y1; y++) {
+        for (let x = x0; x < x1; x++) {
+          hist[gray[y * w + x]]++;
+        }
+      }
+
+      // Clip histogram
+      const limit = Math.floor(clipLimit * tilePixels / 256);
+      let excess = 0;
+      for (let i = 0; i < 256; i++) {
+        if (hist[i] > limit) { excess += hist[i] - limit; hist[i] = limit; }
+      }
+      const inc = Math.floor(excess / 256);
+      for (let i = 0; i < 256; i++) hist[i] += inc;
+
+      // CDF -> LUT
+      const lut = new Uint8Array(256);
+      let cdf = 0;
+      for (let i = 0; i < 256; i++) {
+        cdf += hist[i];
+        lut[i] = Math.round((cdf / tilePixels) * 255);
+      }
+      tileLUTs[ty][tx] = lut;
+    }
+  }
+
+  // Interpolate between tiles for smooth result
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const val = gray[y * w + x];
+      const tx = Math.min(tilesX - 1, (x / tileSize) | 0);
+      const ty = Math.min(tilesY - 1, (y / tileSize) | 0);
+      out[y * w + x] = tileLUTs[ty][tx][val];
+    }
+  }
+
+  return out;
+}
+
+// ========== B&W UI ==========
+
+function toggleBW() {
+  const open = document.getElementById('bwToggle').checked;
+  document.getElementById('bwOptions').classList.toggle('open', open);
+  reprocessPages();
+}
+
+function selectBWMode(btn) {
+  document.querySelectorAll('.bw-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  bwMode = btn.dataset.mode;
+  reprocessPages();
 }
 
 // ========== Pages Screen ==========
@@ -1377,7 +1563,6 @@ function deletePage(idx) {
 }
 
 function previewPage(idx) {
-  // Simple full-screen preview with tap to close
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
   const img = document.createElement('img');
@@ -1403,7 +1588,7 @@ async function reprocessPages() {
       img.src = pages[i].original;
     });
     const canvas = perspectiveTransform(img, pages[i].corners);
-    pages[i].cropped = processImage(canvas, bw, quality);
+    pages[i].cropped = processImage(canvas, bw, bwMode, quality);
   }
 
   renderPages();
@@ -1415,7 +1600,6 @@ async function reprocessPages() {
 
 async function savePDF() {
   if (pages.length === 0) return;
-
   showProcessing('Generating PDF...');
   await new Promise(r => setTimeout(r, 50));
 
@@ -1426,26 +1610,20 @@ async function savePDF() {
 
     for (let i = 0; i < pages.length; i++) {
       if (i > 0) pdf.addPage();
-
       const img = new Image();
       await new Promise(resolve => {
         img.onload = resolve;
         img.src = pages[i].cropped;
       });
-
       const ratio = img.width / img.height;
       let w, h;
       if (ratio > pageWidth / pageHeight) {
-        w = pageWidth;
-        h = pageWidth / ratio;
+        w = pageWidth; h = pageWidth / ratio;
       } else {
-        h = pageHeight;
-        w = pageHeight * ratio;
+        h = pageHeight; w = pageHeight * ratio;
       }
-
       const x = (pageWidth - w) / 2;
       const y = (pageHeight - h) / 2;
-
       pdf.addImage(pages[i].cropped, 'JPEG', x, y, w, h);
     }
 
@@ -1474,8 +1652,6 @@ function showCamera() {
 function updatePageCount() {
   const n = pages.length;
   document.getElementById('pageCount').textContent = `${n} page${n !== 1 ? 's' : ''}`;
-
-  // Update gallery thumbnail
   const thumb = document.getElementById('galleryThumb');
   const ctx = thumb.getContext('2d');
   if (n > 0) {
@@ -1515,7 +1691,6 @@ function showToast(msg) {
 }
 
 // ========== Init ==========
-
 setupCornerDragging();
 startCamera();
 updatePageCount();
