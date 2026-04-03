@@ -356,7 +356,11 @@ const processCtx = processCanvas.getContext('2d');
 async function startCamera() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
+      video: {
+        facingMode,
+        width:  { ideal: 9999 },
+        height: { ideal: 9999 }
+      }
     });
     video.srcObject = stream;
     video.style.display = 'block';
@@ -380,19 +384,44 @@ async function flipCamera() {
   await startCamera();
 }
 
-// Capture directly from the video stream
-function capturePhoto() {
+// Capture a full-resolution still photo
+async function capturePhoto() {
   if (!stream) {
     document.getElementById('fileInput').click();
     return;
   }
+
+  const track = stream.getVideoTracks()[0];
+
+  // Try ImageCapture API (full sensor resolution still photo)
+  if (window.ImageCapture) {
+    try {
+      const capture = new ImageCapture(track);
+      const blob = await capture.takePhoto();
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        // Draw to canvas then get dataURL so we have a consistent format
+        processCanvas.width = img.width;
+        processCanvas.height = img.height;
+        processCtx.drawImage(img, 0, 0);
+        loadImageForCrop(processCanvas.toDataURL('image/jpeg', 0.97));
+      };
+      img.src = url;
+      return;
+    } catch (e) {
+      console.warn('ImageCapture failed, falling back to video frame:', e);
+    }
+  }
+
+  // Fallback: grab from video frame (iOS Safari doesn't support ImageCapture)
   const w = video.videoWidth;
   const h = video.videoHeight;
   processCanvas.width = w;
   processCanvas.height = h;
   processCtx.drawImage(video, 0, 0, w, h);
-  const dataURL = processCanvas.toDataURL('image/jpeg', 0.95);
-  loadImageForCrop(dataURL);
+  loadImageForCrop(processCanvas.toDataURL('image/jpeg', 0.97));
 }
 
 function handleFileInput(e) {
