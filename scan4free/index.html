@@ -246,10 +246,7 @@
   <div class="camera-controls" id="cameraControls">
     <canvas class="gallery-thumb" id="galleryThumb" width="44" height="44" onclick="showPages()"></canvas>
     <button class="capture-btn" id="captureBtn" onclick="triggerStillCapture()"></button>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-      <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
-      <button class="cam-btn" id="flashBtn" onclick="toggleFlash()" title="Flash">&#x26a1;</button>
-    </div>
+    <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
   </div>
 </div>
 
@@ -1225,7 +1222,8 @@ async function savePDF() {
       if (ratio > 210/297) { w = 210; h = 210/ratio; } else { h = 297; w = 297*ratio; }
       pdf.addImage(pages[i].cropped, 'JPEG', (210-w)/2, (297-h)/2, w, h);
     }
-    const filename = `scan_${new Date().toISOString().slice(0,10)}.pdf`;
+    const now = new Date();
+    const filename = `scan_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}.pdf`;
     const blob = pdf.output('blob');
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
