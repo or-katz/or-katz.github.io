@@ -245,7 +245,7 @@
   </div>
   <div class="camera-controls" id="cameraControls">
     <canvas class="gallery-thumb" id="galleryThumb" width="44" height="44" onclick="showPages()"></canvas>
-    <button class="capture-btn" id="captureBtn" onclick="capturePhoto()"></button>
+    <button class="capture-btn" id="captureBtn" onclick="triggerStillCapture()"></button>
     <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
   </div>
 </div>
@@ -317,6 +317,9 @@
   </div>
 </div>
 
+<!-- Still photo capture via native iOS camera -->
+<input type="file" id="stillCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleStillCapture(event)">
+<!-- Gallery / file picker -->
 <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFileInput(event)">
 <canvas id="processCanvas" style="display:none"></canvas>
 
@@ -384,44 +387,18 @@ async function flipCamera() {
   await startCamera();
 }
 
-// Capture a full-resolution still photo
-async function capturePhoto() {
-  if (!stream) {
-    document.getElementById('fileInput').click();
-    return;
-  }
+// Opens iOS native camera for a full-resolution still photo
+function triggerStillCapture() {
+  document.getElementById('stillCameraInput').click();
+}
 
-  const track = stream.getVideoTracks()[0];
-
-  // Try ImageCapture API (full sensor resolution still photo)
-  if (window.ImageCapture) {
-    try {
-      const capture = new ImageCapture(track);
-      const blob = await capture.takePhoto();
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        // Draw to canvas then get dataURL so we have a consistent format
-        processCanvas.width = img.width;
-        processCanvas.height = img.height;
-        processCtx.drawImage(img, 0, 0);
-        loadImageForCrop(processCanvas.toDataURL('image/jpeg', 0.97));
-      };
-      img.src = url;
-      return;
-    } catch (e) {
-      console.warn('ImageCapture failed, falling back to video frame:', e);
-    }
-  }
-
-  // Fallback: grab from video frame (iOS Safari doesn't support ImageCapture)
-  const w = video.videoWidth;
-  const h = video.videoHeight;
-  processCanvas.width = w;
-  processCanvas.height = h;
-  processCtx.drawImage(video, 0, 0, w, h);
-  loadImageForCrop(processCanvas.toDataURL('image/jpeg', 0.97));
+function handleStillCapture(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => loadImageForCrop(reader.result);
+  reader.readAsDataURL(file);
+  e.target.value = '';
 }
 
 function handleFileInput(e) {
