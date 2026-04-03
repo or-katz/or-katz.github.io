@@ -8,19 +8,15 @@
 <style>
   :root {
     --primary: #2563eb;
-    --primary-dark: #1d4ed8;
     --bg: #0f172a;
     --surface: #1e293b;
     --surface2: #334155;
     --text: #f1f5f9;
     --text-muted: #94a3b8;
     --success: #22c55e;
-    --danger: #ef4444;
     --radius: 12px;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
@@ -28,7 +24,6 @@
     min-height: 100dvh;
     overflow-x: hidden;
   }
-
   .header {
     background: var(--surface);
     padding: 12px 16px;
@@ -36,440 +31,202 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--surface2);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: sticky; top: 0; z-index: 100;
   }
-
   .header h1 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 18px; font-weight: 700;
     background: linear-gradient(135deg, #60a5fa, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
-
   .page-count {
-    background: var(--surface2);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    color: var(--text-muted);
+    background: var(--surface2); padding: 4px 12px;
+    border-radius: 20px; font-size: 13px; color: var(--text-muted);
   }
-
   .screen { display: none; }
   .screen.active { display: flex; flex-direction: column; }
 
-  #cameraScreen {
-    height: calc(100dvh - 53px);
-    position: relative;
-    background: #000;
-  }
-
+  /* Camera */
+  #cameraScreen { height: calc(100dvh - 53px); position: relative; background: #000; }
   #videoContainer {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
   }
-
-  #video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
+  #video { width: 100%; height: 100%; object-fit: cover; }
   #overlayCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .camera-controls {
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 16px 20px 24px;
+    display: flex; align-items: center; justify-content: space-around;
+    position: absolute; bottom: 0; left: 0; right: 0;
+  }
+  .capture-btn {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: 4px solid #fff; background: transparent;
+    cursor: pointer; position: relative; transition: transform 0.15s;
+  }
+  .capture-btn::after {
+    content: ''; position: absolute; inset: 4px;
+    border-radius: 50%; background: #fff; transition: background 0.15s;
+  }
+  .capture-btn:active { transform: scale(0.9); }
+  .capture-btn:active::after { background: #ddd; }
+  .cam-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.2); color: #fff; font-size: 20px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .gallery-thumb {
+    width: 44px; height: 44px; border-radius: 8px;
+    border: 2px solid #fff; cursor: pointer; background: var(--surface2);
+  }
+  .native-capture-label {
+    position: absolute; bottom: 104px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.6); color: #fff; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; font-weight: 500;
+    backdrop-filter: blur(8px); white-space: nowrap;
     pointer-events: none;
   }
 
-  .camera-controls {
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-
-  .capture-btn {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    border: 4px solid #fff;
-    background: transparent;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.15s;
-  }
-
-  .capture-btn::after {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-    background: #fff;
-    transition: background 0.15s;
-  }
-
-  .capture-btn:active { transform: scale(0.9); }
-  .capture-btn:active::after { background: #ddd; }
-
-  .cam-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-  }
-
-  .gallery-thumb {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    border: 2px solid #fff;
-    object-fit: cover;
-    cursor: pointer;
-    background: var(--surface2);
-  }
-
-  #uploadFallback {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    gap: 16px;
-  }
-
-  #uploadFallback .upload-icon { font-size: 64px; opacity: 0.5; }
-  #uploadFallback p { color: var(--text-muted); text-align: center; line-height: 1.5; }
-
-  .upload-btn {
-    padding: 14px 32px;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
+  /* Crop */
   #cropScreen { height: calc(100dvh - 53px); }
-
   #cropContainer {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    touch-action: none;
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #000; touch-action: none;
   }
-
-  #cropImage {
-    max-width: 100%;
-    max-height: 100%;
-    user-select: none;
-    -webkit-user-drag: none;
-  }
-
-  #cropCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
+  #cropImage { max-width: 100%; max-height: 100%; user-select: none; -webkit-user-drag: none; }
+  #cropCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
   .corner-handle {
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    background: var(--primary);
-    border: 3px solid #fff;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    cursor: grab;
-    z-index: 10;
-    touch-action: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    position: absolute; width: 32px; height: 32px;
+    background: var(--primary); border: 3px solid #fff; border-radius: 50%;
+    transform: translate(-50%, -50%); cursor: grab; z-index: 10;
+    touch-action: none; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
-
   .crop-toolbar {
-    display: flex;
-    gap: 12px;
-    padding: 16px;
-    background: var(--surface);
-    justify-content: center;
+    display: flex; gap: 12px; padding: 16px;
+    background: var(--surface); justify-content: center;
   }
-
   .crop-toolbar button {
-    flex: 1;
-    max-width: 160px;
-    padding: 12px 20px;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
+    flex: 1; max-width: 160px; padding: 12px 20px; border: none;
+    border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer;
   }
-
   .btn-cancel { background: var(--surface2); color: var(--text); }
   .btn-confirm { background: var(--primary); color: #fff; }
   .btn-auto { background: var(--success); color: #fff; }
 
+  /* Pages */
   #pagesScreen { min-height: calc(100dvh - 53px); }
-
   .pages-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    padding: 16px;
-    flex: 1;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px; padding: 16px; flex: 1;
   }
-
   .page-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    overflow: hidden;
-    position: relative;
-    aspect-ratio: 3/4;
-    cursor: pointer;
-    transition: transform 0.15s;
+    background: var(--surface); border-radius: var(--radius);
+    overflow: hidden; position: relative; aspect-ratio: 3/4;
+    cursor: pointer; transition: transform 0.15s;
   }
-
   .page-card:active { transform: scale(0.97); }
   .page-card img { width: 100%; height: 100%; object-fit: cover; }
-
   .page-card .page-num {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    background: rgba(0,0,0,0.7);
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
+    position: absolute; bottom: 8px; left: 8px;
+    background: rgba(0,0,0,0.7); padding: 2px 10px;
+    border-radius: 12px; font-size: 12px; font-weight: 600;
   }
-
   .page-card .delete-page {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(239,68,68,0.9);
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; top: 6px; right: 6px; width: 28px; height: 28px;
+    border-radius: 50%; border: none; background: rgba(239,68,68,0.9);
+    color: #fff; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
   }
-
   .empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    gap: 12px;
-    color: var(--text-muted);
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px; gap: 12px; color: var(--text-muted);
   }
-
   .empty-state .icon { font-size: 48px; opacity: 0.4; }
 
-  .bottom-bar {
-    padding: 12px 16px;
-    background: var(--surface);
-    border-top: 1px solid var(--surface2);
-    display: flex;
-    gap: 12px;
-  }
-
-  .bottom-bar button {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .btn-scan { background: var(--primary); color: #fff; }
-  .btn-scan:disabled { opacity: 0.5; }
-  .btn-save { background: var(--success); color: #fff; }
-  .btn-save:disabled { opacity: 0.5; }
-
+  /* Settings */
   .settings-panel {
-    padding: 16px;
-    background: var(--surface);
+    padding: 16px; background: var(--surface);
     border-bottom: 1px solid var(--surface2);
   }
-
   .settings-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
+    display: flex; align-items: center;
+    justify-content: space-between; padding: 10px 0;
   }
-
   .settings-row + .settings-row { border-top: 1px solid var(--surface2); }
   .settings-row label { font-size: 14px; color: var(--text-muted); }
-
   .settings-row select {
-    background: var(--surface2);
-    color: var(--text);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 14px;
+    background: var(--surface2); color: var(--text); border: none;
+    padding: 8px 12px; border-radius: 8px; font-size: 14px;
   }
-
-  .toggle {
-    position: relative;
-    width: 48px;
-    height: 28px;
-    cursor: pointer;
-  }
-
+  .toggle { position: relative; width: 48px; height: 28px; cursor: pointer; }
   .toggle input { opacity: 0; width: 0; height: 0; }
-
   .toggle .slider {
-    position: absolute;
-    inset: 0;
-    background: var(--surface2);
-    border-radius: 14px;
-    transition: background 0.2s;
+    position: absolute; inset: 0; background: var(--surface2);
+    border-radius: 14px; transition: background 0.2s;
   }
-
   .toggle .slider::after {
-    content: '';
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #fff;
-    top: 3px;
-    left: 3px;
+    content: ''; position: absolute; width: 22px; height: 22px;
+    border-radius: 50%; background: #fff; top: 3px; left: 3px;
     transition: transform 0.2s;
   }
-
   .toggle input:checked + .slider { background: var(--primary); }
   .toggle input:checked + .slider::after { transform: translateX(20px); }
-
-  .bw-options {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-    padding: 0;
-  }
-
-  .bw-options.open {
-    max-height: 200px;
-    padding: 8px 0 0 0;
-  }
-
-  .bw-mode-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 8px;
-  }
-
+  .bw-options { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .bw-options.open { max-height: 200px; }
+  .bw-mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
   .bw-mode-btn {
-    padding: 10px 8px;
-    border: 2px solid var(--surface2);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
+    padding: 10px 8px; border: 2px solid var(--surface2); border-radius: 8px;
+    background: transparent; color: var(--text-muted); font-size: 12px;
+    font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s;
   }
-
   .bw-mode-btn.active {
-    border-color: var(--primary);
-    color: var(--text);
+    border-color: var(--primary); color: var(--text);
     background: rgba(37, 99, 235, 0.15);
   }
-
   .bw-mode-btn .mode-label { display: block; font-size: 13px; margin-bottom: 2px; }
   .bw-mode-btn .mode-desc { display: block; font-size: 10px; font-weight: 400; opacity: 0.7; }
 
+  /* Bottom bar */
+  .bottom-bar {
+    padding: 12px 16px; background: var(--surface);
+    border-top: 1px solid var(--surface2); display: flex; gap: 12px;
+  }
+  .bottom-bar button {
+    flex: 1; padding: 14px; border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-scan { background: var(--primary); color: #fff; }
+  .btn-save { background: var(--success); color: #fff; }
+  .btn-save:disabled { opacity: 0.5; }
+
+  /* Overlay / Toast */
   .processing-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    gap: 16px;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; z-index: 1000; gap: 16px;
   }
-
   .processing-overlay.hidden { display: none; }
-
   .spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--surface2);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    width: 48px; height: 48px;
+    border: 4px solid var(--surface2); border-top-color: var(--primary);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
   }
-
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
+    position: fixed; bottom: 80px; left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: var(--surface);
-    color: var(--text);
-    padding: 12px 24px;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 500;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    transition: transform 0.3s ease;
-    z-index: 1001;
-    white-space: nowrap;
+    background: var(--surface); color: var(--text); padding: 12px 24px;
+    border-radius: var(--radius); font-size: 14px; font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: transform 0.3s ease;
+    z-index: 1001; white-space: nowrap;
   }
-
   .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
@@ -485,15 +242,11 @@
   <div id="videoContainer">
     <video id="video" autoplay playsinline muted></video>
     <canvas id="overlayCanvas"></canvas>
-    <div id="uploadFallback" style="display:none;">
-      <div class="upload-icon">&#128247;</div>
-      <p>Camera not available.<br>Upload images instead.</p>
-      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose Images</button>
-    </div>
   </div>
+  <div class="native-capture-label" id="nativeLabel">Using iPhone camera for best quality</div>
   <div class="camera-controls" id="cameraControls">
     <canvas class="gallery-thumb" id="galleryThumb" width="44" height="44" onclick="showPages()"></canvas>
-    <button class="capture-btn" id="captureBtn" onclick="capturePhoto()"></button>
+    <button class="capture-btn" id="captureBtn" onclick="triggerCapture()"></button>
     <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
   </div>
 </div>
@@ -536,7 +289,7 @@
         <div class="bw-mode-grid">
           <button class="bw-mode-btn active" data-mode="light" onclick="selectBWMode(this)">
             <span class="mode-label">Light</span>
-            <span class="mode-desc">Preserve details</span>
+            <span class="mode-desc">Soft, preserve detail</span>
           </button>
           <button class="bw-mode-btn" data-mode="standard" onclick="selectBWMode(this)">
             <span class="mode-label">Standard</span>
@@ -548,7 +301,7 @@
           </button>
           <button class="bw-mode-btn" data-mode="extra" onclick="selectBWMode(this)">
             <span class="mode-label">Extra Strong</span>
-            <span class="mode-desc">Text only</span>
+            <span class="mode-desc">Text only, clean</span>
           </button>
         </div>
       </div>
@@ -565,14 +318,16 @@
   </div>
 </div>
 
-<input type="file" id="fileInput" accept="image/*" capture="environment" multiple style="display:none" onchange="handleFileInput(event)">
+<!-- Native camera input (iPhone uses its full camera pipeline) -->
+<input type="file" id="nativeCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleNativeCapture(event)">
+<!-- Gallery file picker (no capture attribute = shows file picker) -->
+<input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFileInput(event)">
 <canvas id="processCanvas" style="display:none"></canvas>
 
 <div class="processing-overlay hidden" id="processingOverlay">
   <div class="spinner"></div>
   <p id="processingText">Processing...</p>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -587,9 +342,10 @@ let stream = null;
 let facingMode = 'environment';
 let draggingCorner = -1;
 let detectionInterval = null;
-let bwMode = 'light'; // light, standard, strong, extra
+let bwMode = 'light';
+let lastDetected = null;       // smoothing for live overlay
+let detectionSmooth = [];      // last N detections for averaging
 
-// DOM refs
 const video = document.getElementById('video');
 const overlayCanvas = document.getElementById('overlayCanvas');
 const overlayCtx = overlayCanvas.getContext('2d');
@@ -604,27 +360,24 @@ const processCtx = processCanvas.getContext('2d');
 async function startCamera() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
     });
     video.srcObject = stream;
     video.style.display = 'block';
-    document.getElementById('uploadFallback').style.display = 'none';
+    document.getElementById('nativeLabel').style.display = 'block';
     document.getElementById('cameraControls').style.display = 'flex';
-    startEdgeDetection();
+    startLiveDetection();
   } catch (e) {
-    console.warn('Camera not available:', e);
+    console.warn('Camera preview not available:', e);
     video.style.display = 'none';
-    document.getElementById('uploadFallback').style.display = 'flex';
-    document.getElementById('cameraControls').style.display = 'none';
+    document.getElementById('nativeLabel').style.display = 'none';
+    document.getElementById('cameraControls').style.display = 'flex';
   }
 }
 
 function stopCamera() {
-  stopEdgeDetection();
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
+  stopLiveDetection();
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
 }
 
 async function flipCamera() {
@@ -633,18 +386,18 @@ async function flipCamera() {
   await startCamera();
 }
 
-function capturePhoto() {
-  if (!stream) {
-    document.getElementById('fileInput').click();
-    return;
-  }
-  const w = video.videoWidth;
-  const h = video.videoHeight;
-  processCanvas.width = w;
-  processCanvas.height = h;
-  processCtx.drawImage(video, 0, 0, w, h);
-  const dataURL = processCanvas.toDataURL('image/jpeg', 0.95);
-  loadImageForCrop(dataURL);
+// Capture: always use native camera input for best iPhone quality
+function triggerCapture() {
+  document.getElementById('nativeCameraInput').click();
+}
+
+function handleNativeCapture(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => loadImageForCrop(reader.result);
+  reader.readAsDataURL(file);
+  e.target.value = '';
 }
 
 function handleFileInput(e) {
@@ -653,110 +406,132 @@ function handleFileInput(e) {
   const reader = new FileReader();
   reader.onload = () => loadImageForCrop(reader.result);
   reader.readAsDataURL(files[0]);
-  if (files.length > 1) {
-    window._pendingFiles = files.slice(1);
-  }
+  if (files.length > 1) window._pendingFiles = files.slice(1);
   e.target.value = '';
 }
 
-// ========== Edge Detection (live preview) ==========
+// ========== Live Edge Detection ==========
 
-function startEdgeDetection() {
-  stopEdgeDetection();
+function startLiveDetection() {
+  stopLiveDetection();
+  detectionSmooth = [];
+  lastDetected = null;
+
   detectionInterval = setInterval(() => {
     if (video.videoWidth === 0) return;
-    overlayCanvas.width = video.videoWidth;
-    overlayCanvas.height = video.videoHeight;
+
     const w = video.videoWidth;
     const h = video.videoHeight;
+    overlayCanvas.width = w;
+    overlayCanvas.height = h;
 
-    processCanvas.width = w;
-    processCanvas.height = h;
-    processCtx.drawImage(video, 0, 0, w, h);
-    const imgData = processCtx.getImageData(0, 0, w, h);
-    const detected = detectDocument(imgData, w, h);
+    // Use a small offscreen canvas for detection only
+    const dScale = 160 / Math.max(w, h); // target ~160px on longest side
+    const dw = Math.round(w * dScale);
+    const dh = Math.round(h * dScale);
+
+    processCanvas.width = dw;
+    processCanvas.height = dh;
+    processCtx.drawImage(video, 0, 0, dw, dh);
+    const smallData = processCtx.getImageData(0, 0, dw, dh);
+
+    const detected = detectPaperQuad(smallData, dw, dh);
 
     overlayCtx.clearRect(0, 0, w, h);
+
     if (detected) {
-      const scaleX = overlayCanvas.clientWidth / w;
-      const scaleY = overlayCanvas.clientHeight / h;
-      overlayCtx.save();
-      overlayCtx.scale(scaleX, scaleY);
-      overlayCtx.beginPath();
-      overlayCtx.moveTo(detected[0].x, detected[0].y);
-      for (let i = 1; i < 4; i++) overlayCtx.lineTo(detected[i].x, detected[i].y);
-      overlayCtx.closePath();
-      overlayCtx.strokeStyle = '#22c55e';
-      overlayCtx.lineWidth = 3 / scaleX;
-      overlayCtx.stroke();
-      overlayCtx.fillStyle = 'rgba(34, 197, 94, 0.1)';
-      overlayCtx.fill();
-      overlayCtx.restore();
+      // Scale detected corners back to video resolution
+      const scaled = detected.map(p => ({ x: p.x / dScale, y: p.y / dScale }));
+
+      // Smooth: average with last few detections
+      detectionSmooth.push(scaled);
+      if (detectionSmooth.length > 5) detectionSmooth.shift();
+
+      const smoothed = averageQuads(detectionSmooth);
+      lastDetected = smoothed;
+
+      drawQuadOverlay(overlayCtx, smoothed, w, h, '#22c55e', 3);
+    } else {
+      // Fade out: keep showing last detection briefly
+      if (lastDetected && detectionSmooth.length > 0) {
+        detectionSmooth.shift();
+        if (detectionSmooth.length > 0) {
+          drawQuadOverlay(overlayCtx, lastDetected, w, h, 'rgba(34,197,94,0.4)', 2);
+        } else {
+          lastDetected = null;
+        }
+      }
     }
-  }, 400);
+  }, 250);
 }
 
-function stopEdgeDetection() {
-  if (detectionInterval) {
-    clearInterval(detectionInterval);
-    detectionInterval = null;
+function stopLiveDetection() {
+  if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; }
+}
+
+function averageQuads(quads) {
+  if (quads.length === 1) return quads[0];
+  return quads[0].map((_, i) => ({
+    x: quads.reduce((s, q) => s + q[i].x, 0) / quads.length,
+    y: quads.reduce((s, q) => s + q[i].y, 0) / quads.length
+  }));
+}
+
+function drawQuadOverlay(ctx, pts, w, h, color, lineWidth) {
+  const scaleX = ctx.canvas.clientWidth / w;
+  const scaleY = ctx.canvas.clientHeight / h;
+  ctx.save();
+  ctx.scale(scaleX, scaleY);
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < 4; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth / scaleX;
+  ctx.stroke();
+  ctx.fillStyle = color.includes('rgba') ? color : 'rgba(34, 197, 94, 0.08)';
+  ctx.fill();
+  // Draw corner circles
+  ctx.fillStyle = color.includes('rgba') ? color : '#22c55e';
+  for (const p of pts) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6 / scaleX, 0, Math.PI * 2);
+    ctx.fill();
   }
+  ctx.restore();
 }
 
-// ========== Document Detection (color-based) ==========
+// ========== Paper Detection (color-based: find white/light region) ==========
 
-function detectDocument(imageData, w, h) {
-  // Downscale for performance
-  const scale = 0.2;
-  const sw = Math.floor(w * scale);
-  const sh = Math.floor(h * scale);
+function detectPaperQuad(imageData, w, h) {
+  const d = imageData.data;
+  const n = w * h;
 
-  const smallCanvas = document.createElement('canvas');
-  smallCanvas.width = sw;
-  smallCanvas.height = sh;
-  const sCtx = smallCanvas.getContext('2d');
+  // Step 1: Classify each pixel as "paper-like" or not.
+  // Paper is bright and has low saturation.
+  // We use Lab-like brightness (just luminance) + saturation.
+  const brightness = new Uint8Array(n);
+  const saturation = new Uint8Array(n);
 
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = w;
-  tempCanvas.height = h;
-  const tCtx = tempCanvas.getContext('2d');
-  tCtx.putImageData(imageData, 0, 0);
-  sCtx.drawImage(tempCanvas, 0, 0, sw, sh);
-
-  const sData = sCtx.getImageData(0, 0, sw, sh);
-  const d = sData.data;
-
-  // Step 1: Build a "paper likelihood" map
-  // Paper is typically bright and low-saturation (white/off-white)
-  // We score each pixel based on brightness and low saturation
-  const paperMap = new Uint8Array(sw * sh);
-
-  // First pass: compute brightness stats to find adaptive threshold
-  let brightSum = 0;
-  let brightCount = 0;
-  const brightness = new Uint8Array(sw * sh);
-
-  for (let i = 0; i < sw * sh; i++) {
+  for (let i = 0; i < n; i++) {
     const j = i * 4;
     const r = d[j], g = d[j+1], b = d[j+2];
-    const lum = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-    brightness[i] = lum;
-    brightSum += lum;
-    brightCount++;
+    brightness[i] = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    saturation[i] = max > 0 ? Math.round(((max - min) / max) * 255) : 0;
   }
 
-  const avgBrightness = brightSum / brightCount;
+  // Step 2: Find the brightness threshold that separates paper from background.
+  // Use a two-class Otsu on brightness, but only consider low-saturation pixels
+  // as potential paper.
+  const hist = new Uint32Array(256);
+  for (let i = 0; i < n; i++) hist[brightness[i]]++;
 
-  // Compute brightness histogram to find the paper cluster
-  const hist = new Array(256).fill(0);
-  for (let i = 0; i < brightness.length; i++) hist[brightness[i]]++;
-
-  // Use Otsu's method to separate paper from background
-  const total = sw * sh;
+  let total = n;
   let sum = 0;
   for (let i = 0; i < 256; i++) sum += i * hist[i];
-
-  let sumB = 0, wB = 0, maxVar = 0, otsuThresh = 128;
+  let sumB = 0, wB = 0, maxVar = 0, otsuT = 128;
   for (let i = 0; i < 256; i++) {
     wB += hist[i];
     if (wB === 0) continue;
@@ -766,162 +541,157 @@ function detectDocument(imageData, w, h) {
     const mB = sumB / wB;
     const mF = (sum - sumB) / wF;
     const v = wB * wF * (mB - mF) * (mB - mF);
-    if (v > maxVar) { maxVar = v; otsuThresh = i; }
+    if (v > maxVar) { maxVar = v; otsuT = i; }
   }
 
-  // The paper threshold: use Otsu but bias towards the brighter class
-  // Paper should be brighter than average
-  const paperThresh = Math.max(otsuThresh, Math.min(avgBrightness * 0.8, 120));
+  // Paper threshold: pick the brighter class. Bias higher to avoid
+  // picking up the desk/background as "paper".
+  // Use max(otsu, 50th percentile) to be robust.
+  let cdf = 0;
+  let p50 = 128;
+  for (let i = 0; i < 256; i++) {
+    cdf += hist[i];
+    if (cdf >= n * 0.5) { p50 = i; break; }
+  }
+  const brightThresh = Math.max(otsuT, Math.min(p50 + 20, 200));
+  const satThresh = 80; // max saturation for "paper" (0-255 scale)
 
-  for (let i = 0; i < sw * sh; i++) {
-    const j = i * 4;
-    const r = d[j], g = d[j+1], b = d[j+2];
-    const lum = brightness[i];
-
-    // Saturation check: paper is low saturation
-    const maxC = Math.max(r, g, b);
-    const minC = Math.min(r, g, b);
-    const saturation = maxC > 0 ? (maxC - minC) / maxC : 0;
-
-    // Paper: bright + low saturation
-    if (lum >= paperThresh && saturation < 0.4) {
-      paperMap[i] = 255;
-    }
+  // Step 3: Build binary paper mask
+  const mask = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    mask[i] = (brightness[i] >= brightThresh && saturation[i] <= satThresh) ? 1 : 0;
   }
 
-  // Step 2: Morphological cleanup - close small gaps, remove noise
-  const cleaned = morphClose(morphOpen(paperMap, sw, sh, 2), sw, sh, 3);
+  // Step 4: Morphological close (fill small gaps) then open (remove noise)
+  // Use fast box-based approach
+  const closed = morphCloseBox(mask, w, h, 2);
+  const cleaned = morphOpenBox(closed, w, h, 2);
 
-  // Step 3: Find largest connected component (the paper)
-  const labels = new Int32Array(sw * sh);
-  const componentSizes = {};
+  // Step 5: Find largest connected component via flood fill
+  const labels = new Int32Array(n);
+  const sizes = {};
   let nextLabel = 1;
 
-  for (let y = 0; y < sh; y++) {
-    for (let x = 0; x < sw; x++) {
-      const idx = y * sw + x;
-      if (cleaned[idx] === 0 || labels[idx] !== 0) continue;
-      // BFS flood fill
-      const label = nextLabel++;
-      const queue = [idx];
-      let size = 0;
-      labels[idx] = label;
-      while (queue.length > 0) {
-        const ci = queue.pop();
-        size++;
-        const cx = ci % sw;
-        const cy = (ci - cx) / sw;
-        const neighbors = [
-          cy > 0 ? ci - sw : -1,
-          cy < sh - 1 ? ci + sw : -1,
-          cx > 0 ? ci - 1 : -1,
-          cx < sw - 1 ? ci + 1 : -1
-        ];
-        for (const ni of neighbors) {
-          if (ni >= 0 && cleaned[ni] === 255 && labels[ni] === 0) {
-            labels[ni] = label;
-            queue.push(ni);
-          }
-        }
-      }
-      componentSizes[label] = size;
+  for (let i = 0; i < n; i++) {
+    if (cleaned[i] === 0 || labels[i] !== 0) continue;
+    const label = nextLabel++;
+    let size = 0;
+    const stack = [i];
+    labels[i] = label;
+    while (stack.length > 0) {
+      const ci = stack.pop();
+      size++;
+      const cx = ci % w, cy = (ci - cx) / w;
+      if (cy > 0 && cleaned[ci - w] === 1 && labels[ci - w] === 0) { labels[ci - w] = label; stack.push(ci - w); }
+      if (cy < h-1 && cleaned[ci + w] === 1 && labels[ci + w] === 0) { labels[ci + w] = label; stack.push(ci + w); }
+      if (cx > 0 && cleaned[ci - 1] === 1 && labels[ci - 1] === 0) { labels[ci - 1] = label; stack.push(ci - 1); }
+      if (cx < w-1 && cleaned[ci + 1] === 1 && labels[ci + 1] === 0) { labels[ci + 1] = label; stack.push(ci + 1); }
     }
+    sizes[label] = size;
   }
 
-  // Find largest component
   let bestLabel = 0, bestSize = 0;
-  for (const [label, size] of Object.entries(componentSizes)) {
-    if (size > bestSize) { bestSize = size; bestLabel = parseInt(label); }
+  for (const l in sizes) {
+    if (sizes[l] > bestSize) { bestSize = sizes[l]; bestLabel = +l; }
   }
 
-  if (bestSize < sw * sh * 0.03) return null; // Too small
-  if (bestSize > sw * sh * 0.95) return null; // Too large (fills whole image)
+  if (bestSize < n * 0.04 || bestSize > n * 0.95) return null;
 
-  // Step 4: Extract boundary points of the largest component
-  const borderPoints = [];
-  const step = 1;
-  for (let y = 0; y < sh; y += step) {
-    for (let x = 0; x < sw; x += step) {
-      const idx = y * sw + x;
+  // Step 6: Get boundary pixels
+  const border = [];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = y * w + x;
       if (labels[idx] !== bestLabel) continue;
-      // Check if it's a border pixel
-      const isBorder = (
-        x === 0 || x === sw - 1 || y === 0 || y === sh - 1 ||
-        labels[(y-1) * sw + x] !== bestLabel ||
-        labels[(y+1) * sw + x] !== bestLabel ||
-        labels[y * sw + (x-1)] !== bestLabel ||
-        labels[y * sw + (x+1)] !== bestLabel
-      );
-      if (isBorder) borderPoints.push({ x, y });
+      if (x === 0 || x === w-1 || y === 0 || y === h-1 ||
+          labels[idx-1] !== bestLabel || labels[idx+1] !== bestLabel ||
+          labels[idx-w] !== bestLabel || labels[idx+w] !== bestLabel) {
+        border.push({ x, y });
+      }
     }
   }
 
-  if (borderPoints.length < 10) return null;
+  if (border.length < 8) return null;
 
-  // Step 5: Convex hull -> simplify to quad
-  const hull = convexHull(borderPoints);
+  // Step 7: Convex hull -> quad
+  const hull = convexHull(border);
   if (hull.length < 4) return null;
 
   let quad = simplifyToQuad(hull);
   if (!quad || quad.length !== 4) return null;
 
-  // Validate aspect ratio and area
-  const area = quadArea(quad);
-  const imgArea = sw * sh;
-  if (area < imgArea * 0.03 || area > imgArea * 0.97) return null;
+  const area = polyArea(quad);
+  if (area < n * 0.04 || area > n * 0.96) return null;
 
-  quad = orderPoints(quad);
-
-  // Scale back to original coordinates
-  return quad.map(p => ({
-    x: Math.round(p.x / scale),
-    y: Math.round(p.y / scale)
-  }));
+  return orderPoints(quad);
 }
 
-function morphOpen(map, w, h, radius) {
-  // Erode then dilate (removes small bright spots)
-  return dilate(erode(map, w, h, radius), w, h, radius);
+// Fast morphological ops using separable box filters
+function morphCloseBox(mask, w, h, r) {
+  return erodeBox(dilateBox(mask, w, h, r), w, h, r);
+}
+function morphOpenBox(mask, w, h, r) {
+  return dilateBox(erodeBox(mask, w, h, r), w, h, r);
 }
 
-function morphClose(map, w, h, radius) {
-  // Dilate then erode (fills small dark gaps)
-  return erode(dilate(map, w, h, radius), w, h, radius);
-}
-
-function erode(map, w, h, radius) {
+function dilateBox(mask, w, h, r) {
   const out = new Uint8Array(w * h);
-  for (let y = radius; y < h - radius; y++) {
-    for (let x = radius; x < w - radius; x++) {
-      let allSet = true;
-      outer:
-      for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-          if (map[(y + dy) * w + (x + dx)] === 0) { allSet = false; break outer; }
-        }
-      }
-      out[y * w + x] = allSet ? 255 : 0;
+  // Horizontal pass
+  const tmp = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) {
+    let count = 0;
+    // Init window
+    for (let x = 0; x <= r && x < w; x++) count += mask[y * w + x];
+    for (let x = 0; x < w; x++) {
+      if (x + r < w) count += mask[y * w + x + r];
+      tmp[y * w + x] = count > 0 ? 1 : 0;
+      if (x - r >= 0) count -= mask[y * w + x - r];
+    }
+  }
+  // Vertical pass
+  for (let x = 0; x < w; x++) {
+    let count = 0;
+    for (let y = 0; y <= r && y < h; y++) count += tmp[y * w + x];
+    for (let y = 0; y < h; y++) {
+      if (y + r < h) count += tmp[(y + r) * w + x];
+      out[y * w + x] = count > 0 ? 1 : 0;
+      if (y - r >= 0) count -= tmp[(y - r) * w + x];
     }
   }
   return out;
 }
 
-function dilate(map, w, h, radius) {
+function erodeBox(mask, w, h, r) {
+  const side = 2 * r + 1;
+  const full = side * side;
   const out = new Uint8Array(w * h);
-  for (let y = radius; y < h - radius; y++) {
-    for (let x = radius; x < w - radius; x++) {
-      let anySet = false;
-      outer:
-      for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-          if (map[(y + dy) * w + (x + dx)] === 255) { anySet = true; break outer; }
-        }
-      }
-      out[y * w + x] = anySet ? 255 : 0;
+  const tmp = new Uint8Array(w * h);
+  // Horizontal
+  for (let y = 0; y < h; y++) {
+    let count = 0;
+    for (let x = 0; x <= r && x < w; x++) count += mask[y * w + x];
+    for (let x = 0; x < w; x++) {
+      if (x + r < w) count += mask[y * w + x + r];
+      const wSize = Math.min(x, r) + Math.min(w - 1 - x, r) + 1;
+      tmp[y * w + x] = count === wSize ? 1 : 0;
+      if (x - r >= 0) count -= mask[y * w + x - r];
+    }
+  }
+  // Vertical
+  for (let x = 0; x < w; x++) {
+    let count = 0;
+    for (let y = 0; y <= r && y < h; y++) count += tmp[y * w + x];
+    for (let y = 0; y < h; y++) {
+      if (y + r < h) count += tmp[(y + r) * w + x];
+      const hSize = Math.min(y, r) + Math.min(h - 1 - y, r) + 1;
+      out[y * w + x] = count === hSize ? 1 : 0;
+      if (y - r >= 0) count -= tmp[(y - r) * w + x];
     }
   }
   return out;
 }
+
+// ========== Geometry Helpers ==========
 
 function convexHull(points) {
   if (points.length < 3) return points;
@@ -938,95 +708,79 @@ function convexHull(points) {
     while (upper.length >= 2 && cross(upper[upper.length-2], upper[upper.length-1], p) <= 0) upper.pop();
     upper.push(p);
   }
-  upper.pop();
-  lower.pop();
+  upper.pop(); lower.pop();
   return lower.concat(upper);
 }
 
 function simplifyToQuad(hull) {
   if (hull.length < 4) return null;
   if (hull.length === 4) return hull;
-
-  let epsilon = 1;
-  let result = hull;
-  while (result.length > 4 && epsilon < 500) {
-    result = douglasPeucker(hull, epsilon);
-    epsilon *= 1.5;
+  let eps = 1, result = hull;
+  while (result.length > 4 && eps < 500) {
+    result = douglasPeucker(hull, eps);
+    eps *= 1.4;
   }
-
   if (result.length < 4) {
-    epsilon /= 1.5;
-    result = douglasPeucker(hull, epsilon / 1.5);
+    eps /= 1.4;
+    result = douglasPeucker(hull, eps / 1.4);
   }
-
   if (result.length > 4) {
-    let bestArea = 0, bestQuad = null;
-    for (let i = 0; i < result.length; i++) {
-      for (let j = i+1; j < result.length; j++) {
-        for (let k = j+1; k < result.length; k++) {
-          for (let l = k+1; l < result.length; l++) {
+    let best = 0, bestQ = null;
+    const n = result.length;
+    for (let i = 0; i < n; i++)
+      for (let j = i+1; j < n; j++)
+        for (let k = j+1; k < n; k++)
+          for (let l = k+1; l < n; l++) {
             const q = [result[i], result[j], result[k], result[l]];
-            const a = quadArea(q);
-            if (a > bestArea) { bestArea = a; bestQuad = q; }
+            const a = polyArea(q);
+            if (a > best) { best = a; bestQ = q; }
           }
-        }
-      }
-    }
-    return bestQuad;
+    return bestQ;
   }
-
   return result.length === 4 ? result : null;
 }
 
-function douglasPeucker(points, epsilon) {
-  if (points.length <= 2) return points;
-  let maxDist = 0, maxIdx = 0;
-  const first = points[0];
-  const last = points[points.length - 1];
-  for (let i = 1; i < points.length - 1; i++) {
-    const d = pointLineDistance(points[i], first, last);
-    if (d > maxDist) { maxDist = d; maxIdx = i; }
+function douglasPeucker(pts, eps) {
+  if (pts.length <= 2) return pts;
+  let maxD = 0, maxI = 0;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const d = ptLineDist(pts[i], pts[0], pts[pts.length-1]);
+    if (d > maxD) { maxD = d; maxI = i; }
   }
-  if (maxDist > epsilon) {
-    const left = douglasPeucker(points.slice(0, maxIdx + 1), epsilon);
-    const right = douglasPeucker(points.slice(maxIdx), epsilon);
-    return left.slice(0, -1).concat(right);
+  if (maxD > eps) {
+    const l = douglasPeucker(pts.slice(0, maxI + 1), eps);
+    const r = douglasPeucker(pts.slice(maxI), eps);
+    return l.slice(0, -1).concat(r);
   }
-  return [first, last];
+  return [pts[0], pts[pts.length-1]];
 }
 
-function pointLineDistance(p, a, b) {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.sqrt(dx * dx + dy * dy);
-  if (len === 0) return Math.sqrt((p.x - a.x) ** 2 + (p.y - a.y) ** 2);
-  return Math.abs(dy * p.x - dx * p.y + b.x * a.y - b.y * a.x) / len;
+function ptLineDist(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+  return Math.abs(dy*p.x - dx*p.y + b.x*a.y - b.y*a.x) / len;
 }
 
-function quadArea(pts) {
-  let area = 0;
+function polyArea(pts) {
+  let a = 0;
   for (let i = 0; i < pts.length; i++) {
     const j = (i + 1) % pts.length;
-    area += pts[i].x * pts[j].y;
-    area -= pts[j].x * pts[i].y;
+    a += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
   }
-  return Math.abs(area) / 2;
+  return Math.abs(a) / 2;
 }
 
 function orderPoints(pts) {
-  const center = {
-    x: pts.reduce((s, p) => s + p.x, 0) / 4,
-    y: pts.reduce((s, p) => s + p.y, 0) / 4
-  };
-  pts.sort((a, b) => Math.atan2(a.y - center.y, a.x - center.x) - Math.atan2(b.y - center.y, b.x - center.x));
-  let minSum = Infinity, minIdx = 0;
+  const cx = pts.reduce((s, p) => s + p.x, 0) / 4;
+  const cy = pts.reduce((s, p) => s + p.y, 0) / 4;
+  pts.sort((a, b) => Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx));
+  let mi = 0, ms = Infinity;
   for (let i = 0; i < 4; i++) {
     const s = pts[i].x + pts[i].y;
-    if (s < minSum) { minSum = s; minIdx = i; }
+    if (s < ms) { ms = s; mi = i; }
   }
-  const ordered = [];
-  for (let i = 0; i < 4; i++) ordered.push(pts[(minIdx + i) % 4]);
-  return ordered;
+  return [0,1,2,3].map(i => pts[(mi + i) % 4]);
 }
 
 // ========== Crop Screen ==========
@@ -1039,44 +793,45 @@ function loadImageForCrop(dataURL) {
     cropImage.src = dataURL;
     showScreen('cropScreen');
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        processCanvas.width = img.width;
-        processCanvas.height = img.height;
-        processCtx.drawImage(img, 0, 0);
-        const imgData = processCtx.getImageData(0, 0, img.width, img.height);
-        currentImageData = imgData;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      processCanvas.width = img.width;
+      processCanvas.height = img.height;
+      processCtx.drawImage(img, 0, 0);
+      currentImageData = processCtx.getImageData(0, 0, img.width, img.height);
 
-        const detected = detectDocument(imgData, img.width, img.height);
-        if (detected) {
-          corners = detected;
-        } else {
-          const m = 0.05;
-          corners = [
-            { x: img.width * m, y: img.height * m },
-            { x: img.width * (1 - m), y: img.height * m },
-            { x: img.width * (1 - m), y: img.height * (1 - m) },
-            { x: img.width * m, y: img.height * (1 - m) }
-          ];
-        }
-        drawCropOverlay();
-        positionHandles();
-      });
-    });
+      // Detect on a downscaled version for speed
+      const ds = 400 / Math.max(img.width, img.height);
+      const dw = Math.round(img.width * ds);
+      const dh = Math.round(img.height * ds);
+      const dc = document.createElement('canvas');
+      dc.width = dw; dc.height = dh;
+      dc.getContext('2d').drawImage(img, 0, 0, dw, dh);
+      const dData = dc.getContext('2d').getImageData(0, 0, dw, dh);
+      const det = detectPaperQuad(dData, dw, dh);
+
+      if (det) {
+        corners = det.map(p => ({ x: Math.round(p.x / ds), y: Math.round(p.y / ds) }));
+      } else {
+        const m = 0.05;
+        corners = [
+          { x: img.width * m, y: img.height * m },
+          { x: img.width * (1 - m), y: img.height * m },
+          { x: img.width * (1 - m), y: img.height * (1 - m) },
+          { x: img.width * m, y: img.height * (1 - m) }
+        ];
+      }
+      drawCropOverlay();
+      positionHandles();
+    }));
   };
   img.src = dataURL;
 }
 
 function getImageDisplayRect() {
-  const container = document.getElementById('cropContainer');
-  const cw = container.clientWidth;
-  const ch = container.clientHeight;
-  const iw = currentImage.width;
-  const ih = currentImage.height;
-  const sc = Math.min(cw / iw, ch / ih);
-  const dw = iw * sc;
-  const dh = ih * sc;
-  return { ox: (cw - dw) / 2, oy: (ch - dh) / 2, dw, dh, scale: sc };
+  const c = document.getElementById('cropContainer');
+  const sc = Math.min(c.clientWidth / currentImage.width, c.clientHeight / currentImage.height);
+  const dw = currentImage.width * sc, dh = currentImage.height * sc;
+  return { ox: (c.clientWidth - dw) / 2, oy: (c.clientHeight - dh) / 2, scale: sc };
 }
 
 function imageToScreen(p) {
@@ -1093,27 +848,24 @@ function screenToImage(p) {
 }
 
 function drawCropOverlay() {
-  const container = document.getElementById('cropContainer');
-  cropCanvas.width = container.clientWidth;
-  cropCanvas.height = container.clientHeight;
+  const c = document.getElementById('cropContainer');
+  cropCanvas.width = c.clientWidth;
+  cropCanvas.height = c.clientHeight;
   cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
-
-  cropCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  cropCtx.fillStyle = 'rgba(0,0,0,0.5)';
   cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
-
-  const screenCorners = corners.map(c => imageToScreen(c));
+  const sc = corners.map(c => imageToScreen(c));
   cropCtx.save();
   cropCtx.globalCompositeOperation = 'destination-out';
   cropCtx.beginPath();
-  cropCtx.moveTo(screenCorners[0].x, screenCorners[0].y);
-  for (let i = 1; i < 4; i++) cropCtx.lineTo(screenCorners[i].x, screenCorners[i].y);
+  cropCtx.moveTo(sc[0].x, sc[0].y);
+  for (let i = 1; i < 4; i++) cropCtx.lineTo(sc[i].x, sc[i].y);
   cropCtx.closePath();
   cropCtx.fill();
   cropCtx.restore();
-
   cropCtx.beginPath();
-  cropCtx.moveTo(screenCorners[0].x, screenCorners[0].y);
-  for (let i = 1; i < 4; i++) cropCtx.lineTo(screenCorners[i].x, screenCorners[i].y);
+  cropCtx.moveTo(sc[0].x, sc[0].y);
+  for (let i = 1; i < 4; i++) cropCtx.lineTo(sc[i].x, sc[i].y);
   cropCtx.closePath();
   cropCtx.strokeStyle = '#2563eb';
   cropCtx.lineWidth = 2;
@@ -1121,50 +873,49 @@ function drawCropOverlay() {
 }
 
 function positionHandles() {
-  const handles = [
-    document.getElementById('handleTL'),
-    document.getElementById('handleTR'),
-    document.getElementById('handleBR'),
-    document.getElementById('handleBL')
-  ];
-  corners.forEach((c, i) => {
-    const sp = imageToScreen(c);
-    handles[i].style.left = sp.x + 'px';
-    handles[i].style.top = sp.y + 'px';
+  ['handleTL','handleTR','handleBR','handleBL'].forEach((id, i) => {
+    const sp = imageToScreen(corners[i]);
+    const el = document.getElementById(id);
+    el.style.left = sp.x + 'px';
+    el.style.top = sp.y + 'px';
   });
 }
 
 function setupCornerDragging() {
-  const handles = document.querySelectorAll('.corner-handle');
+  document.querySelectorAll('.corner-handle').forEach(h => {
+    const start = (e) => { e.preventDefault(); draggingCorner = +h.dataset.corner; };
+    h.addEventListener('mousedown', start);
+    h.addEventListener('touchstart', start, { passive: false });
+  });
   const getPos = (e) => {
     const t = e.touches ? e.touches[0] : e;
-    const rect = document.getElementById('cropContainer').getBoundingClientRect();
-    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+    const r = document.getElementById('cropContainer').getBoundingClientRect();
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
   };
-  handles.forEach(h => {
-    const startDrag = (e) => { e.preventDefault(); draggingCorner = parseInt(h.dataset.corner); };
-    h.addEventListener('mousedown', startDrag);
-    h.addEventListener('touchstart', startDrag, { passive: false });
-  });
-  const onMove = (e) => {
+  const move = (e) => {
     if (draggingCorner < 0) return;
     e.preventDefault();
     corners[draggingCorner] = screenToImage(getPos(e));
     drawCropOverlay();
     positionHandles();
   };
-  const onEnd = () => { draggingCorner = -1; };
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('mouseup', onEnd);
-  document.addEventListener('touchend', onEnd);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('touchmove', move, { passive: false });
+  document.addEventListener('mouseup', () => draggingCorner = -1);
+  document.addEventListener('touchend', () => draggingCorner = -1);
 }
 
 function autoDetect() {
-  if (!currentImageData) return;
-  const detected = detectDocument(currentImageData, currentImage.width, currentImage.height);
-  if (detected) {
-    corners = detected;
+  if (!currentImage) return;
+  const ds = 400 / Math.max(currentImage.width, currentImage.height);
+  const dw = Math.round(currentImage.width * ds);
+  const dh = Math.round(currentImage.height * ds);
+  const dc = document.createElement('canvas');
+  dc.width = dw; dc.height = dh;
+  dc.getContext('2d').drawImage(currentImage, 0, 0, dw, dh);
+  const det = detectPaperQuad(dc.getContext('2d').getImageData(0, 0, dw, dh), dw, dh);
+  if (det) {
+    corners = det.map(p => ({ x: Math.round(p.x / ds), y: Math.round(p.y / ds) }));
     drawCropOverlay();
     positionHandles();
     showToast('Document edges detected');
@@ -1173,231 +924,189 @@ function autoDetect() {
   }
 }
 
-function cancelCrop() {
-  showScreen('cameraScreen');
-  startCamera();
-}
+function cancelCrop() { showScreen('cameraScreen'); startCamera(); }
 
 async function confirmCrop() {
-  showProcessing('Cropping & processing...');
+  showProcessing('Processing...');
   await new Promise(r => setTimeout(r, 50));
-
   const cropped = perspectiveTransform(currentImage, corners);
   const bw = document.getElementById('bwToggle').checked;
   const quality = document.getElementById('qualitySelect').value;
   const finalURL = processImage(cropped, bw, bwMode, quality);
-
-  pages.push({
-    original: currentImage.src,
-    corners: [...corners],
-    cropped: finalURL
-  });
-
+  pages.push({ original: currentImage.src, corners: [...corners], cropped: finalURL });
   updatePageCount();
   hideProcessing();
   showToast('Page added');
-
   if (window._pendingFiles && window._pendingFiles.length > 0) {
     const file = window._pendingFiles.shift();
     const reader = new FileReader();
     reader.onload = () => loadImageForCrop(reader.result);
     reader.readAsDataURL(file);
-  } else {
-    showScreen('cameraScreen');
-    startCamera();
-  }
+  } else { showScreen('cameraScreen'); startCamera(); }
 }
 
 // ========== Perspective Transform ==========
 
 function perspectiveTransform(img, pts) {
-  const widthTop = Math.sqrt((pts[1].x - pts[0].x) ** 2 + (pts[1].y - pts[0].y) ** 2);
-  const widthBottom = Math.sqrt((pts[2].x - pts[3].x) ** 2 + (pts[2].y - pts[3].y) ** 2);
-  const heightLeft = Math.sqrt((pts[3].x - pts[0].x) ** 2 + (pts[3].y - pts[0].y) ** 2);
-  const heightRight = Math.sqrt((pts[2].x - pts[1].x) ** 2 + (pts[2].y - pts[1].y) ** 2);
+  const wT = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
+  const wB = Math.hypot(pts[2].x-pts[3].x, pts[2].y-pts[3].y);
+  const hL = Math.hypot(pts[3].x-pts[0].x, pts[3].y-pts[0].y);
+  const hR = Math.hypot(pts[2].x-pts[1].x, pts[2].y-pts[1].y);
+  const outW = Math.round(Math.max(wT, wB));
+  const outH = Math.round(Math.max(hL, hR));
 
-  const outW = Math.round(Math.max(widthTop, widthBottom));
-  const outH = Math.round(Math.max(heightLeft, heightRight));
+  const sc = document.createElement('canvas');
+  sc.width = img.width; sc.height = img.height;
+  sc.getContext('2d').drawImage(img, 0, 0);
+  const srcD = sc.getContext('2d').getImageData(0, 0, img.width, img.height);
 
-  const srcCanvas = document.createElement('canvas');
-  srcCanvas.width = img.width;
-  srcCanvas.height = img.height;
-  const srcCtx = srcCanvas.getContext('2d');
-  srcCtx.drawImage(img, 0, 0);
-  const srcData = srcCtx.getImageData(0, 0, img.width, img.height);
+  const oc = document.createElement('canvas');
+  oc.width = outW; oc.height = outH;
+  const oCtx = oc.getContext('2d');
+  const oD = oCtx.createImageData(outW, outH);
 
-  const outCanvas = document.createElement('canvas');
-  outCanvas.width = outW;
-  outCanvas.height = outH;
-  const outCtx = outCanvas.getContext('2d');
-  const outData = outCtx.createImageData(outW, outH);
-
-  const src = [pts[0].x, pts[0].y, pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y];
-  const dst = [0, 0, outW, 0, outW, outH, 0, outH];
-  const matrix = computePerspectiveMatrix(dst, src);
+  const src = [pts[0].x,pts[0].y, pts[1].x,pts[1].y, pts[2].x,pts[2].y, pts[3].x,pts[3].y];
+  const dst = [0,0, outW,0, outW,outH, 0,outH];
+  const M = solvePerspective(dst, src);
 
   for (let y = 0; y < outH; y++) {
     for (let x = 0; x < outW; x++) {
-      const d = matrix[6] * x + matrix[7] * y + 1;
-      const sx = (matrix[0] * x + matrix[1] * y + matrix[2]) / d;
-      const sy = (matrix[3] * x + matrix[4] * y + matrix[5]) / d;
+      const dd = M[6]*x + M[7]*y + 1;
+      const sx = (M[0]*x + M[1]*y + M[2]) / dd;
+      const sy = (M[3]*x + M[4]*y + M[5]) / dd;
       const x0 = Math.floor(sx), y0 = Math.floor(sy);
-      const x1 = x0 + 1, y1 = y0 + 1;
-      const fx = sx - x0, fy = sy - y0;
-      if (x0 >= 0 && x1 < img.width && y0 >= 0 && y1 < img.height) {
+      if (x0 >= 0 && x0+1 < img.width && y0 >= 0 && y0+1 < img.height) {
+        const fx = sx - x0, fy = sy - y0;
         const idx = (y * outW + x) * 4;
         for (let c = 0; c < 4; c++) {
-          const v00 = srcData.data[(y0 * img.width + x0) * 4 + c];
-          const v10 = srcData.data[(y0 * img.width + x1) * 4 + c];
-          const v01 = srcData.data[(y1 * img.width + x0) * 4 + c];
-          const v11 = srcData.data[(y1 * img.width + x1) * 4 + c];
-          outData.data[idx + c] = Math.round(
-            v00 * (1 - fx) * (1 - fy) + v10 * fx * (1 - fy) +
-            v01 * (1 - fx) * fy + v11 * fx * fy
-          );
+          const v00 = srcD.data[(y0*img.width+x0)*4+c];
+          const v10 = srcD.data[(y0*img.width+x0+1)*4+c];
+          const v01 = srcD.data[((y0+1)*img.width+x0)*4+c];
+          const v11 = srcD.data[((y0+1)*img.width+x0+1)*4+c];
+          oD.data[idx+c] = Math.round(v00*(1-fx)*(1-fy)+v10*fx*(1-fy)+v01*(1-fx)*fy+v11*fx*fy);
         }
       }
     }
   }
-
-  outCtx.putImageData(outData, 0, 0);
-  return outCanvas;
+  oCtx.putImageData(oD, 0, 0);
+  return oc;
 }
 
-function computePerspectiveMatrix(src, dst) {
+function solvePerspective(src, dst) {
   const A = [], b = [];
   for (let i = 0; i < 4; i++) {
-    const sx = src[i * 2], sy = src[i * 2 + 1];
-    const dx = dst[i * 2], dy = dst[i * 2 + 1];
-    A.push([sx, sy, 1, 0, 0, 0, -dx * sx, -dx * sy]);
-    b.push(dx);
-    A.push([0, 0, 0, sx, sy, 1, -dy * sx, -dy * sy]);
-    b.push(dy);
+    const sx = src[i*2], sy = src[i*2+1], dx = dst[i*2], dy = dst[i*2+1];
+    A.push([sx,sy,1,0,0,0,-dx*sx,-dx*sy]); b.push(dx);
+    A.push([0,0,0,sx,sy,1,-dy*sx,-dy*sy]); b.push(dy);
   }
-  const n = 8;
-  const aug = A.map((row, i) => [...row, b[i]]);
-  for (let col = 0; col < n; col++) {
-    let maxRow = col;
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(aug[row][col]) > Math.abs(aug[maxRow][col])) maxRow = row;
-    }
-    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
-    const pivot = aug[col][col];
-    if (Math.abs(pivot) < 1e-10) return [1, 0, 0, 0, 1, 0, 0, 0];
-    for (let j = col; j <= n; j++) aug[col][j] /= pivot;
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const factor = aug[row][col];
-      for (let j = col; j <= n; j++) aug[row][j] -= factor * aug[col][j];
+  const aug = A.map((r,i) => [...r, b[i]]);
+  for (let c = 0; c < 8; c++) {
+    let mr = c;
+    for (let r = c+1; r < 8; r++) if (Math.abs(aug[r][c]) > Math.abs(aug[mr][c])) mr = r;
+    [aug[c], aug[mr]] = [aug[mr], aug[c]];
+    const piv = aug[c][c];
+    if (Math.abs(piv) < 1e-10) return [1,0,0,0,1,0,0,0];
+    for (let j = c; j <= 8; j++) aug[c][j] /= piv;
+    for (let r = 0; r < 8; r++) {
+      if (r === c) continue;
+      const f = aug[r][c];
+      for (let j = c; j <= 8; j++) aug[r][j] -= f * aug[c][j];
     }
   }
-  return aug.map(row => row[n]);
+  return aug.map(r => r[8]);
 }
 
-// ========== Image Processing (B&W modes) ==========
+// ========== B&W Processing (Sauvola binarization) ==========
 
 function processImage(canvas, bw, mode, quality) {
   if (bw) {
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = canvas.width, h = canvas.height;
     const imgData = ctx.getImageData(0, 0, w, h);
-    const d = imgData.data;
+    const px = imgData.data;
+    const n = w * h;
 
-    // Convert to grayscale
-    const gray = new Uint8Array(w * h);
-    for (let i = 0; i < gray.length; i++) {
+    // Grayscale
+    const gray = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
       const j = i * 4;
-      gray[i] = Math.round(0.299 * d[j] + 0.587 * d[j+1] + 0.114 * d[j+2]);
+      gray[i] = Math.round(0.299 * px[j] + 0.587 * px[j+1] + 0.114 * px[j+2]);
     }
 
-    // Step 1: Noise reduction (bilateral-like filter for light/standard, stronger for strong/extra)
-    const denoised = (mode === 'strong' || mode === 'extra')
-      ? medianFilter(gray, w, h, 2)
-      : (mode === 'standard' ? medianFilter(gray, w, h, 1) : gray);
-
-    // Step 2: Contrast enhancement
-    const enhanced = enhanceContrast(denoised, w, h, mode);
-
-    // Step 3: Adaptive threshold with mode-specific parameters
-    const params = {
-      light:    { blockDiv: 20, C: 5,  minBlock: 25 },
-      standard: { blockDiv: 30, C: 10, minBlock: 19 },
-      strong:   { blockDiv: 40, C: 15, minBlock: 15 },
-      extra:    { blockDiv: 50, C: 22, minBlock: 11 }
-    }[mode] || { blockDiv: 30, C: 10, minBlock: 19 };
-
-    let blockSize = Math.max(params.minBlock, Math.floor(Math.min(w, h) / params.blockDiv));
-    if (blockSize % 2 === 0) blockSize++;
-
-    // Build integral image
-    const integral = new Float64Array((w + 1) * (h + 1));
+    // Build integral image and integral of squares (for Sauvola)
+    const integral = new Float64Array((w+1) * (h+1));
+    const integralSq = new Float64Array((w+1) * (h+1));
     for (let y = 1; y <= h; y++) {
-      let rowSum = 0;
+      let rowSum = 0, rowSumSq = 0;
       for (let x = 1; x <= w; x++) {
-        rowSum += enhanced[(y-1) * w + (x-1)];
-        integral[y * (w+1) + x] = integral[(y-1) * (w+1) + x] + rowSum;
+        const v = gray[(y-1)*w+(x-1)];
+        rowSum += v;
+        rowSumSq += v * v;
+        integral[y*(w+1)+x] = integral[(y-1)*(w+1)+x] + rowSum;
+        integralSq[y*(w+1)+x] = integralSq[(y-1)*(w+1)+x] + rowSumSq;
       }
     }
 
-    const half = Math.floor(blockSize / 2);
-    const C = params.C;
+    // Sauvola parameters per mode
+    // k controls sensitivity: lower k = more pixels become black (more aggressive)
+    // windowDiv controls window size: smaller = more local adaptation
+    const params = {
+      light:    { k: 0.5,  windowDiv: 16, R: 128 },
+      standard: { k: 0.3,  windowDiv: 12, R: 128 },
+      strong:   { k: 0.15, windowDiv: 10, R: 128 },
+      extra:    { k: 0.06, windowDiv: 8,  R: 128 }
+    }[mode];
 
-    for (let i = 0; i < gray.length; i++) {
-      const x = i % w;
-      const y = (i - x) / w;
-      const x1 = Math.max(0, x - half);
-      const y1 = Math.max(0, y - half);
-      const x2 = Math.min(w, x + half + 1);
-      const y2 = Math.min(h, y + half + 1);
+    let winSize = Math.max(11, Math.floor(Math.min(w, h) / params.windowDiv));
+    if (winSize % 2 === 0) winSize++;
+    const half = winSize >> 1;
+
+    // Sauvola: T(x,y) = mean * (1 + k * (stddev / R - 1))
+    // pixel is white if gray > T, else black
+    for (let i = 0; i < n; i++) {
+      const x = i % w, y = (i - x) / w;
+      const x1 = Math.max(0, x - half), y1 = Math.max(0, y - half);
+      const x2 = Math.min(w, x + half + 1), y2 = Math.min(h, y + half + 1);
       const area = (x2 - x1) * (y2 - y1);
-      const sum = integral[y2*(w+1)+x2] - integral[y1*(w+1)+x2]
-                - integral[y2*(w+1)+x1] + integral[y1*(w+1)+x1];
-      const mean = sum / area;
-      const val = enhanced[i] > mean - C ? 255 : 0;
+      const s  = integral[y2*(w+1)+x2] - integral[y1*(w+1)+x2] - integral[y2*(w+1)+x1] + integral[y1*(w+1)+x1];
+      const sq = integralSq[y2*(w+1)+x2] - integralSq[y1*(w+1)+x2] - integralSq[y2*(w+1)+x1] + integralSq[y1*(w+1)+x1];
+      const mean = s / area;
+      const variance = Math.max(0, sq / area - mean * mean);
+      const stddev = Math.sqrt(variance);
+      const threshold = mean * (1 + params.k * (stddev / params.R - 1));
+      const val = gray[i] > threshold ? 255 : 0;
       const j = i * 4;
-      d[j] = d[j+1] = d[j+2] = val;
+      px[j] = px[j+1] = px[j+2] = val;
     }
 
-    // Step 4: Post-processing cleanup for strong/extra modes
+    // Post-processing: remove isolated noise pixels (despeckle)
     if (mode === 'strong' || mode === 'extra') {
-      // Remove isolated black pixels (salt noise in white areas)
-      for (let y = 1; y < h - 1; y++) {
-        for (let x = 1; x < w - 1; x++) {
-          const j = (y * w + x) * 4;
-          if (d[j] === 0) {
-            // Count white neighbors
-            let whiteNeighbors = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
-                if (dy === 0 && dx === 0) continue;
-                if (d[((y+dy) * w + (x+dx)) * 4] === 255) whiteNeighbors++;
-              }
+      const minNeighbors = mode === 'extra' ? 6 : 7;
+      // Remove isolated black dots in white areas
+      for (let y = 1; y < h-1; y++) {
+        for (let x = 1; x < w-1; x++) {
+          const j = (y*w+x)*4;
+          if (px[j] === 0) {
+            let wn = 0;
+            for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++) {
+              if (dy===0&&dx===0) continue;
+              if (px[((y+dy)*w+(x+dx))*4] === 255) wn++;
             }
-            if (whiteNeighbors >= 7) {
-              d[j] = d[j+1] = d[j+2] = 255;
-            }
+            if (wn >= minNeighbors) px[j] = px[j+1] = px[j+2] = 255;
           }
         }
       }
-    }
-
-    if (mode === 'extra') {
-      // Also remove isolated white pixels in dark areas (pepper noise in text)
-      for (let y = 1; y < h - 1; y++) {
-        for (let x = 1; x < w - 1; x++) {
-          const j = (y * w + x) * 4;
-          if (d[j] === 255) {
-            let blackNeighbors = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
-                if (dy === 0 && dx === 0) continue;
-                if (d[((y+dy) * w + (x+dx)) * 4] === 0) blackNeighbors++;
-              }
+      // Remove isolated white dots in black areas
+      for (let y = 1; y < h-1; y++) {
+        for (let x = 1; x < w-1; x++) {
+          const j = (y*w+x)*4;
+          if (px[j] === 255) {
+            let bn = 0;
+            for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++) {
+              if (dy===0&&dx===0) continue;
+              if (px[((y+dy)*w+(x+dx))*4] === 0) bn++;
             }
-            if (blackNeighbors >= 7) {
-              d[j] = d[j+1] = d[j+2] = 0;
-            }
+            if (bn >= minNeighbors) px[j] = px[j+1] = px[j+2] = 0;
           }
         }
       }
@@ -1406,112 +1115,14 @@ function processImage(canvas, bw, mode, quality) {
     ctx.putImageData(imgData, 0, 0);
   }
 
-  const jpegQuality = { low: 0.5, medium: 0.75, high: 0.95 }[quality] || 0.75;
-  return canvas.toDataURL('image/jpeg', jpegQuality);
-}
-
-function medianFilter(gray, w, h, radius) {
-  const out = new Uint8Array(w * h);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const vals = [];
-      for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-          const ny = Math.min(h - 1, Math.max(0, y + dy));
-          const nx = Math.min(w - 1, Math.max(0, x + dx));
-          vals.push(gray[ny * w + nx]);
-        }
-      }
-      vals.sort((a, b) => a - b);
-      out[y * w + x] = vals[vals.length >> 1];
-    }
-  }
-  return out;
-}
-
-function enhanceContrast(gray, w, h, mode) {
-  const out = new Uint8Array(w * h);
-
-  // CLAHE-like local contrast enhancement
-  // Strength varies by mode
-  const tileSize = Math.max(32, Math.floor(Math.min(w, h) / 8));
-  const tilesX = Math.ceil(w / tileSize);
-  const tilesY = Math.ceil(h / tileSize);
-
-  // For light mode: minimal enhancement, just normalize
-  if (mode === 'light') {
-    let min = 255, max = 0;
-    for (let i = 0; i < gray.length; i++) {
-      if (gray[i] < min) min = gray[i];
-      if (gray[i] > max) max = gray[i];
-    }
-    const range = max - min || 1;
-    for (let i = 0; i < gray.length; i++) {
-      out[i] = Math.round(((gray[i] - min) / range) * 255);
-    }
-    return out;
-  }
-
-  // For standard/strong/extra: compute per-tile histograms and equalize
-  const clipLimit = { standard: 3.0, strong: 2.0, extra: 1.5 }[mode] || 3.0;
-
-  // Build tile lookup tables
-  const tileLUTs = [];
-  for (let ty = 0; ty < tilesY; ty++) {
-    tileLUTs[ty] = [];
-    for (let tx = 0; tx < tilesX; tx++) {
-      const x0 = tx * tileSize;
-      const y0 = ty * tileSize;
-      const x1 = Math.min(w, x0 + tileSize);
-      const y1 = Math.min(h, y0 + tileSize);
-
-      // Histogram
-      const hist = new Array(256).fill(0);
-      const tilePixels = (x1 - x0) * (y1 - y0);
-      for (let y = y0; y < y1; y++) {
-        for (let x = x0; x < x1; x++) {
-          hist[gray[y * w + x]]++;
-        }
-      }
-
-      // Clip histogram
-      const limit = Math.floor(clipLimit * tilePixels / 256);
-      let excess = 0;
-      for (let i = 0; i < 256; i++) {
-        if (hist[i] > limit) { excess += hist[i] - limit; hist[i] = limit; }
-      }
-      const inc = Math.floor(excess / 256);
-      for (let i = 0; i < 256; i++) hist[i] += inc;
-
-      // CDF -> LUT
-      const lut = new Uint8Array(256);
-      let cdf = 0;
-      for (let i = 0; i < 256; i++) {
-        cdf += hist[i];
-        lut[i] = Math.round((cdf / tilePixels) * 255);
-      }
-      tileLUTs[ty][tx] = lut;
-    }
-  }
-
-  // Interpolate between tiles for smooth result
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const val = gray[y * w + x];
-      const tx = Math.min(tilesX - 1, (x / tileSize) | 0);
-      const ty = Math.min(tilesY - 1, (y / tileSize) | 0);
-      out[y * w + x] = tileLUTs[ty][tx][val];
-    }
-  }
-
-  return out;
+  const jpegQ = { low: 0.5, medium: 0.75, high: 0.95 }[quality] || 0.75;
+  return canvas.toDataURL('image/jpeg', jpegQ);
 }
 
 // ========== B&W UI ==========
 
 function toggleBW() {
-  const open = document.getElementById('bwToggle').checked;
-  document.getElementById('bwOptions').classList.toggle('open', open);
+  document.getElementById('bwOptions').classList.toggle('open', document.getElementById('bwToggle').checked);
   reprocessPages();
 }
 
@@ -1522,172 +1133,113 @@ function selectBWMode(btn) {
   reprocessPages();
 }
 
-// ========== Pages Screen ==========
+// ========== Pages ==========
 
-function showPages() {
-  showScreen('pagesScreen');
-  stopCamera();
-  renderPages();
-}
+function showPages() { showScreen('pagesScreen'); stopCamera(); renderPages(); }
 
 function renderPages() {
   const grid = document.getElementById('pagesGrid');
   const empty = document.getElementById('emptyState');
   const saveBtn = document.getElementById('savePdfBtn');
-
   if (pages.length === 0) {
-    grid.style.display = 'none';
-    empty.style.display = 'flex';
-    saveBtn.disabled = true;
-    return;
+    grid.style.display = 'none'; empty.style.display = 'flex'; saveBtn.disabled = true; return;
   }
-
-  grid.style.display = 'grid';
-  empty.style.display = 'none';
-  saveBtn.disabled = false;
-
+  grid.style.display = 'grid'; empty.style.display = 'none'; saveBtn.disabled = false;
   grid.innerHTML = pages.map((p, i) => `
     <div class="page-card" onclick="previewPage(${i})">
-      <img src="${p.cropped}" alt="Page ${i + 1}">
-      <span class="page-num">${i + 1}</span>
-      <button class="delete-page" onclick="event.stopPropagation(); deletePage(${i})">&#x2715;</button>
-    </div>
-  `).join('');
+      <img src="${p.cropped}" alt="Page ${i+1}">
+      <span class="page-num">${i+1}</span>
+      <button class="delete-page" onclick="event.stopPropagation();deletePage(${i})">&#x2715;</button>
+    </div>`).join('');
 }
 
-function deletePage(idx) {
-  pages.splice(idx, 1);
-  updatePageCount();
-  renderPages();
-  showToast('Page removed');
-}
+function deletePage(i) { pages.splice(i,1); updatePageCount(); renderPages(); showToast('Page removed'); }
 
-function previewPage(idx) {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+function previewPage(i) {
+  const o = document.createElement('div');
+  o.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
   const img = document.createElement('img');
-  img.src = pages[idx].cropped;
+  img.src = pages[i].cropped;
   img.style.cssText = 'max-width:95%;max-height:95%;object-fit:contain;';
-  overlay.appendChild(img);
-  overlay.onclick = () => overlay.remove();
-  document.body.appendChild(overlay);
+  o.appendChild(img); o.onclick = () => o.remove(); document.body.appendChild(o);
 }
 
 async function reprocessPages() {
   if (pages.length === 0) return;
-  showProcessing('Reprocessing pages...');
+  showProcessing('Reprocessing...');
   const bw = document.getElementById('bwToggle').checked;
   const quality = document.getElementById('qualitySelect').value;
-
   await new Promise(r => setTimeout(r, 50));
-
   for (let i = 0; i < pages.length; i++) {
     const img = new Image();
-    await new Promise(resolve => {
-      img.onload = resolve;
-      img.src = pages[i].original;
-    });
+    await new Promise(res => { img.onload = res; img.src = pages[i].original; });
     const canvas = perspectiveTransform(img, pages[i].corners);
     pages[i].cropped = processImage(canvas, bw, bwMode, quality);
   }
-
-  renderPages();
-  hideProcessing();
-  showToast('Pages reprocessed');
+  renderPages(); hideProcessing(); showToast('Pages reprocessed');
 }
 
-// ========== PDF Export ==========
+// ========== PDF ==========
 
 async function savePDF() {
   if (pages.length === 0) return;
   showProcessing('Generating PDF...');
   await new Promise(r => setTimeout(r, 50));
-
   try {
     const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-    const pageWidth = 210;
-    const pageHeight = 297;
-
     for (let i = 0; i < pages.length; i++) {
       if (i > 0) pdf.addPage();
       const img = new Image();
-      await new Promise(resolve => {
-        img.onload = resolve;
-        img.src = pages[i].cropped;
-      });
+      await new Promise(res => { img.onload = res; img.src = pages[i].cropped; });
       const ratio = img.width / img.height;
       let w, h;
-      if (ratio > pageWidth / pageHeight) {
-        w = pageWidth; h = pageWidth / ratio;
-      } else {
-        h = pageHeight; w = pageHeight * ratio;
-      }
-      const x = (pageWidth - w) / 2;
-      const y = (pageHeight - h) / 2;
-      pdf.addImage(pages[i].cropped, 'JPEG', x, y, w, h);
+      if (ratio > 210/297) { w = 210; h = 210/ratio; } else { h = 297; w = 297*ratio; }
+      pdf.addImage(pages[i].cropped, 'JPEG', (210-w)/2, (297-h)/2, w, h);
     }
-
-    pdf.save(`scan_${new Date().toISOString().slice(0, 10)}.pdf`);
-    hideProcessing();
-    showToast(`PDF saved with ${pages.length} page(s)`);
-  } catch (err) {
-    hideProcessing();
-    showToast('Error generating PDF');
-    console.error(err);
-  }
+    pdf.save(`scan_${new Date().toISOString().slice(0,10)}.pdf`);
+    hideProcessing(); showToast(`PDF saved with ${pages.length} page(s)`);
+  } catch(e) { hideProcessing(); showToast('Error generating PDF'); console.error(e); }
 }
 
-// ========== UI Helpers ==========
+// ========== UI ==========
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function showCamera() {
-  showScreen('cameraScreen');
-  startCamera();
-}
+function showCamera() { showScreen('cameraScreen'); startCamera(); }
 
 function updatePageCount() {
   const n = pages.length;
-  document.getElementById('pageCount').textContent = `${n} page${n !== 1 ? 's' : ''}`;
+  document.getElementById('pageCount').textContent = `${n} page${n!==1?'s':''}`;
   const thumb = document.getElementById('galleryThumb');
   const ctx = thumb.getContext('2d');
   if (n > 0) {
     const img = new Image();
     img.onload = () => {
-      ctx.clearRect(0, 0, 44, 44);
-      const scale = Math.max(44 / img.width, 44 / img.height);
-      const w = img.width * scale;
-      const h = img.height * scale;
-      ctx.drawImage(img, (44 - w) / 2, (44 - h) / 2, w, h);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(0, 0, 44, 44);
+      ctx.clearRect(0,0,44,44);
+      const sc = Math.max(44/img.width, 44/img.height);
+      ctx.drawImage(img, (44-img.width*sc)/2, (44-img.height*sc)/2, img.width*sc, img.height*sc);
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.strokeRect(0,0,44,44);
     };
-    img.src = pages[n - 1].cropped;
+    img.src = pages[n-1].cropped;
   } else {
-    ctx.clearRect(0, 0, 44, 44);
-    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    ctx.fillRect(0, 0, 44, 44);
+    ctx.clearRect(0,0,44,44);
+    ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(0,0,44,44);
   }
 }
 
-function showProcessing(text) {
-  document.getElementById('processingText').textContent = text;
+function showProcessing(t) {
+  document.getElementById('processingText').textContent = t;
   document.getElementById('processingOverlay').classList.remove('hidden');
 }
-
-function hideProcessing() {
-  document.getElementById('processingOverlay').classList.add('hidden');
-}
+function hideProcessing() { document.getElementById('processingOverlay').classList.add('hidden'); }
 
 function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 // ========== Init ==========
