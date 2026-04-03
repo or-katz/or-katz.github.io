@@ -246,7 +246,10 @@
   <div class="camera-controls" id="cameraControls">
     <canvas class="gallery-thumb" id="galleryThumb" width="44" height="44" onclick="showPages()"></canvas>
     <button class="capture-btn" id="captureBtn" onclick="triggerStillCapture()"></button>
-    <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
+      <button class="cam-btn" id="flashBtn" onclick="toggleFlash()" title="Flash">&#x26a1;</button>
+    </div>
   </div>
 </div>
 
@@ -383,8 +386,33 @@ function stopCamera() {
 
 async function flipCamera() {
   facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  flashOn = false;
+  document.getElementById('flashBtn').style.color = '';
   stopCamera();
   await startCamera();
+}
+
+// ========== Flash ==========
+
+let flashOn = false;
+
+async function toggleFlash() {
+  if (!stream) return;
+  const track = stream.getVideoTracks()[0];
+  if (!track) return;
+  const caps = track.getCapabilities ? track.getCapabilities() : {};
+  if (!caps.torch) {
+    showToast('Flash not supported on this camera');
+    return;
+  }
+  flashOn = !flashOn;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+    document.getElementById('flashBtn').style.color = flashOn ? '#facc15' : '';
+  } catch (e) {
+    flashOn = false;
+    showToast('Could not toggle flash');
+  }
 }
 
 // Opens iOS native camera for a full-resolution still photo
@@ -1197,8 +1225,17 @@ async function savePDF() {
       if (ratio > 210/297) { w = 210; h = 210/ratio; } else { h = 297; w = 297*ratio; }
       pdf.addImage(pages[i].cropped, 'JPEG', (210-w)/2, (297-h)/2, w, h);
     }
-    pdf.save(`scan_${new Date().toISOString().slice(0,10)}.pdf`);
-    hideProcessing(); showToast(`PDF saved with ${pages.length} page(s)`);
+    const filename = `scan_${new Date().toISOString().slice(0,10)}.pdf`;
+    const blob = pdf.output('blob');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    hideProcessing(); showToast(`PDF saved — ${pages.length} page(s)`);
   } catch(e) { hideProcessing(); showToast('Error generating PDF'); console.error(e); }
 }
 
