@@ -753,20 +753,26 @@ function cancelCrop() { showScreen('homeScreen'); }
 async function confirmCrop() {
   showProcessing('Processing...');
   await new Promise(r => setTimeout(r, 50));
-  const cropped = perspectiveTransform(currentImage, corners);
-  const bw = document.getElementById('bwToggle').checked;
-  const quality = document.getElementById('qualitySelect').value;
-  const finalURL = processImage(cropped, bw, bwMode, quality);
-  pages.push({ original: currentImage.src, corners: [...corners], cropped: finalURL });
-  updatePageCount();
-  hideProcessing();
-  showToast('Page added');
-  if (window._pendingFiles && window._pendingFiles.length > 0) {
-    const file = window._pendingFiles.shift();
-    const reader = new FileReader();
-    reader.onload = () => loadImageForCrop(reader.result);
-    reader.readAsDataURL(file);
-  } else { showPages(); }
+  try {
+    const cropped = perspectiveTransform(currentImage, corners);
+    const bw = document.getElementById('bwToggle').checked;
+    const quality = document.getElementById('qualitySelect').value;
+    const finalURL = processImage(cropped, bw, bwMode, quality);
+    pages.push({ original: currentImage.src, corners: [...corners], cropped: finalURL });
+    updatePageCount();
+    hideProcessing();
+    showToast('Page added');
+    if (window._pendingFiles && window._pendingFiles.length > 0) {
+      const file = window._pendingFiles.shift();
+      const reader = new FileReader();
+      reader.onload = () => loadImageForCrop(reader.result);
+      reader.readAsDataURL(file);
+    } else { showPages(); }
+  } catch (e) {
+    console.error('confirmCrop error:', e);
+    hideProcessing();
+    showToast('Error processing image');
+  }
 }
 
 // ========== Perspective Transform ==========
