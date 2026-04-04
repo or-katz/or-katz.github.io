@@ -769,89 +769,72 @@ async function confirmCrop() {
       reader.readAsDataURL(file);
     } else { showPages(); }
   } catch (e) {
-    console.error('confirmCrop error:', e);
+    console.error('confirmCrop error:', e.message, e.stack);
     hideProcessing();
-    showToast('Error processing image');
+    showToast('Error: ' + e.message);
   }
 }
 
 // ========== Perspective Transform ==========
 
-// Max output resolution — enough for a crisp A4 PDF at 150dpi
-const MAX_SIDE = 2200;
-
 function perspectiveTransform(img, pts) {
-  // Downscale source image and corners if it's very large
-  const srcMax = Math.max(img.width, img.height);
-  const srcScale = srcMax > MAX_SIDE ? MAX_SIDE / srcMax : 1;
+  // Output dimensions from quad edge lengths (capped for performance)
+  const MAX_SIDE = 2000;
+  const outW = Math.max(1, Math.min(MAX_SIDE, Math.round(Math.max(
+    Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y),
+    Math.hypot(pts[2].x-pts[3].x, pts[2].y-pts[3].y)
+  ))));
+  const outH = Math.max(1, Math.min(MAX_SIDE, Math.round(Math.max(
+    Math.hypot(pts[3].x-pts[0].x, pts[3].y-pts[0].y),
+    Math.hypot(pts[2].x-pts[1].x, pts[2].y-pts[1].y)
+  ))));
 
-  const srcW = Math.round(img.width * srcScale);
-  const srcH = Math.round(img.height * srcScale);
-  const scaledPts = pts.map(p => ({ x: p.x * srcScale, y: p.y * srcScale }));
+  // Use CSS polygon clip + affine approximation via two triangles drawn with setTransform.
+  // This delegates all pixel work to the browser's GPU compositor — near-instant.
+  const out = document.createElement('canvas');
+  out.width = outW; out.height = outH;
+  const ctx = out.getContext('2d');
 
-  // Draw source at working resolution
-  const srcCanvas = document.createElement('canvas');
-  srcCanvas.width = srcW; srcCanvas.height = srcH;
-  srcCanvas.getContext('2d').drawImage(img, 0, 0, srcW, srcH);
+  // Source quad corners (TL, TR, BR, BL)
+  const s = pts;
+  // Destination rectangle corners
+  const d = [{x:0,y:0},{x:outW,y:0},{x:outW,y:outH},{x:0,y:outH}];
 
-  // Output size from quad dimensions
-  const wT = Math.hypot(scaledPts[1].x-scaledPts[0].x, scaledPts[1].y-scaledPts[0].y);
-  const wB = Math.hypot(scaledPts[2].x-scaledPts[3].x, scaledPts[2].y-scaledPts[3].y);
-  const hL = Math.hypot(scaledPts[3].x-scaledPts[0].x, scaledPts[3].y-scaledPts[0].y);
-  const hR = Math.hypot(scaledPts[2].x-scaledPts[1].x, scaledPts[2].y-scaledPts[1].y);
-  const outW = Math.round(Math.max(wT, wB));
-  const outH = Math.round(Math.max(hL, hR));
+  // Draw two triangles (TL-TR-BR and TL-BR-BL) using affine transform per triangle.
+  // An affine transform is exact for triangles and the browser does it in GPU.
+  function drawTriangle(s0, s1, s2, d0, d1, d2) {
+    // Solve 2D affine: [d] = M * [s] + t
+    // [d0x d1x d2x]   [a c e]   [s0x s1x s2x]
+    // [d0y d1y d2y] = [b d f] * [s0y s1y s2y]
+    //                            [1   1   1  ]
+    const denom = (s0.x*(s1.y-s2.y) + s1.x*(s2.y-s0.y) + s2.x*(s0.y-s1.y));
+    if (Math.abs(denom) < 1e-6) return;
+    const a = (d0.x*(s1.y-s2.y) + d1.x*(s2.y-s0.y) + d2.x*(s0.y-s1.y)) / denom;
+    const b = (d0.y*(s1.y-s2.y) + d1.y*(s2.y-s0.y) + d2.y*(s0.y-s1.y)) / denom;
+    const c = (d0.x*(s2.x-s1.x) + d1.x*(s0.x-s2.x) + d2.x*(s1.x-s0.x)) / denom;
+    const dd= (d0.y*(s2.x-s1.x) + d1.y*(s0.x-s2.x) + d2.y*(s1.x-s0.x)) / denom;
+    const e = d0.x - a*s0.x - c*s0.y;
+    const f = d0.y - b*s0.x - dd*s0.y;
 
-  // Use CSS transform matrix on a hidden canvas element to let the GPU do the warp
-  const src = scaledPts;
-  const dst = [
-    { x: 0,    y: 0 },
-    { x: outW, y: 0 },
-    { x: outW, y: outH },
-    { x: 0,    y: outH }
-  ];
-
-  // Compute the 3x3 homography (src → dst)
-  const srcArr = src.flatMap(p => [p.x, p.y]);
-  const dstArr = dst.flatMap(p => [p.x, p.y]);
-  const M = solvePerspective(srcArr, dstArr);
-
-  // Render via WebGL if available, otherwise JS fallback (now on smaller image)
-  const srcD = srcCanvas.getContext('2d').getImageData(0, 0, srcW, srcH);
-
-  const outCanvas = document.createElement('canvas');
-  outCanvas.width = outW; outCanvas.height = outH;
-  const outCtx = outCanvas.getContext('2d');
-  const outData = outCtx.createImageData(outW, outH);
-  const od = outData.data;
-  const sd = srcD.data;
-
-  // Inverse map: for each dest pixel find source pixel
-  const Mi = solvePerspective(dstArr, srcArr);
-
-  for (let y = 0; y < outH; y++) {
-    for (let x = 0; x < outW; x++) {
-      const dv = Mi[6]*x + Mi[7]*y + 1;
-      const sx = (Mi[0]*x + Mi[1]*y + Mi[2]) / dv;
-      const sy = (Mi[3]*x + Mi[4]*y + Mi[5]) / dv;
-      const x0 = sx | 0, y0 = sy | 0;
-      if (x0 >= 0 && x0 < srcW-1 && y0 >= 0 && y0 < srcH-1) {
-        const fx = sx - x0, fy = sy - y0;
-        const i = (y * outW + x) * 4;
-        const a = (y0 * srcW + x0) * 4;
-        const b = a + 4;
-        const c = ((y0+1) * srcW + x0) * 4;
-        const d = c + 4;
-        const ifx = 1-fx, ify = 1-fy;
-        od[i]   = (sd[a]*ifx + sd[b]*fx)*ify + (sd[c]*ifx + sd[d]*fx)*fy;
-        od[i+1] = (sd[a+1]*ifx + sd[b+1]*fx)*ify + (sd[c+1]*ifx + sd[d+1]*fx)*fy;
-        od[i+2] = (sd[a+2]*ifx + sd[b+2]*fx)*ify + (sd[c+2]*ifx + sd[d+2]*fx)*fy;
-        od[i+3] = 255;
-      }
-    }
+    ctx.save();
+    ctx.setTransform(a, b, c, dd, e, f);
+    // Clip to destination triangle
+    ctx.beginPath();
+    ctx.moveTo(s0.x, s0.y);
+    ctx.lineTo(s1.x, s1.y);
+    ctx.lineTo(s2.x, s2.y);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
   }
-  outCtx.putImageData(outData, 0, 0);
-  return outCanvas;
+
+  // Triangle 1: TL, TR, BR
+  drawTriangle(s[0], s[1], s[2], d[0], d[1], d[2]);
+  // Triangle 2: TL, BR, BL
+  drawTriangle(s[0], s[2], s[3], d[0], d[2], d[3]);
+
+  return out;
 }
 
 function solvePerspective(src, dst) {
