@@ -615,37 +615,39 @@ function loadImageForCrop(dataURL) {
   img.onload = () => {
     currentImage = img;
     cropImage.src = dataURL;
+
+    // Default corners first so the crop screen shows immediately
+    const m = 0.05;
+    corners = [
+      { x: img.width * m,       y: img.height * m },
+      { x: img.width * (1 - m), y: img.height * m },
+      { x: img.width * (1 - m), y: img.height * (1 - m) },
+      { x: img.width * m,       y: img.height * (1 - m) }
+    ];
+
     showScreen('cropScreen');
 
+    // After the screen is painted, run detection and update handles
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      processCanvas.width = img.width;
-      processCanvas.height = img.height;
-      processCtx.drawImage(img, 0, 0);
-      currentImageData = processCtx.getImageData(0, 0, img.width, img.height);
-
-      // Detect on a downscaled version for speed
-      const ds = 400 / Math.max(img.width, img.height);
-      const dw = Math.round(img.width * ds);
-      const dh = Math.round(img.height * ds);
-      const dc = document.createElement('canvas');
-      dc.width = dw; dc.height = dh;
-      dc.getContext('2d').drawImage(img, 0, 0, dw, dh);
-      const dData = dc.getContext('2d').getImageData(0, 0, dw, dh);
-      const det = detectPaperQuad(dData, dw, dh);
-
-      if (det) {
-        corners = det.map(p => ({ x: Math.round(p.x / ds), y: Math.round(p.y / ds) }));
-      } else {
-        const m = 0.05;
-        corners = [
-          { x: img.width * m, y: img.height * m },
-          { x: img.width * (1 - m), y: img.height * m },
-          { x: img.width * (1 - m), y: img.height * (1 - m) },
-          { x: img.width * m, y: img.height * (1 - m) }
-        ];
-      }
       drawCropOverlay();
       positionHandles();
+
+      // Run detection asynchronously so UI is not blocked
+      setTimeout(() => {
+        const ds = Math.min(1, 800 / Math.max(img.width, img.height));
+        const dw = Math.round(img.width * ds);
+        const dh = Math.round(img.height * ds);
+        const dc = document.createElement('canvas');
+        dc.width = dw; dc.height = dh;
+        dc.getContext('2d').drawImage(img, 0, 0, dw, dh);
+        const det = detectPaperQuad(dc.getContext('2d').getImageData(0, 0, dw, dh), dw, dh);
+        if (det) {
+          corners = det.map(p => ({ x: Math.round(p.x / ds), y: Math.round(p.y / ds) }));
+          drawCropOverlay();
+          positionHandles();
+          showToast('Document detected');
+        }
+      }, 100);
     }));
   };
   img.src = dataURL;
@@ -1036,10 +1038,7 @@ async function savePDF() {
       if (i > 0) pdf.addPage();
       const img = new Image();
       await new Promise(res => { img.onload = res; img.src = pages[i].cropped; });
-      const ratio = img.width / img.height;
-      let w, h;
-      if (ratio > 210/297) { w = 210; h = 210/ratio; } else { h = 297; w = 297*ratio; }
-      pdf.addImage(pages[i].cropped, 'JPEG', (210-w)/2, (297-h)/2, w, h);
+      pdf.addImage(pages[i].cropped, 'JPEG', 0, 0, 210, 297);
     }
     const now = new Date();
     const filename = `scan_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}.pdf`;
