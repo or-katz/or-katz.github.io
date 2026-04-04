@@ -237,8 +237,21 @@
   <div class="page-count" id="pageCount">0 pages</div>
 </div>
 
+<!-- Home Screen -->
+<div class="screen active" id="homeScreen">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px;">
+    <div style="font-size:72px;">&#128247;</div>
+    <div style="text-align:center;">
+      <div style="font-size:22px;font-weight:700;margin-bottom:8px;">Scan for Free</div>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">Scan documents, auto-detect edges,<br>and export to PDF.</div>
+    </div>
+    <button onclick="showCamera()" style="padding:16px 48px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);font-size:17px;font-weight:700;cursor:pointer;width:100%;max-width:280px;">Start Scanning</button>
+    <button onclick="showPages()" style="padding:14px 48px;background:var(--surface2);color:var(--text);border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;width:100%;max-width:280px;">View Pages</button>
+  </div>
+</div>
+
 <!-- Camera Screen -->
-<div class="screen active" id="cameraScreen">
+<div class="screen" id="cameraScreen">
   <div id="videoContainer">
     <video id="video" autoplay playsinline muted></video>
     <canvas id="overlayCanvas"></canvas>
@@ -389,28 +402,6 @@ async function flipCamera() {
   await startCamera();
 }
 
-// ========== Flash ==========
-
-let flashOn = false;
-
-async function toggleFlash() {
-  if (!stream) return;
-  const track = stream.getVideoTracks()[0];
-  if (!track) return;
-  const caps = track.getCapabilities ? track.getCapabilities() : {};
-  if (!caps.torch) {
-    showToast('Flash not supported on this camera');
-    return;
-  }
-  flashOn = !flashOn;
-  try {
-    await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-    document.getElementById('flashBtn').style.color = flashOn ? '#facc15' : '';
-  } catch (e) {
-    flashOn = false;
-    showToast('Could not toggle flash');
-  }
-}
 
 // Opens iOS native camera for a full-resolution still photo
 function triggerStillCapture() {
@@ -1280,7 +1271,6 @@ function showToast(msg) {
 
 // ========== Init ==========
 setupCornerDragging();
-startCamera();
 updatePageCount();
 </script>
 </body>
