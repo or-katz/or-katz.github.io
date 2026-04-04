@@ -45,52 +45,6 @@
   .screen { display: none; }
   .screen.active { display: flex; flex-direction: column; }
 
-  /* Camera */
-  #cameraScreen { height: calc(100dvh - 53px); position: relative; background: #000; }
-  #videoContainer {
-    flex: 1; position: relative; overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-  }
-  #video { width: 100%; height: 100%; object-fit: cover; }
-  #overlayCanvas {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-  }
-  .camera-controls {
-    background: linear-gradient(transparent, rgba(0,0,0,0.85));
-    padding: 16px 20px 24px;
-    display: flex; align-items: center; justify-content: space-around;
-    position: absolute; bottom: 0; left: 0; right: 0;
-  }
-  .capture-btn {
-    width: 72px; height: 72px; border-radius: 50%;
-    border: 4px solid #fff; background: transparent;
-    cursor: pointer; position: relative; transition: transform 0.15s;
-  }
-  .capture-btn::after {
-    content: ''; position: absolute; inset: 4px;
-    border-radius: 50%; background: #fff; transition: background 0.15s;
-  }
-  .capture-btn:active { transform: scale(0.9); }
-  .capture-btn:active::after { background: #ddd; }
-  .cam-btn {
-    width: 44px; height: 44px; border-radius: 50%; border: none;
-    background: rgba(255,255,255,0.2); color: #fff; font-size: 20px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    backdrop-filter: blur(10px);
-  }
-  .gallery-thumb {
-    width: 44px; height: 44px; border-radius: 8px;
-    border: 2px solid #fff; cursor: pointer; background: var(--surface2);
-  }
-  .native-capture-label {
-    position: absolute; bottom: 104px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.6); color: #fff; padding: 6px 14px;
-    border-radius: 20px; font-size: 12px; font-weight: 500;
-    backdrop-filter: blur(8px); white-space: nowrap;
-    pointer-events: none;
-  }
-
   /* Crop */
   #cropScreen { height: calc(100dvh - 53px); }
   #cropContainer {
@@ -245,23 +199,11 @@
       <div style="font-size:22px;font-weight:700;margin-bottom:8px;">Scan for Free</div>
       <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">Scan documents, auto-detect edges,<br>and export to PDF.</div>
     </div>
-    <button onclick="showCamera()" style="padding:16px 48px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);font-size:17px;font-weight:700;cursor:pointer;width:100%;max-width:280px;">Start Scanning</button>
+    <button onclick="triggerStillCapture()" style="padding:16px 48px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);font-size:17px;font-weight:700;cursor:pointer;width:100%;max-width:280px;">Start Scanning</button>
     <button onclick="showPages()" style="padding:14px 48px;background:var(--surface2);color:var(--text);border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;width:100%;max-width:280px;">View Pages</button>
   </div>
 </div>
 
-<!-- Camera Screen -->
-<div class="screen" id="cameraScreen">
-  <div id="videoContainer">
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="overlayCanvas"></canvas>
-  </div>
-  <div class="camera-controls" id="cameraControls">
-    <canvas class="gallery-thumb" id="galleryThumb" width="44" height="44" onclick="showPages()"></canvas>
-    <button class="capture-btn" id="captureBtn" onclick="triggerStillCapture()"></button>
-    <button class="cam-btn" id="flipBtn" onclick="flipCamera()">&#x21bb;</button>
-  </div>
-</div>
 
 <!-- Crop Screen -->
 <div class="screen" id="cropScreen">
@@ -325,7 +267,7 @@
     <p>No pages scanned yet</p>
   </div>
   <div class="bottom-bar">
-    <button class="btn-scan" onclick="showCamera()">&#128247; Scan More</button>
+    <button class="btn-scan" onclick="triggerStillCapture()">&#128247; Scan More</button>
     <button class="btn-save" id="savePdfBtn" onclick="savePDF()" disabled>&#128190; Save PDF</button>
   </div>
 </div>
@@ -350,60 +292,17 @@ let pages = [];
 let currentImage = null;
 let currentImageData = null;
 let corners = [];
-let stream = null;
-let facingMode = 'environment';
 let draggingCorner = -1;
-let detectionInterval = null;
 let bwMode = 'light';
-let lastDetected = null;       // smoothing for live overlay
-let detectionSmooth = [];      // last N detections for averaging
 
-const video = document.getElementById('video');
-const overlayCanvas = document.getElementById('overlayCanvas');
-const overlayCtx = overlayCanvas.getContext('2d');
 const cropImage = document.getElementById('cropImage');
 const cropCanvas = document.getElementById('cropCanvas');
 const cropCtx = cropCanvas.getContext('2d');
 const processCanvas = document.getElementById('processCanvas');
 const processCtx = processCanvas.getContext('2d');
 
-// ========== Camera ==========
+// ========== Capture ==========
 
-async function startCamera() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode,
-        width:  { ideal: 9999 },
-        height: { ideal: 9999 }
-      }
-    });
-    video.srcObject = stream;
-    video.style.display = 'block';
-    document.getElementById('cameraControls').style.display = 'flex';
-    startLiveDetection();
-  } catch (e) {
-    console.warn('Camera not available:', e);
-    video.style.display = 'none';
-    document.getElementById('cameraControls').style.display = 'flex';
-  }
-}
-
-function stopCamera() {
-  stopLiveDetection();
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-}
-
-async function flipCamera() {
-  facingMode = facingMode === 'environment' ? 'user' : 'environment';
-  flashOn = false;
-  document.getElementById('flashBtn').style.color = '';
-  stopCamera();
-  await startCamera();
-}
-
-
-// Opens iOS native camera for a full-resolution still photo
 function triggerStillCapture() {
   document.getElementById('stillCameraInput').click();
 }
@@ -425,97 +324,6 @@ function handleFileInput(e) {
   reader.readAsDataURL(files[0]);
   if (files.length > 1) window._pendingFiles = files.slice(1);
   e.target.value = '';
-}
-
-// ========== Live Edge Detection ==========
-
-function startLiveDetection() {
-  stopLiveDetection();
-  detectionSmooth = [];
-  lastDetected = null;
-
-  detectionInterval = setInterval(() => {
-    if (video.videoWidth === 0) return;
-
-    const w = video.videoWidth;
-    const h = video.videoHeight;
-    overlayCanvas.width = w;
-    overlayCanvas.height = h;
-
-    // Use a small offscreen canvas for detection only
-    const dScale = 160 / Math.max(w, h); // target ~160px on longest side
-    const dw = Math.round(w * dScale);
-    const dh = Math.round(h * dScale);
-
-    processCanvas.width = dw;
-    processCanvas.height = dh;
-    processCtx.drawImage(video, 0, 0, dw, dh);
-    const smallData = processCtx.getImageData(0, 0, dw, dh);
-
-    const detected = detectPaperQuad(smallData, dw, dh);
-
-    overlayCtx.clearRect(0, 0, w, h);
-
-    if (detected) {
-      // Scale detected corners back to video resolution
-      const scaled = detected.map(p => ({ x: p.x / dScale, y: p.y / dScale }));
-
-      // Smooth: average with last few detections
-      detectionSmooth.push(scaled);
-      if (detectionSmooth.length > 5) detectionSmooth.shift();
-
-      const smoothed = averageQuads(detectionSmooth);
-      lastDetected = smoothed;
-
-      drawQuadOverlay(overlayCtx, smoothed, w, h, '#22c55e', 3);
-    } else {
-      // Fade out: keep showing last detection briefly
-      if (lastDetected && detectionSmooth.length > 0) {
-        detectionSmooth.shift();
-        if (detectionSmooth.length > 0) {
-          drawQuadOverlay(overlayCtx, lastDetected, w, h, 'rgba(34,197,94,0.4)', 2);
-        } else {
-          lastDetected = null;
-        }
-      }
-    }
-  }, 250);
-}
-
-function stopLiveDetection() {
-  if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; }
-}
-
-function averageQuads(quads) {
-  if (quads.length === 1) return quads[0];
-  return quads[0].map((_, i) => ({
-    x: quads.reduce((s, q) => s + q[i].x, 0) / quads.length,
-    y: quads.reduce((s, q) => s + q[i].y, 0) / quads.length
-  }));
-}
-
-function drawQuadOverlay(ctx, pts, w, h, color, lineWidth) {
-  const scaleX = ctx.canvas.clientWidth / w;
-  const scaleY = ctx.canvas.clientHeight / h;
-  ctx.save();
-  ctx.scale(scaleX, scaleY);
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < 4; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth / scaleX;
-  ctx.stroke();
-  ctx.fillStyle = color.includes('rgba') ? color : 'rgba(34, 197, 94, 0.08)';
-  ctx.fill();
-  // Draw corner circles
-  ctx.fillStyle = color.includes('rgba') ? color : '#22c55e';
-  for (const p of pts) {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 6 / scaleX, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
 }
 
 // ========== Paper Detection (color-based: find white/light region) ==========
@@ -941,7 +749,7 @@ function autoDetect() {
   }
 }
 
-function cancelCrop() { showScreen('cameraScreen'); startCamera(); }
+function cancelCrop() { showScreen('homeScreen'); }
 
 async function confirmCrop() {
   showProcessing('Processing...');
@@ -959,7 +767,7 @@ async function confirmCrop() {
     const reader = new FileReader();
     reader.onload = () => loadImageForCrop(reader.result);
     reader.readAsDataURL(file);
-  } else { showScreen('cameraScreen'); startCamera(); }
+  } else { showScreen('homeScreen'); }
 }
 
 // ========== Perspective Transform ==========
@@ -1235,7 +1043,6 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-function showCamera() { showScreen('cameraScreen'); startCamera(); }
 
 function updatePageCount() {
   const n = pages.length;
