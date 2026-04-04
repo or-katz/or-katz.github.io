@@ -1067,21 +1067,6 @@ function showScreen(id) {
 function updatePageCount() {
   const n = pages.length;
   document.getElementById('pageCount').textContent = `${n} page${n!==1?'s':''}`;
-  const thumb = document.getElementById('galleryThumb');
-  const ctx = thumb.getContext('2d');
-  if (n > 0) {
-    const img = new Image();
-    img.onload = () => {
-      ctx.clearRect(0,0,44,44);
-      const sc = Math.max(44/img.width, 44/img.height);
-      ctx.drawImage(img, (44-img.width*sc)/2, (44-img.height*sc)/2, img.width*sc, img.height*sc);
-      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.strokeRect(0,0,44,44);
-    };
-    img.src = pages[n-1].cropped;
-  } else {
-    ctx.clearRect(0,0,44,44);
-    ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(0,0,44,44);
-  }
 }
 
 function showProcessing(t) {
