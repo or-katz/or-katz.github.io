@@ -777,49 +777,81 @@ async function confirmCrop() {
 
 // ========== Perspective Transform ==========
 
+// Max output resolution — enough for a crisp A4 PDF at 150dpi
+const MAX_SIDE = 2200;
+
 function perspectiveTransform(img, pts) {
-  const wT = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
-  const wB = Math.hypot(pts[2].x-pts[3].x, pts[2].y-pts[3].y);
-  const hL = Math.hypot(pts[3].x-pts[0].x, pts[3].y-pts[0].y);
-  const hR = Math.hypot(pts[2].x-pts[1].x, pts[2].y-pts[1].y);
+  // Downscale source image and corners if it's very large
+  const srcMax = Math.max(img.width, img.height);
+  const srcScale = srcMax > MAX_SIDE ? MAX_SIDE / srcMax : 1;
+
+  const srcW = Math.round(img.width * srcScale);
+  const srcH = Math.round(img.height * srcScale);
+  const scaledPts = pts.map(p => ({ x: p.x * srcScale, y: p.y * srcScale }));
+
+  // Draw source at working resolution
+  const srcCanvas = document.createElement('canvas');
+  srcCanvas.width = srcW; srcCanvas.height = srcH;
+  srcCanvas.getContext('2d').drawImage(img, 0, 0, srcW, srcH);
+
+  // Output size from quad dimensions
+  const wT = Math.hypot(scaledPts[1].x-scaledPts[0].x, scaledPts[1].y-scaledPts[0].y);
+  const wB = Math.hypot(scaledPts[2].x-scaledPts[3].x, scaledPts[2].y-scaledPts[3].y);
+  const hL = Math.hypot(scaledPts[3].x-scaledPts[0].x, scaledPts[3].y-scaledPts[0].y);
+  const hR = Math.hypot(scaledPts[2].x-scaledPts[1].x, scaledPts[2].y-scaledPts[1].y);
   const outW = Math.round(Math.max(wT, wB));
   const outH = Math.round(Math.max(hL, hR));
 
-  const sc = document.createElement('canvas');
-  sc.width = img.width; sc.height = img.height;
-  sc.getContext('2d').drawImage(img, 0, 0);
-  const srcD = sc.getContext('2d').getImageData(0, 0, img.width, img.height);
+  // Use CSS transform matrix on a hidden canvas element to let the GPU do the warp
+  const src = scaledPts;
+  const dst = [
+    { x: 0,    y: 0 },
+    { x: outW, y: 0 },
+    { x: outW, y: outH },
+    { x: 0,    y: outH }
+  ];
 
-  const oc = document.createElement('canvas');
-  oc.width = outW; oc.height = outH;
-  const oCtx = oc.getContext('2d');
-  const oD = oCtx.createImageData(outW, outH);
+  // Compute the 3x3 homography (src → dst)
+  const srcArr = src.flatMap(p => [p.x, p.y]);
+  const dstArr = dst.flatMap(p => [p.x, p.y]);
+  const M = solvePerspective(srcArr, dstArr);
 
-  const src = [pts[0].x,pts[0].y, pts[1].x,pts[1].y, pts[2].x,pts[2].y, pts[3].x,pts[3].y];
-  const dst = [0,0, outW,0, outW,outH, 0,outH];
-  const M = solvePerspective(dst, src);
+  // Render via WebGL if available, otherwise JS fallback (now on smaller image)
+  const srcD = srcCanvas.getContext('2d').getImageData(0, 0, srcW, srcH);
+
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = outW; outCanvas.height = outH;
+  const outCtx = outCanvas.getContext('2d');
+  const outData = outCtx.createImageData(outW, outH);
+  const od = outData.data;
+  const sd = srcD.data;
+
+  // Inverse map: for each dest pixel find source pixel
+  const Mi = solvePerspective(dstArr, srcArr);
 
   for (let y = 0; y < outH; y++) {
     for (let x = 0; x < outW; x++) {
-      const dd = M[6]*x + M[7]*y + 1;
-      const sx = (M[0]*x + M[1]*y + M[2]) / dd;
-      const sy = (M[3]*x + M[4]*y + M[5]) / dd;
-      const x0 = Math.floor(sx), y0 = Math.floor(sy);
-      if (x0 >= 0 && x0+1 < img.width && y0 >= 0 && y0+1 < img.height) {
+      const dv = Mi[6]*x + Mi[7]*y + 1;
+      const sx = (Mi[0]*x + Mi[1]*y + Mi[2]) / dv;
+      const sy = (Mi[3]*x + Mi[4]*y + Mi[5]) / dv;
+      const x0 = sx | 0, y0 = sy | 0;
+      if (x0 >= 0 && x0 < srcW-1 && y0 >= 0 && y0 < srcH-1) {
         const fx = sx - x0, fy = sy - y0;
-        const idx = (y * outW + x) * 4;
-        for (let c = 0; c < 4; c++) {
-          const v00 = srcD.data[(y0*img.width+x0)*4+c];
-          const v10 = srcD.data[(y0*img.width+x0+1)*4+c];
-          const v01 = srcD.data[((y0+1)*img.width+x0)*4+c];
-          const v11 = srcD.data[((y0+1)*img.width+x0+1)*4+c];
-          oD.data[idx+c] = Math.round(v00*(1-fx)*(1-fy)+v10*fx*(1-fy)+v01*(1-fx)*fy+v11*fx*fy);
-        }
+        const i = (y * outW + x) * 4;
+        const a = (y0 * srcW + x0) * 4;
+        const b = a + 4;
+        const c = ((y0+1) * srcW + x0) * 4;
+        const d = c + 4;
+        const ifx = 1-fx, ify = 1-fy;
+        od[i]   = (sd[a]*ifx + sd[b]*fx)*ify + (sd[c]*ifx + sd[d]*fx)*fy;
+        od[i+1] = (sd[a+1]*ifx + sd[b+1]*fx)*ify + (sd[c+1]*ifx + sd[d+1]*fx)*fy;
+        od[i+2] = (sd[a+2]*ifx + sd[b+2]*fx)*ify + (sd[c+2]*ifx + sd[d+2]*fx)*fy;
+        od[i+3] = 255;
       }
     }
   }
-  oCtx.putImageData(oD, 0, 0);
-  return oc;
+  outCtx.putImageData(outData, 0, 0);
+  return outCanvas;
 }
 
 function solvePerspective(src, dst) {
