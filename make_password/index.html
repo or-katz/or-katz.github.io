@@ -1,672 +1,326 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ניהול הוצאות חופשה</title>
+    <title>Password Generator</title>
+    
+    <!-- PWA Setup & App Meta Tags -->
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PassGen">
+    <meta name="msapplication-TileColor" content="#4f46e5">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- App Icons -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
+    
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Password Generator","short_name":"PassGen","start_url":".","display":"standalone","background_color":"#f3f4f6","theme_color":"#4f46e5","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=","sizes":"192x192 512x512 any","type":"image/svg+xml","purpose":"any maskable"}]}'>
+
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-4 text-gray-800 font-sans">
-    <div id="mainApp" class="max-w-2xl mx-auto bg-white p-6 rounded-2xl shadow-xl print:hidden">
-        <h1 class="text-2xl font-extrabold mb-6 text-center text-indigo-700">ניהול הוצאות חופשה</h1>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Roboto+Mono:wght@500;700&display=swap');
         
-        <!-- ניהול חברים -->
-        <div class="mb-8">
-            <h2 class="text-lg font-bold mb-3 border-b pb-2">1. הוספת חברים</h2>
-            <div class="flex gap-2">
-                <input type="text" id="memberName" class="border p-3 rounded-lg w-full focus:ring-2 focus:ring-indigo-300 outline-none" placeholder="הכנס שם חבר...">
-                <button onclick="addMember()" class="bg-indigo-600 hover:bg-indigo-700 transition text-white px-6 py-3 rounded-lg font-semibold">הוסף</button>
-            </div>
-            <div id="membersList" class="mt-4 flex flex-wrap gap-2"></div>
-        </div>
+        body { font-family: 'Heebo', sans-serif; background-color: #f3f4f6; }
+        .word-display { font-family: 'Roboto Mono', monospace; transition: all 0.3s ease; }
+        .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 50% { transform: scale(1.02); } 100% { transform: scale(1); opacity: 1; } }
+        
+        /* QR Code Container Styling */
+        #qrcode { display: inline-block; padding: 8px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; }
+    </style>
+    
+    <!-- ספרייה קטנה וקלה ליצירת QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100">
 
-        <!-- הוספת / עריכת הוצאה -->
-        <div class="mb-8 bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
-            <h2 id="expenseFormTitle" class="text-lg font-bold mb-4 border-b pb-2 text-indigo-800">2. הוספת הוצאה</h2>
-            <div class="space-y-4">
-                <input type="hidden" id="editExpenseId">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="date" id="expDate" class="border p-3 rounded-lg w-full focus:ring-2 focus:ring-indigo-300 outline-none">
-                    <input type="text" id="expDesc" class="border p-3 rounded-lg w-full focus:ring-2 focus:ring-indigo-300 outline-none" placeholder="תיאור ההוצאה (למשל: מסעדה)">
-                </div>
-                
-                <div id="membersExpenseInputs" class="space-y-4 mt-4">
-                    <!-- שדות תשלום ואחוזים יוזרקו לכאן -->
-                </div>
+    <div class="bg-white rounded-3xl shadow-xl p-6 w-full max-w-lg border border-gray-100 relative">
+        
+        <!-- כפתור התקנה -->
+        <button id="installBtn" class="hidden absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs font-bold shadow-sm z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            Install App
+        </button>
 
-                <div class="flex gap-2 mt-6">
-                    <button onclick="saveExpense()" id="saveExpenseBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 transition text-white p-4 rounded-xl font-bold text-lg shadow-md">
-                        שמור הוצאה
-                    </button>
-                    <button onclick="cancelEdit()" id="cancelEditBtn" class="hidden bg-gray-400 hover:bg-gray-500 transition text-white p-4 rounded-xl font-bold text-lg shadow-md">
-                        ביטול
-                    </button>
-                </div>
-            </div>
-        </div>
+        <header class="text-center mb-6 mt-2">
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">Password Generator</h1>
+            <p class="text-gray-500 text-xs">Phonotactically logical, easy to type & scan.</p>
+        </header>
 
-        <!-- רשימת הוצאות וסיכום -->
-        <div class="space-y-6">
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <h2 class="text-lg font-bold mb-0 border-b p-4 bg-gray-50 flex justify-between items-center">
-                    רשימת הוצאות
-                    <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 font-normal underline">מחיקת נתונים ואיפוס</button>
-                </h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-right">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-600 border-b">
-                                <th class="p-3">תאריך</th>
-                                <th class="p-3">תיאור</th>
-                                <th class="p-3">סה"כ</th>
-                                <th class="p-3 text-center">פעולות</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expensesTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- אזור התחשבנות - מופיע אוטומטית -->
-            <div id="resultsArea" class="mt-4 p-5 rounded-xl border whitespace-pre-line text-base hidden font-medium leading-relaxed shadow-inner"></div>
+        <!-- אזור התצוגה המוקטן (סיסמה + QR) -->
+        <div class="bg-gray-50 rounded-2xl p-5 mb-5 text-center border-2 border-indigo-50 shadow-inner relative overflow-hidden flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-purple-500"></div>
             
-            <button onclick="openReport()" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white p-4 rounded-xl font-bold text-lg shadow-md mt-4 flex justify-center items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                הצג דוח מפורט (לשמירה כ-PDF)
-            </button>
-        </div>
-    </div>
+            <div class="flex-1 flex flex-col justify-center w-full">
+                <p id="wordOutput" class="word-display font-bold text-indigo-900 tracking-tight break-all text-2xl sm:text-3xl">
+                    Welcome
+                </p>
+                <button id="copyBtn" class="mx-auto mt-3 flex items-center justify-center gap-1.5 px-4 py-1.5 bg-white text-indigo-600 rounded-full shadow-sm border border-indigo-100 transition-all hover:bg-indigo-50 hover:scale-105 active:scale-95 font-bold text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="copyIcon"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    <span id="copyBtnLabel">Copy</span>
+                </button>
+            </div>
 
-    <!-- אזור הדוח -->
-    <div id="reportView" class="hidden max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-xl print:block print:shadow-none print:p-0">
-        <div class="flex justify-between items-center mb-8 print:hidden border-b pb-4">
-            <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold shadow flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                הדפס / שמור כ-PDF
-            </button>
-            <button onclick="closeReport()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-bold shadow">חזור אחורה</button>
+            <!-- מכל ה-QR Code -->
+            <div class="flex-shrink-0 flex flex-col items-center">
+                <div id="qrcode"></div>
+                <span class="text-[10px] text-gray-400 mt-1 font-bold">Scan to Copy</span>
+            </div>
         </div>
-        <div id="reportContent" class="text-right"></div>
+
+        <!-- פקדים ובקרות -->
+        <div class="space-y-3">
+            <div class="flex flex-col gap-2 mb-3">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-bold text-gray-700">Length:</label>
+                    <span id="lengthValue" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-100 shadow-sm">8</span>
+                </div>
+                <input type="range" id="lengthSlider" min="4" max="25" value="8" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+            </div>
+
+            <div id="specialCharsWrapper" class="flex items-center gap-2 mb-1">
+                <input type="checkbox" id="specialCharsCheckbox" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="specialCharsCheckbox" class="text-xs font-bold text-gray-700 cursor-pointer">Include separators (@ # % & ? ! * - _ + =)</label>
+            </div>
+
+            <div class="flex items-center gap-2 mb-3">
+                <input type="checkbox" id="numbersCheckbox" checked class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="numbersCheckbox" class="text-xs font-bold text-gray-700 cursor-pointer">Append random numbers (0-999)</label>
+            </div>
+
+            <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-base">
+                Generate Password
+            </button>
+        </div>
+
     </div>
 
     <script>
-        // משתנים גלובליים
-        let members = [];
-        let expenses = [];
-        let currentPercentages = {};
-
-        // מפתחות לשמירה ב-localStorage
-        const STORAGE_KEY_MEMBERS = 'holiday_expenses_members_db';
-        const STORAGE_KEY_EXPENSES = 'holiday_expenses_data_db';
-
-        // טעינת נתונים ראשונית
-        function loadData() {
-            try {
-                const storedMembers = localStorage.getItem(STORAGE_KEY_MEMBERS);
-                const storedExpenses = localStorage.getItem(STORAGE_KEY_EXPENSES);
-                
-                if (storedMembers) members = JSON.parse(storedMembers);
-                if (storedExpenses) expenses = JSON.parse(storedExpenses);
-            } catch (e) {
-                members = [];
-                expenses = [];
-            }
+        // --- PWA Installation Logic ---
+        if ('serviceWorker' in navigator) {
+            const swCode = `self.addEventListener('fetch', function(event) {});`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
         }
 
-        // שמירת נתונים
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY_MEMBERS, JSON.stringify(members));
-            localStorage.setItem(STORAGE_KEY_EXPENSES, JSON.stringify(expenses));
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+
+        if (!isInStandaloneMode()) {
+            installBtn.classList.remove('hidden');
         }
 
-        // ניקוי כל הנתונים
-        function clearAllData() {
-            if(confirm("האם אתה בטוח שברצונך למחוק את כל הנתונים וההיסטוריה?")) {
-                localStorage.removeItem(STORAGE_KEY_MEMBERS);
-                localStorage.removeItem(STORAGE_KEY_EXPENSES);
-                members = [];
-                expenses = [];
-                currentPercentages = {};
-                cancelEdit();
-                renderUI();
-                calculateSettlement();
-            }
-        }
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
 
-        function addMember() {
-            const name = document.getElementById('memberName').value.trim().replace(/['"]/g, '');
-            if (name && !members.includes(name)) {
-                members.push(name);
-                saveData(); 
-                document.getElementById('memberName').value = '';
-                initPercentages();
-                renderUI();
-            }
-        }
-
-        function removeMember(name) {
-            if(confirm(`האם להסיר את ${name}? (לא יימחק מהוצאות קיימות)`)) {
-                members = members.filter(m => m !== name);
-                saveData(); 
-                initPercentages();
-                renderUI();
-            }
-        }
-
-        function initPercentages() {
-            if(members.length === 0) return;
-            const equalShare = 100 / members.length;
-            members.forEach(m => currentPercentages[m] = equalShare);
-        }
-
-        function updatePercentage(targetName, delta) {
-            if(members.length <= 1) return;
-            
-            let currentPaid = {};
-            document.querySelectorAll('.paid-amount').forEach(input => {
-                currentPaid[input.dataset.name] = input.value;
-            });
-            
-            let currentTargetValue = currentPercentages[targetName];
-            let newTargetValue = Math.max(0, Math.min(100, currentTargetValue + delta));
-            let diff = newTargetValue - currentTargetValue;
-            
-            if (diff === 0) return;
-
-            currentPercentages[targetName] = newTargetValue;
-            
-            let others = members.filter(m => m !== targetName);
-            let totalOthers = others.reduce((sum, m) => sum + currentPercentages[m], 0);
-            
-            if (totalOthers > 0) {
-                others.forEach(m => {
-                    let proportion = currentPercentages[m] / totalOthers;
-                    currentPercentages[m] = Math.max(0, currentPercentages[m] - (diff * proportion));
-                });
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') installBtn.classList.add('hidden');
+                deferredPrompt = null;
+            } else if (isIos()) {
+                alert('To install on iPhone/iPad:\n\n1. Tap the "Share" icon.\n2. Tap "Add to Home Screen".');
             } else {
-                let share = diff / others.length;
-                others.forEach(m => {
-                    currentPercentages[m] = Math.max(0, currentPercentages[m] - share);
-                });
+                alert('Open your browser menu and select "Install" or "Add to Home Screen".');
             }
-            
-            normalizePercentages();
-            renderExpenseInputs(currentPaid); 
+        });
+
+        if (isIos() && !isInStandaloneMode()) {
+            installBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> iOS Install';
         }
 
-        function normalizePercentages() {
-            let total = members.reduce((sum, m) => sum + currentPercentages[m], 0);
-            if (Math.abs(total - 100) > 0.01 && total > 0) {
-                let ratio = 100 / total;
-                members.forEach(m => currentPercentages[m] *= ratio);
+        // --- Linguistics ---
+        const vowels = ['a', 'e', 'i', 'o', 'u', 'y']; 
+        const vowelPairs = ['ea', 'ou', 'ai', 'oa', 'ie', 'ei', 'au', 'ay', 'ey', 'oi', 'oy'];
+        const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'x', 'z'];
+        const initialBlends = ['bl', 'br', 'ch', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr', 'sh', 'sl', 'sm', 'sn', 'sp', 'st', 'th', 'tr', 'wh', 'ph', 'qu', 'sw', 'tw'];
+        const medialBlends = ['ch', 'sh', 'th', 'ph', 'st', 'nd', 'nt', 'ng', 'rt', 'lt', 'rm', 'rn', 'mb', 'mp'];
+        const finalBlends = ['ch', 'ck', 'ft', 'ld', 'nd', 'ng', 'nk', 'nt', 'ph', 'rd', 'rk', 'rt', 'sh', 'sk', 'sp', 'st', 'th', 'mp', 'rn', 'rm'];
+        const prefixes = ['re', 'un', 'in', 'ex', 'de', 'pro', 'con', 'pre', 'over', 'sub', 'dis', 'mis', 'out', 'en', 'mega', 'cyber', 'neo', 'retro', 'astro'];
+        const suffixes = ['tion', 'ing', 'er', 'ment', 'able', 'ous', 'ify', 'ity', 'ish', 'ic', 'dom', 'ful', 'ism', 'ship', 'punk', 'wave', 'logy'];
+
+        const getRandom = arr => arr[Math.floor(Math.random() * arr.length)];
+        const chance = percentage => Math.random() * 100 < percentage;
+        const isVowel = char => ['a','e','i','o','u','y'].includes(char.toLowerCase());
+
+        function isLogicalFinal(text) {
+            const lower = text.toLowerCase();
+            if (/([a-z])\1/i.test(lower)) return false;
+            if (/[^aeiouy]{3,}/i.test(lower)) return false;
+            if (/[aeiouy]{3,}/i.test(lower)) return false;
+            if (/[vjqx]$/i.test(lower)) return false;
+            const illegalPairs = ['cj','vj','qc','qg','qk','qv','qw','qx','qz','hh','pq','zk','zh','wp','bf','hx','xj','zx','cv','mx','xw','wx','jw','wj','kg','gk','pb','bp','td','dt','cg','gc','sz','zs','iy','yi','uy','yu'];
+            for (let pair of illegalPairs) {
+                if (lower.includes(pair)) return false;
             }
+            return true;
         }
 
-        function renderUI() {
-            document.getElementById('membersList').innerHTML = members.map(m => `
-                <span class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm border border-indigo-200">
-                    ${m}
-                    <button onclick="removeMember('${m}')" class="text-indigo-400 hover:text-red-500 transition text-lg leading-none focus:outline-none">&times;</button>
-                </span>
-            `).join('');
-            
-            let needsInit = false;
-            members.forEach(m => {
-                if(currentPercentages[m] === undefined || isNaN(currentPercentages[m])) needsInit = true;
-            });
-            if(needsInit || Object.keys(currentPercentages).length !== members.length) {
-                initPercentages();
-            }
-            
-            renderExpenseInputs();
-            renderExpensesTable();
-        }
+        function generateRandomSequence(targetL) {
+            let seq = "";
+            let usePrefix = targetL >= 6 ? chance(25) : false;
+            let useSuffix = targetL >= 6 ? chance(25) : false;
+            let currentType = chance(50) ? 'V' : 'C';
 
-        function renderExpenseInputs(paidValues = null) {
-            const container = document.getElementById('membersExpenseInputs');
-            if(members.length === 0) {
-                container.innerHTML = '<div class="text-center p-6 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">הוסף חברים כדי להתחיל להזין הוצאות</div>';
-                return;
+            if (usePrefix) {
+                let p = getRandom(prefixes);
+                seq += p;
+                currentType = isVowel(p.slice(-1)) ? 'C' : 'V';
             }
 
-            container.innerHTML = members.map(m => `
-                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm transition-all hover:shadow-md">
-                    <div class="font-bold text-indigo-900 mb-3 text-lg">${m}</div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-600 mb-2">סכום ששולם בפועל</label>
-                            <input type="number" class="paid-amount border p-2 rounded-lg w-full focus:ring-2 focus:ring-indigo-300 outline-none transition" data-name="${m}" value="${paidValues ? (paidValues[m] || '') : ''}" placeholder="0" min="0" step="0.01">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-600 mb-2">חלוקת צריכה אישית</label>
-                            <div class="flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-200">
-                                <button onclick="updatePercentage('${m}', -5)" class="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 w-12 h-10 rounded-md font-bold text-xl flex items-center justify-center transition shadow-sm">-</button>
-                                <span class="font-mono font-bold text-gray-800 text-lg w-16 text-center">${Math.round(currentPercentages[m])}%</span>
-                                <button onclick="updatePercentage('${m}', 5)" class="bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700 w-12 h-10 rounded-md font-bold text-xl flex items-center justify-center transition shadow-sm">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+            let bodyTarget = targetL - (useSuffix ? 4 : 0); 
+            if (bodyTarget < 1) bodyTarget = 1;
 
-        function saveExpense() {
-            if(members.length === 0) return alert("יש להוסיף לפחות חבר אחד.");
-            
-            const desc = document.getElementById('expDesc').value.trim();
-            const date = document.getElementById('expDate').value || new Date().toISOString().split('T')[0];
-            const editId = document.getElementById('editExpenseId').value;
-            
-            if(!desc) {
-                alert("אנא הזן תיאור להוצאה.");
-                document.getElementById('expDesc').focus();
-                return;
-            }
-
-            let paid = {};
-            let dist = {};
-            let totalAmount = 0;
-
-            document.querySelectorAll('.paid-amount').forEach(input => {
-                let val = parseFloat(input.value) || 0;
-                paid[input.dataset.name] = val;
-                totalAmount += val;
-            });
-
-            if(totalAmount <= 0) {
-                alert("אנא הזן סכום ששולם בפועל לאחד החברים לפחות.");
-                return;
-            }
-
-            members.forEach(m => {
-                dist[m] = currentPercentages[m] / 100;
-            });
-
-            if (editId) {
-                const index = expenses.findIndex(e => e.id == editId);
-                if (index !== -1) {
-                    expenses[index] = { id: parseInt(editId), date, desc, amount: totalAmount, paid, dist };
-                }
-            } else {
-                expenses.push({ id: Date.now(), date, desc, amount: totalAmount, paid, dist });
-            }
-
-            saveData(); 
-            cancelEdit(); 
-            calculateSettlement(); 
-        }
-
-        function editExpense(id) {
-            const expenseToEdit = expenses.find(e => e.id == id);
-            if (!expenseToEdit) return;
-
-            document.getElementById('editExpenseId').value = expenseToEdit.id;
-            document.getElementById('expDate').value = expenseToEdit.date;
-            document.getElementById('expDesc').value = expenseToEdit.desc;
-            
-            document.getElementById('expenseFormTitle').innerText = "2. עריכת הוצאה";
-            document.getElementById('saveExpenseBtn').innerText = "עדכן הוצאה";
-            document.getElementById('saveExpenseBtn').classList.replace('bg-emerald-600', 'bg-blue-600');
-            document.getElementById('saveExpenseBtn').classList.replace('hover:bg-emerald-700', 'hover:bg-blue-700');
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-
-            let tempPercentages = {};
-            let totalPercentageFromExisting = 0;
-            let existingMembersCount = 0;
-
-            members.forEach(m => {
-                if (expenseToEdit.dist[m] !== undefined) {
-                    tempPercentages[m] = expenseToEdit.dist[m] * 100;
-                    totalPercentageFromExisting += tempPercentages[m];
-                    existingMembersCount++;
+            while (seq.length < bodyTarget) {
+                if (currentType === 'V') {
+                    seq += getRandom([...vowels, ...vowels, ...vowels, ...vowelPairs]); 
+                    currentType = 'C';
                 } else {
-                    tempPercentages[m] = 0;
+                    seq += (seq.length === 0) ? getRandom([...consonants, ...consonants, ...initialBlends]) : getRandom([...consonants, ...consonants, ...medialBlends, ...finalBlends]);
+                    currentType = 'V';
                 }
-            });
-
-            if (existingMembersCount > 0 && Math.abs(totalPercentageFromExisting - 100) > 0.01) {
-                 let ratio = 100 / totalPercentageFromExisting;
-                 for (let m in tempPercentages) {
-                     tempPercentages[m] *= ratio;
-                 }
-            } else if (existingMembersCount === 0) {
-                 members.forEach(m => tempPercentages[m] = 100 / members.length);
             }
 
-            currentPercentages = Object.assign({}, tempPercentages);
-            renderExpenseInputs(expenseToEdit.paid);
-            document.getElementById('expenseFormTitle').scrollIntoView({ behavior: 'smooth' });
+            if (useSuffix) {
+                let s = getRandom(suffixes);
+                let sStartsVowel = isVowel(s[0]);
+                if (currentType === 'V' && sStartsVowel) seq += getRandom(consonants);
+                else if (currentType === 'C' && !sStartsVowel) seq += getRandom(vowels);
+                seq += s;
+            }
+            return seq.replace(/q(?!u)/g, 'qu');
         }
 
-        function cancelEdit() {
-            document.getElementById('editExpenseId').value = '';
-            document.getElementById('expDesc').value = '';
-            document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-            
-            document.getElementById('expenseFormTitle').innerText = "2. הוספת הוצאה";
-            document.getElementById('saveExpenseBtn').innerText = "שמור הוצאה";
-            document.getElementById('saveExpenseBtn').classList.replace('bg-blue-600', 'bg-emerald-600');
-            document.getElementById('saveExpenseBtn').classList.replace('hover:bg-blue-700', 'hover:bg-emerald-700');
-            document.getElementById('cancelEditBtn').classList.add('hidden');
-            
-            initPercentages();
-            renderExpenseInputs(); 
-            renderExpensesTable(); 
-        }
-
-        function deleteExpense(id) {
-            if(confirm("למחוק הוצאה זו?")) {
-                expenses = expenses.filter(e => e.id !== id);
-                saveData(); 
-                renderExpensesTable();
-                
-                if (document.getElementById('editExpenseId').value == id) {
-                    cancelEdit();
+        function getPartTargetingLength(targetL) {
+            if (targetL <= 0) return "";
+            if (targetL === 1) return getRandom(vowels); 
+            let attempts = 0;
+            while (attempts < 10000) {
+                attempts++;
+                let part = generateRandomSequence(targetL);
+                if (part.length === targetL && isLogicalFinal(part)) return part;
+            }
+            let fb = "";
+            let cleanC = ['b','d','f','g','h','k','l','m','n','p','r','s','t','v','z'];
+            for(let i=0; i<targetL; i++) {
+                if (i%2 === 0) {
+                    let nextC = getRandom(cleanC);
+                    while(fb.endsWith(nextC)) nextC = getRandom(cleanC);
+                    fb += nextC;
+                } else {
+                    let nextV = getRandom(vowels);
+                    while(fb.endsWith(nextV)) nextV = getRandom(vowels);
+                    fb += nextV;
                 }
-                calculateSettlement(); 
             }
+            return fb;
         }
 
-        function renderExpensesTable() {
-            const tbody = document.getElementById('expensesTableBody');
-            if(expenses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500 italic">לא נרשמו הוצאות עדיין.</td></tr>';
-                return;
-            }
-
-            const sortedExpenses = [...expenses].sort((a,b) => new Date(a.date) - new Date(b.date) || a.id - b.id);
-
-            tbody.innerHTML = sortedExpenses.map(e => `
-                <tr class="border-b hover:bg-gray-50 transition">
-                    <td class="p-3 text-gray-600 whitespace-nowrap">${e.date}</td>
-                    <td class="p-3 font-semibold text-gray-800">${e.desc}</td>
-                    <td class="p-3 font-mono font-bold text-indigo-700">${e.amount.toFixed(2)}</td>
-                    <td class="p-3 text-center flex justify-center gap-2">
-                        <button onclick="editExpense(${e.id})" class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition" title="ערוך הוצאה">✏️</button>
-                        <button onclick="deleteExpense(${e.id})" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition" title="מחק הוצאה">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // מחשב את המאזן לשורה בודדת
-        function getRowSettlement(expense) {
-            let rowBalances = {};
-            let allMembersInRow = new Set([...Object.keys(expense.paid), ...Object.keys(expense.dist)]);
+        function generateWord() {
+            let totalLen = parseInt(document.getElementById('lengthSlider').value, 10);
+            const incSpecial = document.getElementById('specialCharsCheckbox').checked;
+            const incNums = document.getElementById('numbersCheckbox').checked;
             
-            allMembersInRow.forEach(m => {
-                let paid = expense.paid[m] || 0;
-                let consumed = expense.amount * (expense.dist[m] || 0);
-                rowBalances[m] = paid - consumed;
-            });
-
-            let debtors = [];
-            let creditors = [];
-            for (let m in rowBalances) {
-                if (rowBalances[m] < -0.01) debtors.push({ name: m, amount: Math.abs(rowBalances[m]) });
-                else if (rowBalances[m] > 0.01) creditors.push({ name: m, amount: rowBalances[m] });
+            let numStr = "";
+            if (incNums) {
+                let digits = totalLen >= 10 ? 3 : (totalLen >= 7 ? 2 : 1);
+                if (totalLen - digits < (incSpecial && totalLen >= 6 ? 4 : 3)) digits = 1;
+                for(let i=0; i<digits; i++) numStr += Math.floor(Math.random() * 10).toString();
+                totalLen -= digits; 
             }
 
-            let settlementText = [];
-            debtors.sort((a,b) => b.amount - a.amount);
-            creditors.sort((a,b) => b.amount - a.amount);
-
-            let dIdx = 0, cIdx = 0;
-            while (dIdx < debtors.length && cIdx < creditors.length) {
-                let debtor = debtors[dIdx];
-                let creditor = creditors[cIdx];
-                let amountToTransfer = Math.min(debtor.amount, creditor.amount);
-                
-                if (amountToTransfer > 0.01) {
-                    settlementText.push(`${debtor.name} <span class="mx-1 text-gray-400">➔</span> ${creditor.name} (${amountToTransfer.toFixed(2)})`);
-                }
-                
-                debtor.amount -= amountToTransfer;
-                creditor.amount -= amountToTransfer;
-                
-                if (debtor.amount < 0.01) dIdx++;
-                if (creditor.amount < 0.01) cIdx++;
-            }
-            return settlementText.length > 0 ? settlementText.join('<br>') : '<span class="text-gray-400 italic">מאוזן</span>';
-        }
-
-        // מחשב את המאזן הכללי
-        function getSettlementLinesData() {
-            let allInvolvedMembers = new Set(members);
-            expenses.forEach(ex => {
-                Object.keys(ex.paid).forEach(m => allInvolvedMembers.add(m));
-                Object.keys(ex.dist).forEach(m => allInvolvedMembers.add(m));
-            });
-
-            let balances = {};
-            allInvolvedMembers.forEach(m => balances[m] = 0);
-
-            expenses.forEach(ex => {
-                allInvolvedMembers.forEach(m => {
-                    let paidByHim = ex.paid[m] || 0;
-                    let consumedByHim = ex.amount * (ex.dist[m] || 0);
-                    balances[m] += (paidByHim - consumedByHim);
-                });
-            });
-
-            let debtors = [];
-            let creditors = [];
-            
-            for (let m in balances) {
-                if (balances[m] < -0.01) debtors.push({ name: m, amount: Math.abs(balances[m]) });
-                else if (balances[m] > 0.01) creditors.push({ name: m, amount: balances[m] });
+            let separator = "";
+            if (incSpecial && totalLen >= 5 && document.getElementById('lengthSlider').value >= 6) {
+                separator = getRandom(['@', '#', '%', '&', '+', '=', '?', '!', '$', '*', '-', '_']);
+                totalLen -= 1; 
             }
 
-            let settlementLines = [];
-            debtors.sort((a,b) => b.amount - a.amount);
-            creditors.sort((a,b) => b.amount - a.amount);
-
-            let dIdx = 0;
-            let cIdx = 0;
-
-            while (dIdx < debtors.length && cIdx < creditors.length) {
-                let debtor = debtors[dIdx];
-                let creditor = creditors[cIdx];
-                
-                let amountToTransfer = Math.min(debtor.amount, creditor.amount);
-                
-                if (amountToTransfer > 0.01) {
-                    settlementLines.push({ debtor: debtor.name, creditor: creditor.name, amount: amountToTransfer });
-                }
-                
-                debtor.amount -= amountToTransfer;
-                creditor.amount -= amountToTransfer;
-                
-                if (debtor.amount < 0.01) dIdx++;
-                if (creditor.amount < 0.01) cIdx++;
-            }
-            return settlementLines;
-        }
-
-        function calculateSettlement() {
-            const resultsArea = document.getElementById('resultsArea');
-            
-            if(expenses.length === 0) {
-                resultsArea.classList.add('hidden');
-                return;
-            }
-
-            let settlementData = getSettlementLinesData();
-            resultsArea.classList.remove('hidden');
-            
-            if (settlementData.length === 0) {
-                resultsArea.innerHTML = `<div class="flex items-center gap-3">
-                                            <span class="text-2xl">🎉</span> 
-                                            <div>
-                                                <h3 class="font-bold text-lg text-green-800">הכל מאוזן!</h3>
-                                                <p class="text-green-700">אין צורך בהעברות כספיות נוספות, כולם שילמו בדיוק את חלקם.</p>
-                                            </div>
-                                         </div>`;
-                resultsArea.className = "mt-4 p-5 bg-green-50 rounded-xl border border-green-200 text-base font-medium shadow-sm block";
+            let resultWord = "";
+            if (separator !== "") {
+                let p1Len = Math.floor(totalLen / 2);
+                let p2Len = totalLen - p1Len;
+                resultWord = getPartTargetingLength(p1Len) + separator + getPartTargetingLength(p2Len);
             } else {
-                let formattedLines = settlementData.map(line => 
-                    `<li>• <span class="font-bold text-indigo-700">${line.debtor}</span> יעביר/תעביר ל-<span class="font-bold text-indigo-700">${line.creditor}</span>: <span class="font-bold text-indigo-700">${line.amount.toFixed(2)}</span></li>`
-                ).join('');
-
-                resultsArea.innerHTML = `<h3 class='font-bold text-xl mb-4 border-b border-purple-200 pb-3 text-purple-800 flex items-center gap-2'>
-                                            סיכום העברות נדרשות
-                                         </h3>
-                                         <ul class="space-y-3 pr-2">
-                                            ${formattedLines}
-                                         </ul>`;
-                resultsArea.className = "mt-4 p-6 bg-purple-50 rounded-xl border border-purple-200 text-base text-gray-800 shadow-sm block";
-            }
-        }
-
-        function openReport() {
-            if(expenses.length === 0) return alert("אין הוצאות להצגה בדוח.");
-            
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('reportView').classList.remove('hidden');
-            window.scrollTo(0, 0);
-
-            const totalAmount = expenses.reduce((sum, ex) => sum + ex.amount, 0);
-            
-            let html = `
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl font-extrabold text-indigo-800 mb-2">דוח הוצאות חופשה מפורט</h1>
-                    <p class="text-gray-600 text-lg">סך הכל הוצאות: <strong>${totalAmount.toFixed(2)}</strong></p>
-                    <p class="text-gray-500 text-sm mt-1">הופק בתאריך: ${new Date().toLocaleDateString('he-IL')}</p>
-                </div>
-                
-                <h2 class="text-xl font-bold mb-4 text-indigo-700 border-b pb-2">פירוט כלל ההוצאות</h2>
-                <div class="overflow-x-auto mb-8">
-                    <table class="w-full text-sm border-collapse text-right border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="border border-gray-300 p-2">תאריך</th>
-                                <th class="border border-gray-300 p-2">תיאור</th>
-                                <th class="border border-gray-300 p-2">סה"כ</th>
-                                <th class="border border-gray-300 p-2">פירוט תשלום</th>
-                                <th class="border border-gray-300 p-2">צריכה / חלוקה</th>
-                                <th class="border border-gray-300 p-2 bg-yellow-50 text-yellow-900">התחשבנות פנימית (בשורה זו)</th>
-                                <th class="border border-gray-300 p-2 bg-purple-50 text-purple-900">התחשבנות מצטברת (לאחר שורה זו)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            const sortedExpenses = [...expenses].sort((a,b) => new Date(a.date) - new Date(b.date) || a.id - b.id);
-            
-            // אוספים את כל החברים שאי פעם השתתפו, כדי לנהל מאזן ריצה מצטבר לכולם
-            let allInvolved = new Set(members);
-            sortedExpenses.forEach(ex => {
-                Object.keys(ex.paid).forEach(m => allInvolved.add(m));
-                Object.keys(ex.dist).forEach(m => allInvolved.add(m));
-            });
-            
-            let runningBalances = {};
-            allInvolved.forEach(m => runningBalances[m] = 0);
-
-            sortedExpenses.forEach(ex => {
-                let paidList = Object.entries(ex.paid)
-                    .filter(([m, amount]) => amount > 0)
-                    .map(([m, amount]) => `<div class="mb-1"><span class="font-bold">${m}:</span> ${amount.toFixed(2)}</div>`)
-                    .join('');
-                
-                let distList = Object.entries(ex.dist)
-                    .filter(([m, pct]) => pct > 0)
-                    .map(([m, pct]) => `<div class="mb-1"><span class="font-bold">${m}:</span> ${Math.round(pct * 100)}% (${(ex.amount * pct).toFixed(2)})</div>`)
-                    .join('');
-                
-                let rowSettlement = getRowSettlement(ex);
-                
-                // חישוב המאזן המצטבר הכללי עד לנקודה זו
-                allInvolved.forEach(m => {
-                    let paid = ex.paid[m] || 0;
-                    let consumed = ex.amount * (ex.dist[m] || 0);
-                    runningBalances[m] += (paid - consumed);
-                });
-
-                let debtors = [];
-                let creditors = [];
-                for (let m in runningBalances) {
-                    if (runningBalances[m] < -0.01) debtors.push({ name: m, amount: Math.abs(runningBalances[m]) });
-                    else if (runningBalances[m] > 0.01) creditors.push({ name: m, amount: runningBalances[m] });
-                }
-                debtors.sort((a,b) => b.amount - a.amount);
-                creditors.sort((a,b) => b.amount - a.amount);
-
-                let cumulativeText = [];
-                let dIdx = 0, cIdx = 0;
-                
-                // העתקת המערכים כדי לא לפגוע בסכום המקורי בהמשך הלולאה
-                let tempDebtors = debtors.map(d => ({...d}));
-                let tempCreditors = creditors.map(c => ({...c}));
-                
-                while (dIdx < tempDebtors.length && cIdx < tempCreditors.length) {
-                    let d = tempDebtors[dIdx];
-                    let c = tempCreditors[cIdx];
-                    let transfer = Math.min(d.amount, c.amount);
-                    
-                    if (transfer > 0.01) {
-                        cumulativeText.push(`${d.name} <span class="mx-1 text-gray-400">➔</span> ${c.name} <span class="font-bold">(${transfer.toFixed(2)})</span>`);
-                    }
-                    
-                    d.amount -= transfer;
-                    c.amount -= transfer;
-                    
-                    if (d.amount < 0.01) dIdx++;
-                    if (c.amount < 0.01) cIdx++;
-                }
-                
-                let cumulativeHtml = cumulativeText.length > 0 ? cumulativeText.join('<br>') : '<span class="text-gray-400 italic">מאוזן</span>';
-
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-300 p-2 align-top text-gray-600 whitespace-nowrap">${ex.date}</td>
-                        <td class="border border-gray-300 p-2 align-top font-bold">${ex.desc}</td>
-                        <td class="border border-gray-300 p-2 align-top font-bold text-indigo-700">${ex.amount.toFixed(2)}</td>
-                        <td class="border border-gray-300 p-2 align-top bg-blue-50/50">${paidList || '-'}</td>
-                        <td class="border border-gray-300 p-2 align-top bg-green-50/50">${distList || '-'}</td>
-                        <td class="border border-gray-300 p-2 align-top bg-yellow-50/50 text-yellow-900">${rowSettlement}</td>
-                        <td class="border border-gray-300 p-2 align-top bg-purple-50/50 text-purple-900">${cumulativeHtml}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</tbody></table></div>`;
-
-            let settlementData = getSettlementLinesData();
-            html += `<h2 class="text-xl font-bold mb-4 text-indigo-700 border-b pb-2">סיכום התחשבנות כולל לאיזון</h2>`;
-            
-            if (settlementData.length === 0) {
-                html += `<p class="text-green-700 font-bold bg-green-50 p-4 rounded border border-green-200 text-center text-lg">הכל מאוזן! אין העברות כספיות נדרשות.</p>`;
-            } else {
-                html += `<ul class="space-y-3 bg-purple-50 p-6 rounded border border-purple-200">`;
-                settlementData.forEach(line => {
-                    html += `<li class="text-lg flex items-center gap-2">
-                        <span class="text-purple-500 font-black">•</span>
-                        <span class="font-bold text-indigo-700">${line.debtor}</span> 
-                        <span class="text-gray-500">מעביר/ה ל-</span> 
-                        <span class="font-bold text-indigo-700">${line.creditor}</span> 
-                        <span class="text-gray-400 mx-1">➔</span>
-                        <strong>${line.amount.toFixed(2)}</strong>
-                    </li>`;
-                });
-                html += `</ul>`;
+                resultWord = getPartTargetingLength(totalLen);
             }
 
-            document.getElementById('reportContent').innerHTML = html;
+            resultWord = resultWord.charAt(0).toUpperCase() + resultWord.slice(1);
+            return { text: resultWord + numStr };
         }
 
-        function closeReport() {
-            document.getElementById('reportView').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
+        // --- UI & QR Code ---
+        const qrCodeObj = new QRCode(document.getElementById("qrcode"), {
+            width: 80, // גודל קומפקטי
+            height: 80,
+            colorDark : "#4f46e5", // צבע הברקוד
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.L // רמת תיקון נמוכה לברקוד נקי יותר
+        });
+
+        function toggleSpecialCharsVisibility(val) {
+            document.getElementById('specialCharsWrapper').style.display = (val < 6) ? 'none' : 'flex';
         }
+
+        document.getElementById('lengthSlider').addEventListener('input', (e) => {
+            document.getElementById('lengthValue').textContent = e.target.value;
+            toggleSpecialCharsVisibility(parseInt(e.target.value, 10));
+            updateUI();
+        });
+
+        document.getElementById('specialCharsCheckbox').addEventListener('change', updateUI);
+        document.getElementById('numbersCheckbox').addEventListener('change', updateUI);
+        document.getElementById('generateBtn').addEventListener('click', updateUI);
+
+        function updateUI() {
+            const result = generateWord();
+            const wordOutput = document.getElementById('wordOutput');
+            
+            wordOutput.classList.remove('animate-pop');
+            void wordOutput.offsetWidth;
+            
+            // התאמת גודל טקסט לפי אורך (הקטנו את הגדלים המקסימליים)
+            wordOutput.className = 'word-display font-bold text-indigo-900 tracking-tight break-all text-2xl sm:text-3xl';
+            if (result.text.length > 14) wordOutput.classList.replace('text-2xl', 'text-xl');
+            
+            wordOutput.textContent = result.text;
+            wordOutput.classList.add('animate-pop');
+
+            // עדכון ה-QR Code
+            qrCodeObj.clear();
+            qrCodeObj.makeCode(result.text);
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const text = document.getElementById('wordOutput').textContent;
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                if (document.execCommand('copy')) {
+                    const btn = document.getElementById('copyBtnLabel');
+                    const orig = btn.textContent;
+                    btn.textContent = "Copied!";
+                    setTimeout(() => btn.textContent = orig, 1500);
+                }
+            } catch (err) {}
+            document.body.removeChild(textArea);
+        });
 
         window.onload = () => {
-            document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-            loadData(); 
-            renderUI();
-            calculateSettlement();
+            toggleSpecialCharsVisibility(parseInt(document.getElementById('lengthSlider').value, 10));
+            updateUI();
         };
     </script>
 </body>
