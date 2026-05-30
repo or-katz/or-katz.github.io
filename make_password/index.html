@@ -11,216 +11,165 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PassGen">
-    
-    <!-- Windows Meta Tags -->
     <meta name="msapplication-TileColor" content="#4f46e5">
     <meta name="msapplication-tap-highlight" content="no">
     
-    <!-- App Icons (Embedded High-Quality SVG) -->
+    <!-- App Icons -->
     <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=" type="image/svg+xml">
-    
-    <!-- iOS Apple Touch Icons (Multiple sizes for full compatibility) -->
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
-    <link rel="apple-touch-icon" sizes="152x152" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
-    <link rel="apple-touch-icon" sizes="167x167" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
-
-    <!-- Web App Manifest (Explicit sizes for Windows/Android) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Password Generator","short_name":"PassGen","start_url":".","display":"standalone","background_color":"#f3f4f6","theme_color":"#4f46e5","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=","sizes":"72x72 96x96 128x128 144x144 152x152 192x192 384x384 512x512 any","type":"image/svg+xml","purpose":"any maskable"}]}'>
+    
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Password Generator","short_name":"PassGen","start_url":".","display":"standalone","background_color":"#f3f4f6","theme_color":"#4f46e5","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik0yNTYgMTI4Yy02MCAwLTEwMCA0MC0xMDAgMTAwdjQ4SDEzNnYxNjBoMjQwVjI3NmgtMjB2LTQ4YzAtNjAtNDAtMTAwLTEwMC0xMDB6bTAgMzJjNDAgMCA2OCAyOCA2OCA2OHY0OEgxODh2LTQ4YzAtNDAgMjgtNjggNjgtNjh6bTAgMTQ0YzE4IDAgMzIgMTQgMzIgMzIgMCAxMy04IDI1LTIwIDMwdjM0aC0yNHYtMzRjLTEyLTUtMjAtMTctMjAtMzAgMC0xOCAxNC0zMiAzMi0zMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=","sizes":"192x192 512x512 any","type":"image/svg+xml","purpose":"any maskable"}]}'>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Roboto+Mono:wght@500;700&display=swap');
         
-        body {
-            font-family: 'Heebo', sans-serif;
-            background-color: #f3f4f6;
-        }
-
-        .word-display {
-            font-family: 'Roboto Mono', monospace;
-            transition: all 0.3s ease;
-        }
-
-        .animate-pop {
-            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes pop {
-            0% { transform: scale(0.9); opacity: 0; }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        body { font-family: 'Heebo', sans-serif; background-color: #f3f4f6; }
+        .word-display { font-family: 'Roboto Mono', monospace; transition: all 0.3s ease; }
+        .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 50% { transform: scale(1.02); } 100% { transform: scale(1); opacity: 1; } }
+        
+        /* QR Code Container Styling */
+        #qrcode { display: inline-block; padding: 8px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; }
     </style>
+    
+    <!-- ספרייה קטנה וקלה ליצירת QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100">
 
-    <div class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-lg border border-gray-100 relative">
+    <div class="bg-white rounded-3xl shadow-xl p-6 w-full max-w-lg border border-gray-100 relative">
         
-        <!-- כפתור התקנה (גלוי תמיד) -->
-        <button id="installBtn" class="absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs font-bold shadow-sm z-10">
+        <!-- כפתור התקנה -->
+        <button id="installBtn" class="hidden absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 hover:bg-indigo-100 transition-colors text-xs font-bold shadow-sm z-10">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
             Install App
         </button>
 
-        <header class="text-center mb-8 relative mt-4">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Phonotactic Password Generator</h1>
-            <p class="text-gray-500 text-sm">Generates highly readable, syntactically perfect passwords. No double letters, easy to pronounce.</p>
+        <header class="text-center mb-6 mt-2">
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">Password Generator</h1>
+            <p class="text-gray-500 text-xs">Phonotactically logical, easy to type & scan.</p>
         </header>
 
-        <!-- אזור תצוגת הסיסמה -->
-        <div class="bg-gray-50 rounded-2xl p-8 mb-6 text-center border-2 border-indigo-50 shadow-inner relative overflow-hidden">
+        <!-- אזור התצוגה המוקטן (סיסמה + QR) -->
+        <div class="bg-gray-50 rounded-2xl p-5 mb-5 text-center border-2 border-indigo-50 shadow-inner relative overflow-hidden flex flex-col sm:flex-row items-center justify-center gap-4">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-purple-500"></div>
             
-            <p id="wordOutput" class="word-display font-bold text-indigo-900 tracking-tighter break-words w-full mx-auto py-6">
-                Welcome
-            </p>
-        </div>
+            <div class="flex-1 flex flex-col justify-center w-full">
+                <p id="wordOutput" class="word-display font-bold text-indigo-900 tracking-tight break-all text-2xl sm:text-3xl">
+                    Welcome
+                </p>
+                <button id="copyBtn" class="mx-auto mt-3 flex items-center justify-center gap-1.5 px-4 py-1.5 bg-white text-indigo-600 rounded-full shadow-sm border border-indigo-100 transition-all hover:bg-indigo-50 hover:scale-105 active:scale-95 font-bold text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="copyIcon"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    <span id="copyBtnLabel">Copy</span>
+                </button>
+            </div>
 
-        <!-- כפתור העתקה -->
-        <div class="flex justify-center mb-8">
-            <button id="copyBtn" class="flex items-center gap-2 px-6 py-2 bg-white text-indigo-600 rounded-full shadow-md border border-indigo-100 transition-all hover:bg-indigo-50 hover:scale-105 active:scale-95 font-bold text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="copyIcon"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                <span id="copyBtnLabel">Copy Password</span>
-            </button>
+            <!-- מכל ה-QR Code -->
+            <div class="flex-shrink-0 flex flex-col items-center">
+                <div id="qrcode"></div>
+                <span class="text-[10px] text-gray-400 mt-1 font-bold">Scan to Copy</span>
+            </div>
         </div>
 
         <!-- פקדים ובקרות -->
-        <div class="space-y-4">
-            <div class="flex flex-col gap-3 mb-4">
+        <div class="space-y-3">
+            <div class="flex flex-col gap-2 mb-3">
                 <div class="flex justify-between items-center">
-                    <label class="text-sm font-bold text-gray-700">Password Length (characters):</label>
-                    <span id="lengthValue" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100 shadow-sm">8</span>
+                    <label class="text-sm font-bold text-gray-700">Length:</label>
+                    <span id="lengthValue" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-100 shadow-sm">8</span>
                 </div>
-                <input type="range" id="lengthSlider" min="4" max="25" value="8" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                <input type="range" id="lengthSlider" min="4" max="25" value="8" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
             </div>
 
-            <div id="specialCharsWrapper" class="flex items-center gap-2 mb-2">
-                <input type="checkbox" id="specialCharsCheckbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                <label for="specialCharsCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer">Include separators (@ # % & ? ! * - _ + =)</label>
+            <div id="specialCharsWrapper" class="flex items-center gap-2 mb-1">
+                <input type="checkbox" id="specialCharsCheckbox" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="specialCharsCheckbox" class="text-xs font-bold text-gray-700 cursor-pointer">Include separators (@ # % & ? ! * - _ + =)</label>
             </div>
 
-            <div class="flex items-center gap-2 mb-4">
-                <input type="checkbox" id="numbersCheckbox" checked class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                <label for="numbersCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer">Append random numbers (0-999)</label>
+            <div class="flex items-center gap-2 mb-3">
+                <input type="checkbox" id="numbersCheckbox" checked class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="numbersCheckbox" class="text-xs font-bold text-gray-700 cursor-pointer">Append random numbers (0-999)</label>
             </div>
 
-            <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-300 text-lg">
-                Generate Password ✨
+            <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-base">
+                Generate Password
             </button>
         </div>
 
     </div>
 
     <script>
-        // --- PWA Installation Logic & Virtual Service Worker ---
-        
-        // יצירת Service Worker וירטואלי כדי לרצות את חוקי ההתקנה של Chrome/Edge
+        // --- PWA Installation Logic ---
         if ('serviceWorker' in navigator) {
             const swCode = `self.addEventListener('fetch', function(event) {});`;
             const blob = new Blob([swCode], { type: 'application/javascript' });
             const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(() => console.log('SW registration ignored'));
+            navigator.serviceWorker.register(swUrl).catch(() => {});
         }
 
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
-
-        const isIos = () => {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            return /iphone|ipad|ipod/.test(userAgent);
-        };
+        const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
         const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
 
-        // הסתרת הכפתור אם האפליקציה כבר מותקנת ורצה במסך מלא
-        if (isInStandaloneMode()) {
-            installBtn.style.display = 'none';
+        if (!isInStandaloneMode()) {
+            installBtn.classList.remove('hidden');
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e; // שומרים את האירוע המקורי של הדפדפן
+            deferredPrompt = e;
         });
 
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // הדפדפן מוכן להתקנה - מציגים את חלון ההתקנה המקורי
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.style.display = 'none';
-                }
+                if (outcome === 'accepted') installBtn.classList.add('hidden');
                 deferredPrompt = null;
+            } else if (isIos()) {
+                alert('To install on iPhone/iPad:\n\n1. Tap the "Share" icon.\n2. Tap "Add to Home Screen".');
             } else {
-                // אם הדפדפן לא תומך בהקפצה אוטומטית (כמו ספארי), מציגים הוראות
-                if (isIos()) {
-                    alert('To install on iPhone/iPad:\n\n1. Tap the "Share" icon at the bottom of Safari.\n2. Scroll down and tap "Add to Home Screen".');
-                } else {
-                    alert('To install this app:\n\nOpen your browser menu (the three dots) and select "Install" or "Add to Home Screen".');
-                }
+                alert('Open your browser menu and select "Install" or "Add to Home Screen".');
             }
         });
 
-        // שינוי אייקון למשתמשי אייפון לנוחות
         if (isIos() && !isInStandaloneMode()) {
-            installBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> iOS Install';
+            installBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> iOS Install';
         }
 
-        // --- מילונים מסוננים קפדנית (ללא אותיות כפולות כלל) ---
-        
+        // --- Linguistics ---
         const vowels = ['a', 'e', 'i', 'o', 'u', 'y']; 
         const vowelPairs = ['ea', 'ou', 'ai', 'oa', 'ie', 'ei', 'au', 'ay', 'ey', 'oi', 'oy'];
-        
         const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'x', 'z'];
         const initialBlends = ['bl', 'br', 'ch', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr', 'sh', 'sl', 'sm', 'sn', 'sp', 'st', 'th', 'tr', 'wh', 'ph', 'qu', 'sw', 'tw'];
         const medialBlends = ['ch', 'sh', 'th', 'ph', 'st', 'nd', 'nt', 'ng', 'rt', 'lt', 'rm', 'rn', 'mb', 'mp'];
         const finalBlends = ['ch', 'ck', 'ft', 'ld', 'nd', 'ng', 'nk', 'nt', 'ph', 'rd', 'rk', 'rt', 'sh', 'sk', 'sp', 'st', 'th', 'mp', 'rn', 'rm'];
-        
         const prefixes = ['re', 'un', 'in', 'ex', 'de', 'pro', 'con', 'pre', 'over', 'sub', 'dis', 'mis', 'out', 'en', 'mega', 'cyber', 'neo', 'retro', 'astro'];
         const suffixes = ['tion', 'ing', 'er', 'ment', 'able', 'ous', 'ify', 'ity', 'ish', 'ic', 'dom', 'ful', 'ism', 'ship', 'punk', 'wave', 'logy'];
 
-        // --- פונקציות עזר ---
+        const getRandom = arr => arr[Math.floor(Math.random() * arr.length)];
+        const chance = percentage => Math.random() * 100 < percentage;
+        const isVowel = char => ['a','e','i','o','u','y'].includes(char.toLowerCase());
 
-        function getRandom(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
-
-        function chance(percentage) {
-            return Math.random() * 100 < percentage;
-        }
-
-        function isVowel(char) {
-            return ['a','e','i','o','u','y'].includes(char.toLowerCase());
-        }
-
-        // --- מנגנון וידוא לוגיקה תחבירית מורחב וקפדני ---
         function isLogicalFinal(text) {
             const lower = text.toLowerCase();
-            
             if (/([a-z])\1/i.test(lower)) return false;
             if (/[^aeiouy]{3,}/i.test(lower)) return false;
             if (/[aeiouy]{3,}/i.test(lower)) return false;
             if (/[vjqx]$/i.test(lower)) return false;
-
-            const illegalPairs = [
-                'cj', 'vj', 'qc', 'qg', 'qk', 'qv', 'qw', 'qx', 'qz', 
-                'hh', 'pq', 'zk', 'zh', 'wp', 'bf', 'hx', 'xj', 'zx', 'cv', 'mx',
-                'xw', 'wx', 'jw', 'wj', 'kg', 'gk', 'pb', 'bp', 'td', 'dt', 'cg', 'gc',
-                'sz', 'zs', 'iy', 'yi', 'uy', 'yu'
-            ];
+            const illegalPairs = ['cj','vj','qc','qg','qk','qv','qw','qx','qz','hh','pq','zk','zh','wp','bf','hx','xj','zx','cv','mx','xw','wx','jw','wj','kg','gk','pb','bp','td','dt','cg','gc','sz','zs','iy','yi','uy','yu'];
             for (let pair of illegalPairs) {
                 if (lower.includes(pair)) return false;
             }
-
             return true;
         }
 
-        // --- מנוע הרכבת החלקים לפי State Machine ---
         function generateRandomSequence(targetL) {
             let seq = "";
             let usePrefix = targetL >= 6 ? chance(25) : false;
             let useSuffix = targetL >= 6 ? chance(25) : false;
-            
             let currentType = chance(50) ? 'V' : 'C';
 
             if (usePrefix) {
@@ -237,12 +186,7 @@
                     seq += getRandom([...vowels, ...vowels, ...vowels, ...vowelPairs]); 
                     currentType = 'C';
                 } else {
-                    let isFirst = (seq.length === 0);
-                    if (isFirst) {
-                        seq += getRandom([...consonants, ...consonants, ...initialBlends]);
-                    } else {
-                        seq += getRandom([...consonants, ...consonants, ...medialBlends, ...finalBlends]);
-                    }
+                    seq += (seq.length === 0) ? getRandom([...consonants, ...consonants, ...initialBlends]) : getRandom([...consonants, ...consonants, ...medialBlends, ...finalBlends]);
                     currentType = 'V';
                 }
             }
@@ -254,29 +198,24 @@
                 else if (currentType === 'C' && !sStartsVowel) seq += getRandom(vowels);
                 seq += s;
             }
-
             return seq.replace(/q(?!u)/g, 'qu');
         }
 
         function getPartTargetingLength(targetL) {
             if (targetL <= 0) return "";
             if (targetL === 1) return getRandom(vowels); 
-            
             let attempts = 0;
             while (attempts < 10000) {
                 attempts++;
                 let part = generateRandomSequence(targetL);
-                if (part.length === targetL && isLogicalFinal(part)) {
-                    return part;
-                }
+                if (part.length === targetL && isLogicalFinal(part)) return part;
             }
-            
             let fb = "";
-            let cleanConsonants = ['b','d','f','g','h','k','l','m','n','p','r','s','t','v','z'];
+            let cleanC = ['b','d','f','g','h','k','l','m','n','p','r','s','t','v','z'];
             for(let i=0; i<targetL; i++) {
                 if (i%2 === 0) {
-                    let nextC = getRandom(cleanConsonants);
-                    while(fb.endsWith(nextC)) nextC = getRandom(cleanConsonants);
+                    let nextC = getRandom(cleanC);
+                    while(fb.endsWith(nextC)) nextC = getRandom(cleanC);
                     fb += nextC;
                 } else {
                     let nextV = getRandom(vowels);
@@ -287,45 +226,30 @@
             return fb;
         }
 
-        // --- הפונקציה הראשית שמרכיבה את כל הסיסמה ---
         function generateWord() {
             let totalLen = parseInt(document.getElementById('lengthSlider').value, 10);
-            const includeSpecialChars = document.getElementById('specialCharsCheckbox').checked;
-            const includeNumbers = document.getElementById('numbersCheckbox').checked;
+            const incSpecial = document.getElementById('specialCharsCheckbox').checked;
+            const incNums = document.getElementById('numbersCheckbox').checked;
             
             let numStr = "";
-
-            if (includeNumbers) {
-                let digits = 0;
-                if (totalLen >= 10) digits = 3;
-                else if (totalLen >= 7) digits = 2;
-                else digits = 1;
-                
-                if (totalLen - digits < (includeSpecialChars && totalLen >= 6 ? 4 : 3)) {
-                    digits = 1;
-                }
-                
-                for(let i=0; i<digits; i++) {
-                    numStr += Math.floor(Math.random() * 10).toString();
-                }
+            if (incNums) {
+                let digits = totalLen >= 10 ? 3 : (totalLen >= 7 ? 2 : 1);
+                if (totalLen - digits < (incSpecial && totalLen >= 6 ? 4 : 3)) digits = 1;
+                for(let i=0; i<digits; i++) numStr += Math.floor(Math.random() * 10).toString();
                 totalLen -= digits; 
             }
 
             let separator = "";
-            if (includeSpecialChars && totalLen >= 5 && document.getElementById('lengthSlider').value >= 6) {
+            if (incSpecial && totalLen >= 5 && document.getElementById('lengthSlider').value >= 6) {
                 separator = getRandom(['@', '#', '%', '&', '+', '=', '?', '!', '$', '*', '-', '_']);
                 totalLen -= 1; 
             }
 
             let resultWord = "";
-            
             if (separator !== "") {
                 let p1Len = Math.floor(totalLen / 2);
                 let p2Len = totalLen - p1Len;
-                
-                let p1 = getPartTargetingLength(p1Len);
-                let p2 = getPartTargetingLength(p2Len);
-                resultWord = p1 + separator + p2;
+                resultWord = getPartTargetingLength(p1Len) + separator + getPartTargetingLength(p2Len);
             } else {
                 resultWord = getPartTargetingLength(totalLen);
             }
@@ -334,80 +258,68 @@
             return { text: resultWord + numStr };
         }
 
-        // --- UI ---
-        
-        const generateBtn = document.getElementById('generateBtn');
-        const wordOutput = document.getElementById('wordOutput');
-        const lengthSlider = document.getElementById('lengthSlider');
-        const lengthValue = document.getElementById('lengthValue');
-        const specialCharsCheckbox = document.getElementById('specialCharsCheckbox');
-        const numbersCheckbox = document.getElementById('numbersCheckbox');
-        const specialCharsWrapper = document.getElementById('specialCharsWrapper');
-        const copyBtn = document.getElementById('copyBtn');
-        const copyBtnLabel = document.getElementById('copyBtnLabel');
+        // --- UI & QR Code ---
+        const qrCodeObj = new QRCode(document.getElementById("qrcode"), {
+            width: 80, // גודל קומפקטי
+            height: 80,
+            colorDark : "#4f46e5", // צבע הברקוד
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.L // רמת תיקון נמוכה לברקוד נקי יותר
+        });
 
         function toggleSpecialCharsVisibility(val) {
-            if (val < 6) {
-                specialCharsWrapper.style.visibility = 'hidden';
-                specialCharsWrapper.style.pointerEvents = 'none';
-            } else {
-                specialCharsWrapper.style.visibility = 'visible';
-                specialCharsWrapper.style.pointerEvents = 'auto';
-            }
+            document.getElementById('specialCharsWrapper').style.display = (val < 6) ? 'none' : 'flex';
         }
 
-        lengthSlider.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value, 10);
-            lengthValue.textContent = val;
-            toggleSpecialCharsVisibility(val);
+        document.getElementById('lengthSlider').addEventListener('input', (e) => {
+            document.getElementById('lengthValue').textContent = e.target.value;
+            toggleSpecialCharsVisibility(parseInt(e.target.value, 10));
             updateUI();
         });
 
-        specialCharsCheckbox.addEventListener('change', updateUI);
-        numbersCheckbox.addEventListener('change', updateUI);
-        generateBtn.addEventListener('click', updateUI);
+        document.getElementById('specialCharsCheckbox').addEventListener('change', updateUI);
+        document.getElementById('numbersCheckbox').addEventListener('change', updateUI);
+        document.getElementById('generateBtn').addEventListener('click', updateUI);
 
         function updateUI() {
             const result = generateWord();
+            const wordOutput = document.getElementById('wordOutput');
+            
             wordOutput.classList.remove('animate-pop');
             void wordOutput.offsetWidth;
             
-            wordOutput.className = 'word-display font-bold text-indigo-900 tracking-tighter break-words w-full mx-auto py-6';
-            if (result.text.length <= 10) wordOutput.classList.add('text-5xl', 'md:text-6xl');
-            else if (result.text.length <= 18) wordOutput.classList.add('text-4xl', 'md:text-5xl');
-            else wordOutput.classList.add('text-3xl', 'md:text-4xl');
+            // התאמת גודל טקסט לפי אורך (הקטנו את הגדלים המקסימליים)
+            wordOutput.className = 'word-display font-bold text-indigo-900 tracking-tight break-all text-2xl sm:text-3xl';
+            if (result.text.length > 14) wordOutput.classList.replace('text-2xl', 'text-xl');
             
             wordOutput.textContent = result.text;
             wordOutput.classList.add('animate-pop');
+
+            // עדכון ה-QR Code
+            qrCodeObj.clear();
+            qrCodeObj.makeCode(result.text);
         }
 
-        function copyToClipboard() {
-            const text = wordOutput.textContent;
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const text = document.getElementById('wordOutput').textContent;
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
+            textArea.style.position = "fixed"; textArea.style.left = "-9999px";
             document.body.appendChild(textArea);
             textArea.select();
             try {
                 if (document.execCommand('copy')) {
-                    const originalText = copyBtnLabel.textContent;
-                    copyBtnLabel.textContent = "Copied!";
-                    copyBtn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
-                    setTimeout(() => {
-                        copyBtnLabel.textContent = originalText;
-                        copyBtn.classList.remove('bg-green-50', 'text-green-600', 'border-green-200');
-                    }, 1500);
+                    const btn = document.getElementById('copyBtnLabel');
+                    const orig = btn.textContent;
+                    btn.textContent = "Copied!";
+                    setTimeout(() => btn.textContent = orig, 1500);
                 }
             } catch (err) {}
             document.body.removeChild(textArea);
-        }
+        });
 
-        copyBtn.addEventListener('click', copyToClipboard);
-        
         window.onload = () => {
-            const val = parseInt(lengthSlider.value, 10);
-            toggleSpecialCharsVisibility(val);
+            toggleSpecialCharsVisibility(parseInt(document.getElementById('lengthSlider').value, 10));
             updateUI();
         };
     </script>
