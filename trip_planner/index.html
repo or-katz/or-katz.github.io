@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip Planner</title>
+
+  <style>
+    :root {
+      --bg: #0f1729;
+      --panel: #16203a;
+      --panel-2: #1e2a48;
+      --border: #2b3a5e;
+      --text: #e6ebf5;
+      --muted: #9fb0cc;
+      --accent: #4f8cff;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow: hidden;
+      color-scheme: dark; /* makes native date/time pickers legible in dark UI */
+    }
+
+    input[type="date"], input[type="time"] { color-scheme: dark; }
+
+    #app { height: 100vh; }
+
+    /* Map fills the whole screen; all controls float on top of it. */
+    #map { position: absolute; inset: 0; }
+
+    /* ---------- Floating sidebar ---------- */
+    #sidebar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 900;
+      width: 340px;
+      max-width: calc(100vw - 20px);
+      max-height: calc(100vh - 20px);
+      background: rgba(22, 32, 58, 0.94);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-header h1 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+      flex: 1;
+    }
+
+    .sidebar-header p { display: none; }
+
+    #collapseBtn {
+      flex: none;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* Collapsed = just the header bar */
+    #sidebar.collapsed .add-box,
+    #sidebar.collapsed .list-wrap,
+    #sidebar.collapsed .summary { display: none; }
+    #sidebar.collapsed .sidebar-header { border-bottom: none; }
+
+    /* Fully hidden menu */
+    #sidebar.hidden { display: none; }
+
+    #menuToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--text);
+      background: rgba(22, 32, 58, 0.94);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+    #menuToggle:hover { background: #26365c; }
+
+    /* Globe texture selector (floating, top-right, below the menu toggle) */
+    #globeStyle {
+      position: absolute;
+      top: 56px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(22, 32, 58, 0.94);
+      backdrop-filter: blur(6px);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 8px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+
+    .add-box {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    input, select, button, textarea {
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .field {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      width: 100%;
+    }
+
+    .field:focus { border-color: var(--accent); }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { background: #26365c; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: #3f7cf0; }
+
+    .btn.small { padding: 4px 8px; font-size: 12px; }
+    .btn.danger { color: #ffd7d7; border-color: #5c2b2b; background: #3a1e1e; }
+    .btn.danger:hover { background: #4d2525; }
+
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .search-results {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .search-results.show { display: block; }
+
+    .search-results li {
+      padding: 8px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .search-results li:last-child { border-bottom: none; }
+    .search-results li:hover { background: var(--panel-2); }
+
+    /* ---------- Location table ---------- */
+    .list-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 8px 10px;
+      min-height: 0;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 30px 10px;
+      line-height: 1.5;
+    }
+
+    table.trip {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    table.trip th {
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 4px 5px;
+      position: sticky;
+      top: 0;
+      background: var(--panel);
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    table.trip td {
+      padding: 4px 5px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    table.trip tr.row.active td { background: rgba(79, 140, 255, 0.14); }
+    table.trip tr.row.hover td { background: rgba(79, 140, 255, 0.07); }
+    table.trip tr.dragging td { background: var(--panel-2); }
+    table.trip tr.dragging { opacity: 0.6; }
+
+    /* Rows are draggable by their body when not being edited */
+    table.trip tr.row:not(.editing) { cursor: grab; touch-action: none; }
+    table.trip tr.row.dragging { cursor: grabbing; }
+
+    /* Display-mode text cells */
+    .cell-text { color: var(--text); }
+    .cell-text.name { font-weight: 600; }
+    .cell-text.dt { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .cell-text.tz { color: var(--muted); white-space: nowrap; }
+
+    /* Edit-mode inputs */
+    .cell-input {
+      width: 100%;
+      min-width: 0;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 6px;
+      font-size: 12px;
+      outline: none;
+    }
+    .cell-input:focus { border-color: var(--accent); }
+    .name-input { font-weight: 600; min-width: 90px; }
+    .tz-input { max-width: 160px; }
+
+    .row-actions { white-space: nowrap; text-align: right; width: 1%; }
+
+    .act-btn {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+      padding: 6px 9px;
+      border-radius: 6px;
+    }
+    .act-btn:hover { background: #26365c; }
+    .act-btn.save { background: var(--accent-2); border-color: var(--accent-2); color: #06210f; font-weight: 700; }
+    .act-btn.save:hover { background: #1eb054; }
+    .act-btn.remove { color: #ffb4b4; border-color: #5c2b2b; background: #3a1e1e; }
+    .act-btn.remove:hover { background: #4d2525; }
+
+    /* ---------- Footer actions ---------- */
+    .summary {
+      border-top: 1px solid var(--border);
+      padding: 8px 10px;
+      background: transparent;
+    }
+
+    /* ---------- Globe ---------- */
+    #map { background: #05070f; }
+
+    .globe-pin {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      color: #fff;
+      font-weight: 700;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .globe-pin.active { background: var(--accent-2); color: #06210f; }
+    .globe-pin.hover { transform: scale(1.3); z-index: 5; }
+
+    #plane {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: 22px;
+      line-height: 1;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+      will-change: left, top;
+    }
+
+    /* ---------- Floating animation bar ---------- */
+    #anim {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      z-index: 900;
+      width: min(680px, calc(100vw - 20px));
+      background: rgba(22, 32, 58, 0.94);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #anim .controls { display: flex; align-items: center; gap: 6px; flex: none; }
+
+    #anim .btn { padding: 6px 9px; }
+
+    #playBtn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      padding: 0;
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+      color: #06210f;
+      font-weight: 700;
+    }
+    #playBtn:hover { background: #1eb054; }
+    #resetBtn { width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; }
+
+    .live {
+      flex: 1;
+      min-width: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .live b { color: var(--text); }
+    .live .leg-title { color: var(--accent-2); font-weight: 700; }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: #2c3c60; border-radius: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    @media (max-width: 820px) {
+      #sidebar { width: calc(100vw - 20px); max-height: 60vh; }
+      /* Keep the player on a single compact line */
+      .live { min-width: 0; }
+      /* Bigger touch targets on mobile */
+      .btn { padding: 10px 12px; }
+      .cell-input { padding: 8px 6px; font-size: 13px; }
+      .act-btn { padding: 9px 11px; font-size: 13px; }
+      table.trip td, table.trip th { padding: 6px 5px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h1>Trip Planner</h1>
+        <button id="collapseBtn" class="btn small" title="Minimize">&#8211;</button>
+      </div>
+
+      <div class="add-box">
+        <div class="search-row">
+          <input id="searchInput" class="field" type="text" placeholder="Search a place…" />
+          <button id="searchBtn" class="btn primary">Search</button>
+        </div>
+        <ul id="searchResults" class="search-results"></ul>
+      </div>
+
+      <div id="listWrap" class="list-wrap"></div>
+
+      <div class="summary">
+        <div style="display:flex; gap:6px;">
+          <button id="clearBtn" class="btn danger small">Clear all</button>
+          <button id="fitBtn" class="btn small">Fit map</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Floating show/hide menu button -->
+    <button id="menuToggle" title="Hide menu">&#10005;</button>
+
+    <!-- Globe texture selector -->
+    <select id="globeStyle" title="Globe style">
+      <option value="blue">Blue Marble</option>
+      <option value="day">Day</option>
+      <option value="night">Night</option>
+      <option value="dark">Dark</option>
+    </select>
+
+    <!-- 3D globe -->
+    <div id="map"></div>
+
+    <!-- Animation bar -->
+    <div id="anim">
+      <div class="controls">
+        <button id="playBtn" class="btn" title="Fly to next location">&#9654;</button>
+        <button id="resetBtn" class="btn small" title="Back to start">&#8635;</button>
+      </div>
+      <div id="live" class="live">Add stops to fly your trip.</div>
+    </div>
+  </div>
+
+  <!-- 3D globe (free, no API key; bundles three.js) -->
+  <script src="https://unpkg.com/globe.gl@2.34.4/dist/globe.gl.min.js"></script>
+
+  <!-- Offline timezone-from-coordinates lookup (free, no API key) -->
+  <script src="https://unpkg.com/tz-lookup@6.1.25/tz.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    // ---------------------------------------------------------------------
+    // State
+    // ---------------------------------------------------------------------
+    const STORAGE_KEY = "tripPlanner.v1";
+    const LOCAL_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+    // Resolve an IANA timezone from coordinates using the offline tz-lookup lib.
+    function lookupTz(lat, lng) {
+      try {
+        if (typeof window.tzlookup === "function") return window.tzlookup(lat, lng);
+      } catch (e) { /* out-of-range or lib missing */ }
+      return null;
+    }
+
+    /** @type {Array<{id:string,name:string,lat:number,lng:number,date:string,time:string,tz:string}>} */
+    let stops = load();
+    let activeId = null;
+
+    // Timezone list (fallback if Intl.supportedValuesOf unavailable)
+    const TZ_LIST = (typeof Intl.supportedValuesOf === "function")
+      ? Intl.supportedValuesOf("timeZone")
+      : ["UTC","America/New_York","America/Chicago","America/Denver","America/Los_Angeles",
+         "America/Sao_Paulo","Europe/London","Europe/Paris","Europe/Berlin","Europe/Moscow",
+         "Asia/Jerusalem","Asia/Dubai","Asia/Kolkata","Asia/Bangkok","Asia/Shanghai",
+         "Asia/Tokyo","Australia/Sydney","Pacific/Auckland"];
+
+    // ---------------------------------------------------------------------
+    // Persistence
+    // ---------------------------------------------------------------------
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) { /* ignore */ }
+      return [];
+    }
+    function save() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stops)); } catch (e) {}
+    }
+
+    function uid() { return Math.random().toString(36).slice(2, 10); }
+
+    // ---------------------------------------------------------------------
+    // Timezone-aware time helpers
+    // ---------------------------------------------------------------------
+    // Offset (ms) of a timezone at a given absolute instant.
+    function tzOffset(timeZone, date) {
+      const dtf = new Intl.DateTimeFormat("en-US", {
+        timeZone, hour12: false,
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+      });
+      const parts = dtf.formatToParts(date);
+      const m = {};
+      for (const p of parts) m[p.type] = p.value;
+      let hour = m.hour === "24" ? 0 : m.hour;
+      const asUTC = Date.UTC(+m.year, +m.month - 1, +m.day, +hour, +m.minute, +m.second);
+      return asUTC - date.getTime();
+    }
+
+    // Convert wall-clock date/time in a timezone to an absolute UTC epoch (ms).
+    function zonedToUtc(dateStr, timeStr, timeZone) {
+      if (!dateStr || !timeStr) return null;
+      const [y, mo, d] = dateStr.split("-").map(Number);
+      const [h, mi] = timeStr.split(":").map(Number);
+      if ([y, mo, d, h, mi].some(Number.isNaN)) return null;
+      const wall = Date.UTC(y, mo - 1, d, h, mi, 0);
+      let off = tzOffset(timeZone, new Date(wall));
+      let t = wall - off;
+      const off2 = tzOffset(timeZone, new Date(t));
+      if (off2 !== off) t = wall - off2;
+      return t;
+    }
+
+    function utcOf(stop) { return zonedToUtc(stop.date, stop.time, stop.tz); }
+
+    function fmtInstant(utcMs, timeZone) {
+      if (utcMs == null) return "—";
+      return new Intl.DateTimeFormat("en-GB", {
+        timeZone, weekday: "short", day: "2-digit", month: "short",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+      }).format(new Date(utcMs)) + " (" + shortTz(timeZone) + ")";
+    }
+
+    function shortTz(timeZone) {
+      try {
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone, timeZoneName: "short",
+        }).formatToParts(new Date());
+        const p = parts.find((x) => x.type === "timeZoneName");
+        return p ? p.value : timeZone;
+      } catch (e) { return timeZone; }
+    }
+
+    function fmtDuration(ms) {
+      if (ms == null || isNaN(ms)) return "—";
+      if (ms < 0) return "invalid";
+      const mins = Math.round(ms / 60000);
+      const d = Math.floor(mins / 1440);
+      const h = Math.floor((mins % 1440) / 60);
+      const m = mins % 60;
+      const parts = [];
+      if (d) parts.push(d + "d");
+      if (h) parts.push(h + "h");
+      if (m || (!d && !h)) parts.push(m + "m");
+      return parts.join(" ");
+    }
+
+    function fmtDist(meters) {
+      if (meters == null) return "—";
+      if (meters < 1000) return Math.round(meters) + " m";
+      return (meters / 1000).toFixed(meters < 10000 ? 2 : 1) + " km";
+    }
+
+    // ---------------------------------------------------------------------
+    // Geometry helpers (great-circle math for the globe)
+    // ---------------------------------------------------------------------
+    const EARTH_R = 6371000; // meters
+    const rad = (d) => (d * Math.PI) / 180;
+    const deg = (r) => (r * 180) / Math.PI;
+
+    function centralAngle(a, b) {
+      const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+      const h = Math.sin(dLat / 2) ** 2 +
+        Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+      return 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    }
+    function haversineMeters(a, b) { return EARTH_R * centralAngle(a, b); }
+
+    // Spherical interpolation along the great circle from a to b (t in 0..1).
+    function slerp(a, b, t) {
+      const f1 = rad(a.lat), l1 = rad(a.lng), f2 = rad(b.lat), l2 = rad(b.lng);
+      const x1 = Math.cos(f1) * Math.cos(l1), y1 = Math.cos(f1) * Math.sin(l1), z1 = Math.sin(f1);
+      const x2 = Math.cos(f2) * Math.cos(l2), y2 = Math.cos(f2) * Math.sin(l2), z2 = Math.sin(f2);
+      let dot = x1 * x2 + y1 * y2 + z1 * z2;
+      dot = Math.min(1, Math.max(-1, dot));
+      const w = Math.acos(dot);
+      if (w < 1e-6) return { lat: a.lat, lng: a.lng };
+      const s = Math.sin(w), k1 = Math.sin((1 - t) * w) / s, k2 = Math.sin(t * w) / s;
+      const x = k1 * x1 + k2 * x2, y = k1 * y1 + k2 * y2, z = k1 * z1 + k2 * z2;
+      return { lat: deg(Math.atan2(z, Math.hypot(x, y))), lng: deg(Math.atan2(y, x)) };
+    }
+
+    // Peak altitude (fraction of globe radius) of a leg's flight arc.
+    function legArcAltitude(a, b) {
+      return 0.12 + 0.42 * (centralAngle(a, b) / Math.PI); // 0.12 .. 0.54
+    }
+
+    // ---------------------------------------------------------------------
+    // Globe setup (globe.gl — free, no API key)
+    // ---------------------------------------------------------------------
+    const TEX = {
+      blue: "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
+      day: "https://unpkg.com/three-globe/example/img/earth-day.jpg",
+      night: "https://unpkg.com/three-globe/example/img/earth-night.jpg",
+      dark: "https://unpkg.com/three-globe/example/img/earth-dark.jpg",
+    };
+    const globeEl = document.getElementById("map");
+
+    const world = Globe()(globeEl)
+      .globeImageUrl(TEX.blue)
+      .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+      .backgroundImageUrl("https://unpkg.com/three-globe/example/img/night-sky.png")
+      .showAtmosphere(true)
+      .atmosphereColor("#6ba8ff")
+      .atmosphereAltitude(0.16)
+      .pointOfView({ lat: 20, lng: 0, altitude: 2.6 });
+
+    // Slow idle spin; pauses whenever the user interacts.
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 0.35;
+    globeEl.addEventListener("pointerdown", () => { world.controls().autoRotate = false; });
+
+    function sizeGlobe() { world.width(globeEl.clientWidth).height(globeEl.clientHeight); }
+    window.addEventListener("resize", sizeGlobe);
+    sizeGlobe();
+
+    document.getElementById("globeStyle").addEventListener("change", (e) => {
+      world.globeImageUrl(TEX[e.target.value] || TEX.blue);
+    });
+
+    // Live airplane marker. Rendered as a real DOM emoji floated over the globe
+    // via getScreenCoords, so it shows a true ✈️, rides the 3D arc altitude,
+    // and is hidden when it passes behind the globe.
+    let mover = { lat: 0, lng: 0, alt: 0.02 };
+    let moverActive = false;
+    const GLOBE_RADIUS = 100; // globe.gl's internal globe radius
+
+    const planeEl = document.createElement("div");
+    planeEl.id = "plane";
+    planeEl.textContent = "\u2708\uFE0F"; // ✈️
+    planeEl.style.display = "none";
+    globeEl.appendChild(planeEl);
+
+    function updatePlane() {
+      requestAnimationFrame(updatePlane);
+      if (!moverActive || !stops.length) { planeEl.style.display = "none"; return; }
+      const sc = world.getScreenCoords(mover.lat, mover.lng, mover.alt);
+      const cam = world.camera().position;
+      const camDist = Math.hypot(cam.x, cam.y, cam.z) || 1;
+      const pc = world.getCoords(mover.lat, mover.lng, 0);
+      const cosAngle = (pc.x * cam.x + pc.y * cam.y + pc.z * cam.z) / (GLOBE_RADIUS * camDist);
+      if (sc && cosAngle > GLOBE_RADIUS / camDist - 0.03) {
+        planeEl.style.display = "block";
+        planeEl.style.left = sc.x + "px";
+        planeEl.style.top = sc.y + "px";
+      } else {
+        planeEl.style.display = "none";
+      }
+    }
+    requestAnimationFrame(updatePlane);
+
+    // ---------------------------------------------------------------------
+    // Geocoding (free, OpenStreetMap Nominatim)
+    // ---------------------------------------------------------------------
+    async function geocode(q) {
+      const url = "https://nominatim.openstreetmap.org/search?format=json&limit=6&q=" +
+        encodeURIComponent(q);
+      const res = await fetch(url, { headers: { "Accept-Language": navigator.language || "en" } });
+      if (!res.ok) throw new Error("search failed");
+      return res.json();
+    }
+
+    // ---------------------------------------------------------------------
+    // Stop CRUD
+    // ---------------------------------------------------------------------
+    function addStop({ lat, lng, name }) {
+      const now = new Date();
+      const last = stops[stops.length - 1];
+      const date = last ? last.date : now.toISOString().slice(0, 10);
+      const time = last ? last.time : now.toTimeString().slice(0, 5);
+      const tz = lookupTz(lat, lng) || (last ? last.tz : LOCAL_TZ);
+      const stop = { id: uid(), name: name || "Untitled stop",
+        lat: +lat.toFixed(6), lng: +lng.toFixed(6), date, time, tz };
+      stops.push(stop);
+      activeId = stop.id;
+      save();
+      renderAll();
+      fitBounds();
+    }
+
+    function removeStop(id) {
+      stops = stops.filter((s) => s.id !== id);
+      if (activeId === id) activeId = null;
+      save();
+      renderAll();
+    }
+
+    function updateStop(id, patch) {
+      const s = stops.find((x) => x.id === id);
+      if (!s) return;
+      Object.assign(s, patch);
+      save();
+      renderMap();
+      renderSummary();
+      renderList(); // refresh computed leg info
+    }
+
+    // ---------------------------------------------------------------------
+    // Leg / trip computations
+    // ---------------------------------------------------------------------
+    function legBetween(a, b) {
+      const dist = haversineMeters(a, b); // meters
+      const ta = utcOf(a), tb = utcOf(b);
+      const dur = (ta != null && tb != null) ? tb - ta : null;
+      return { dist, dur, ta, tb };
+    }
+
+    // ---------------------------------------------------------------------
+    // Rendering: list
+    // ---------------------------------------------------------------------
+    const listWrap = document.getElementById("listWrap");
+    let tbody = null; // set on each renderList
+    let editingId = null; // row currently in edit mode
+    let justDragged = 0; // timestamp guard so a drag doesn't trigger row-click
+
+    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    function fmtWall(s) {
+      if (!s.date || !s.time) return "—";
+      const [y, mo, d] = s.date.split("-").map(Number);
+      if ([y, mo, d].some(Number.isNaN)) return s.date + " " + s.time;
+      return d + " " + MONTHS[mo - 1] + " " + y + ", " + s.time;
+    }
+
+    function dtLocalValue(s) {
+      return (s.date && s.time) ? s.date + "T" + s.time : "";
+    }
+
+    function tzSelect(value) {
+      const sel = document.createElement("select");
+      sel.className = "field";
+      for (const tz of TZ_LIST) {
+        const o = document.createElement("option");
+        o.value = tz; o.textContent = tz;
+        if (tz === value) o.selected = true;
+        sel.appendChild(o);
+      }
+      return sel;
+    }
+
+    function renderList() {
+      listWrap.innerHTML = "";
+      tbody = null;
+      if (!stops.length) {
+        const d = document.createElement("div");
+        d.className = "empty";
+        d.innerHTML = "No stops yet.<br>Search a place or click the map to begin planning your trip.";
+        listWrap.appendChild(d);
+        return;
+      }
+
+      const table = document.createElement("table");
+      table.className = "trip";
+      table.innerHTML =
+        "<thead><tr>" +
+        "<th>Location</th><th>Date &amp; time</th><th>Timezone</th>" +
+        "<th></th><th></th>" +
+        "</tr></thead>";
+      tbody = document.createElement("tbody");
+      table.appendChild(tbody);
+
+      stops.forEach((s, idx) => {
+        const editing = s.id === editingId;
+        const tr = document.createElement("tr");
+        tr.className = "row" + (s.id === activeId ? " active" : "") + (editing ? " editing" : "");
+        tr.dataset.id = s.id;
+
+        // ---- Location ----
+        const tdL = document.createElement("td");
+        let nameIn;
+        if (editing) {
+          nameIn = document.createElement("input");
+          nameIn.className = "cell-input name-input"; nameIn.value = s.name;
+          tdL.appendChild(nameIn);
+        } else {
+          const span = document.createElement("div");
+          span.className = "cell-text name"; span.textContent = s.name;
+          tdL.appendChild(span);
+        }
+        tr.appendChild(tdL);
+
+        // ---- Date & time ----
+        const tdD = document.createElement("td");
+        let dtIn;
+        if (editing) {
+          dtIn = document.createElement("input");
+          dtIn.type = "datetime-local"; dtIn.className = "cell-input"; dtIn.value = dtLocalValue(s);
+          tdD.appendChild(dtIn);
+        } else {
+          const span = document.createElement("div");
+          span.className = "cell-text dt"; span.textContent = fmtWall(s);
+          tdD.appendChild(span);
+        }
+        tr.appendChild(tdD);
+
+        // ---- Timezone ----
+        const tdZ = document.createElement("td");
+        let tzSel;
+        if (editing) {
+          tzSel = tzSelect(s.tz);
+          tzSel.className = "cell-input tz-input";
+          tdZ.appendChild(tzSel);
+        } else {
+          const span = document.createElement("div");
+          span.className = "cell-text tz"; span.title = s.tz;
+          span.textContent = s.tz + " (" + shortTz(s.tz) + ")";
+          tdZ.appendChild(span);
+        }
+        tr.appendChild(tdZ);
+
+        // ---- Edit / Save+Cancel ----
+        const tdE = document.createElement("td");
+        tdE.className = "row-actions";
+        if (editing) {
+          const saveBtn = document.createElement("button");
+          saveBtn.className = "act-btn save"; saveBtn.textContent = "Save";
+          saveBtn.style.marginRight = "4px";
+          saveBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const patch = { name: (nameIn.value || "").trim() || s.name, tz: tzSel.value };
+            if (dtIn.value) {
+              const [dd, tt] = dtIn.value.split("T");
+              patch.date = dd; patch.time = (tt || "").slice(0, 5);
+            }
+            editingId = null;
+            updateStop(s.id, patch);
+          });
+          const cancelBtn = document.createElement("button");
+          cancelBtn.className = "act-btn"; cancelBtn.textContent = "Cancel";
+          cancelBtn.addEventListener("click", (e) => { e.stopPropagation(); editingId = null; renderList(); });
+          tdE.appendChild(saveBtn); tdE.appendChild(cancelBtn);
+        } else {
+          const editBtn = document.createElement("button");
+          editBtn.className = "act-btn"; editBtn.textContent = "Edit";
+          editBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); editingId = s.id; activeId = s.id; renderList();
+          });
+          tdE.appendChild(editBtn);
+        }
+        tr.appendChild(tdE);
+
+        // ---- Remove ----
+        const tdR = document.createElement("td");
+        tdR.className = "row-actions";
+        const rmBtn = document.createElement("button");
+        rmBtn.className = "act-btn remove"; rmBtn.textContent = "Remove";
+        rmBtn.addEventListener("click", (e) => { e.stopPropagation(); removeStop(s.id); });
+        tdR.appendChild(rmBtn);
+        tr.appendChild(tdR);
+
+        // ---- Row interactions ----
+        tr.addEventListener("click", (e) => {
+          if (Date.now() - justDragged < 300) return;
+          if (e.target.closest("input, select, button")) return;
+          jumpToStop(idx);
+        });
+        tr.addEventListener("mouseenter", () => { tr.classList.add("hover"); highlightMarker(idx, true); });
+        tr.addEventListener("mouseleave", () => { tr.classList.remove("hover"); highlightMarker(idx, false); });
+        tr.addEventListener("pointerdown", (e) => onRowPointerDown(e, tr));
+
+        tbody.appendChild(tr);
+      });
+
+      listWrap.appendChild(table);
+    }
+
+    // ---------------------------------------------------------------------
+    // Drag-and-drop reordering by dragging a row (mouse & touch).
+    //  - Mouse: starts once you move a few px (a plain click still selects).
+    //  - Touch: long-press (~350ms) starts a drag, so short swipes still scroll.
+    // ---------------------------------------------------------------------
+    function onRowPointerDown(ev, tr) {
+      if (tr.classList.contains("editing")) return;
+      if (ev.target.closest("button, input, select")) return;
+      if (ev.button != null && ev.button > 0) return;
+      if (!tbody) return;
+
+      const startX = ev.clientX, startY = ev.clientY;
+      const pointerId = ev.pointerId;
+      const isTouch = ev.pointerType === "touch";
+      let started = false;
+      let longPressTimer = null;
+
+      const begin = () => {
+        started = true;
+        longPressTimer = null;
+        tr.classList.add("dragging");
+        document.body.style.userSelect = "none";
+        try { tr.setPointerCapture(pointerId); } catch (e) {}
+      };
+
+      const move = (e) => {
+        if (!started) {
+          const dx = Math.abs(e.clientX - startX), dy = Math.abs(e.clientY - startY);
+          if (isTouch) {
+            // Moving before the long-press fires => user wants to scroll: abort.
+            if ((dx > 8 || dy > 8) && longPressTimer) { cleanup(); }
+            return;
+          }
+          if (dx > 4 || dy > 4) begin(); else return;
+        }
+        e.preventDefault();
+        const after = getDragAfterElement(e.clientY);
+        if (after == null) tbody.appendChild(tr);
+        else if (after !== tr) tbody.insertBefore(tr, after);
+      };
+
+      const end = () => {
+        const didDrag = started;
+        cleanup();
+        if (didDrag) { justDragged = Date.now(); commitDragOrder(); }
+      };
+
+      function cleanup() {
+        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        window.removeEventListener("pointermove", move, true);
+        window.removeEventListener("pointerup", end, true);
+        window.removeEventListener("pointercancel", end, true);
+        document.body.style.userSelect = "";
+        try { tr.releasePointerCapture(pointerId); } catch (e) {}
+        tr.classList.remove("dragging");
+      }
+
+      window.addEventListener("pointermove", move, { capture: true, passive: false });
+      window.addEventListener("pointerup", end, true);
+      window.addEventListener("pointercancel", end, true);
+
+      if (isTouch) longPressTimer = setTimeout(begin, 350);
+    }
+
+    function getDragAfterElement(y) {
+      const rows = [...tbody.querySelectorAll("tr:not(.dragging)")];
+      let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+      for (const row of rows) {
+        const box = row.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) closest = { offset, element: row };
+      }
+      return closest.element;
+    }
+
+    function commitDragOrder() {
+      if (!tbody) return;
+      const ids = [...tbody.querySelectorAll("tr")].map((tr) => tr.dataset.id);
+      const before = stops.map((s) => s.id).join(",");
+      stops.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+      if (stops.map((s) => s.id).join(",") !== before) save();
+      renderAll();
+    }
+
+    // ---------------------------------------------------------------------
+    // Rendering: globe (numbered pins + flight arcs)
+    // ---------------------------------------------------------------------
+    function renderMap() {
+      // Numbered stop pins as HTML elements anchored to the globe.
+      world
+        .htmlElementsData(stops)
+        .htmlLat((d) => d.lat)
+        .htmlLng((d) => d.lng)
+        .htmlAltitude(0.008)
+        .htmlElement((d) => {
+          const idx = stops.indexOf(d);
+          const el = document.createElement("div");
+          el.className = "globe-pin" + (d.id === activeId ? " active" : "");
+          el.dataset.idx = idx;
+          el.textContent = idx + 1;
+          el.title = (idx + 1) + ". " + d.name + "\nArrival: " +
+            fmtInstant(utcOf(d), d.tz);
+          el.onclick = (ev) => { ev.stopPropagation(); jumpToStop(idx); };
+          el.onmouseenter = () => highlightMarker(idx, true);
+          el.onmouseleave = () => highlightMarker(idx, false);
+          return el;
+        });
+
+      // Flight arcs between consecutive stops.
+      const legs = [];
+      for (let i = 0; i < stops.length - 1; i++) {
+        legs.push({
+          startLat: stops[i].lat, startLng: stops[i].lng,
+          endLat: stops[i + 1].lat, endLng: stops[i + 1].lng,
+          alt: legArcAltitude(stops[i], stops[i + 1]),
+        });
+      }
+      world
+        .arcsData(legs)
+        .arcStartLat("startLat").arcStartLng("startLng")
+        .arcEndLat("endLat").arcEndLng("endLng")
+        .arcAltitude("alt")
+        .arcColor(() => ["#4f8cff", "#22c55e"])
+        .arcStroke(0.5)
+        .arcDashLength(0.4)
+        .arcDashGap(0.15)
+        .arcDashAnimateTime(2200);
+    }
+
+    function highlightMarker(idx, on) {
+      const el = globeEl.querySelector('.globe-pin[data-idx="' + idx + '"]');
+      if (el) el.classList.toggle("hover", on);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+
+    // "Fit" the globe view: point the camera at the stops' centroid and back
+    // the camera off proportionally to how spread out they are.
+    function fitBounds() {
+      if (!stops.length) return;
+      world.controls().autoRotate = false;
+      let x = 0, y = 0, z = 0;
+      for (const s of stops) {
+        const f = rad(s.lat), l = rad(s.lng);
+        x += Math.cos(f) * Math.cos(l); y += Math.cos(f) * Math.sin(l); z += Math.sin(f);
+      }
+      x /= stops.length; y /= stops.length; z /= stops.length;
+      const lat = deg(Math.atan2(z, Math.hypot(x, y)));
+      const lng = deg(Math.atan2(y, x));
+      const cmag = Math.hypot(x, y, z) || 1;
+      let maxW = 0;
+      for (const s of stops) {
+        const f = rad(s.lat), l = rad(s.lng);
+        const dot = (Math.cos(f) * Math.cos(l) * x + Math.cos(f) * Math.sin(l) * y +
+          Math.sin(f) * z) / cmag;
+        maxW = Math.max(maxW, Math.acos(Math.min(1, Math.max(-1, dot))));
+      }
+      const altitude = Math.min(Math.max(maxW * 1.7 + 0.55, 0.9), 3.4);
+      world.pointOfView({ lat, lng, altitude }, 900);
+    }
+
+    // ---------------------------------------------------------------------
+    // Rendering: summary
+    // ---------------------------------------------------------------------
+    function renderSummary() {
+      // Trip summary stats are hidden by request; nothing to render here.
+    }
+
+    // ---------------------------------------------------------------------
+    // Animation
+    // ---------------------------------------------------------------------
+    const playBtn = document.getElementById("playBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const live = document.getElementById("live");
+
+    const FLIGHT_MS = 600;  // duration of each hop between two stops
+    let currentIdx = 0;     // stop the marker is currently sitting on
+    let animating = false;
+    let rafId = null;
+
+    function setMover(lat, lng, alt) {
+      mover.lat = lat; mover.lng = lng; mover.alt = alt;
+      moverActive = true;
+    }
+    function hideMover() {
+      moverActive = false;
+    }
+
+    function captionFor(idx) {
+      const s = stops[idx];
+      if (!s) return "";
+      const legLabel = idx === 0 ? "Start" : "Leg " + idx + "/" + (stops.length - 1);
+      return '<span class="leg-title">' + legLabel + "</span> &middot; " +
+        "<b>" + escapeHtml(s.name) + "</b> &middot; " +
+        fmtWall(s) + " &middot; " + escapeHtml(shortTz(s.tz));
+    }
+
+    // Refresh mover + caption for the current, resting state.
+    function renderAnim() {
+      if (animating) return;
+      if (!stops.length) {
+        live.textContent = "Add stops to fly your trip.";
+        hideMover();
+        return;
+      }
+      currentIdx = Math.min(Math.max(currentIdx, 0), stops.length - 1);
+      const s = stops[currentIdx];
+      setMover(s.lat, s.lng, 0.02);
+      live.innerHTML = captionFor(currentIdx) +
+        (stops.length < 2 ? ' &middot; <span style="color:var(--muted)">add another stop</span>' : "");
+      live.title = live.textContent;
+    }
+
+    // Jump the player straight to a given stop (used by pin & row clicks).
+    function jumpToStop(idx) {
+      if (idx < 0 || idx >= stops.length) return;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      animating = false;
+      playBtn.disabled = false;
+      currentIdx = idx;
+      activeId = stops[idx].id;
+      world.controls().autoRotate = false;
+      const s = stops[idx];
+      world.pointOfView({ lat: s.lat, lng: s.lng, altitude: 1.6 }, 700);
+      renderAll();
+    }
+
+    // Each click flies to the next stop over FLIGHT_MS with a 3D arc; wraps at end.
+    function flyToNext() {
+      if (animating || stops.length < 2) return;
+      if (currentIdx >= stops.length - 1) { currentIdx = 0; renderAnim(); return; }
+
+      const a = stops[currentIdx], b = stops[currentIdx + 1];
+      const peak = legArcAltitude(a, b);
+      animating = true;
+      playBtn.disabled = true;
+      world.controls().autoRotate = false;
+      // Rotate the globe toward the destination while the plane flies the arc.
+      world.pointOfView({ lat: b.lat, lng: b.lng, altitude: 1.7 }, FLIGHT_MS);
+      const start = performance.now();
+
+      const step = (now) => {
+        let t = (now - start) / FLIGHT_MS;
+        if (t > 1) t = 1;
+        const pos = slerp(a, b, t);
+        // Ride the arc: near the surface at the ends, peaking mid-flight.
+        const alt = Math.max(0.01, peak * Math.sin(Math.PI * t));
+        setMover(pos.lat, pos.lng, alt);
+        if (t < 1) {
+          rafId = requestAnimationFrame(step);
+        } else {
+          rafId = null;
+          animating = false;
+          playBtn.disabled = false;
+          currentIdx += 1;
+          activeId = stops[currentIdx].id;
+          renderAll();
+        }
+      };
+      rafId = requestAnimationFrame(step);
+    }
+
+    playBtn.addEventListener("click", flyToNext);
+    resetBtn.addEventListener("click", () => {
+      if (animating) return;
+      currentIdx = 0;
+      renderAnim();
+    });
+
+    // ---------------------------------------------------------------------
+    // Search UI
+    // ---------------------------------------------------------------------
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchResults = document.getElementById("searchResults");
+
+    async function doSearch() {
+      const q = searchInput.value.trim();
+      if (!q) return;
+      searchBtn.disabled = true; searchBtn.textContent = "…";
+      try {
+        const results = await geocode(q);
+        searchResults.innerHTML = "";
+        if (!results.length) {
+          searchResults.innerHTML = "<li>No results found.</li>";
+        } else {
+          results.forEach((r) => {
+            const li = document.createElement("li");
+            li.textContent = r.display_name;
+            li.addEventListener("click", () => {
+              addStop({ lat: +r.lat, lng: +r.lon,
+                name: r.display_name.split(",").slice(0, 2).join(",").trim() });
+              searchResults.classList.remove("show");
+              searchInput.value = "";
+            });
+            searchResults.appendChild(li);
+          });
+        }
+        searchResults.classList.add("show");
+      } catch (e) {
+        searchResults.innerHTML = "<li>Search failed. Try again.</li>";
+        searchResults.classList.add("show");
+      } finally {
+        searchBtn.disabled = false; searchBtn.textContent = "Search";
+      }
+    }
+
+    searchBtn.addEventListener("click", doSearch);
+    searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(); });
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".add-box")) searchResults.classList.remove("show");
+    });
+
+    // ---------------------------------------------------------------------
+    // Global buttons
+    // ---------------------------------------------------------------------
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (!stops.length) return;
+      if (!confirm("Remove all stops from this trip?")) return;
+      stops = []; activeId = null; currentIdx = 0;
+      save(); renderAll();
+    });
+    document.getElementById("fitBtn").addEventListener("click", fitBounds);
+
+    const sidebarEl = document.getElementById("sidebar");
+    const collapseBtn = document.getElementById("collapseBtn");
+    collapseBtn.addEventListener("click", () => {
+      const collapsed = sidebarEl.classList.toggle("collapsed");
+      collapseBtn.innerHTML = collapsed ? "&#43;" : "&#8211;"; // + / –
+      collapseBtn.title = collapsed ? "Expand" : "Minimize";
+    });
+
+    const menuToggle = document.getElementById("menuToggle");
+    menuToggle.addEventListener("click", () => {
+      const hidden = sidebarEl.classList.toggle("hidden");
+      menuToggle.innerHTML = hidden ? "&#9776;" : "&#10005;"; // ☰ / ✕
+      menuToggle.title = hidden ? "Show menu" : "Hide menu";
+    });
+
+    // ---------------------------------------------------------------------
+    // Render orchestration
+    // ---------------------------------------------------------------------
+    function renderAll() {
+      renderList();
+      renderMap();
+      renderSummary();
+      renderAnim();
+    }
+
+    renderAll();
+    if (stops.length) fitBounds();
+  })();
+  </script>
+</body>
+</html>
