@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Counter</title>
+<style>
+  :root { --bg:#111827; --fg:#f9fafb; --plus:#16a34a; --minus:#dc2626; --reset:#374151; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; margin:0; }
+  body { background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif;
+         display:flex; flex-direction:column; align-items:center; justify-content:center;
+         gap:4vh; padding:16px; user-select:none; touch-action:manipulation; }
+  #display { font-size:min(35vw,40vh); font-weight:700; line-height:1; font-variant-numeric:tabular-nums;
+             font-family:ui-monospace,Menlo,Consolas,monospace; }
+  button { border:0; border-radius:16px; color:#fff; font-weight:700; cursor:pointer; }
+  button:active { transform:scale(.96); }
+  #plus  { background:var(--plus);  width:min(90vw,520px); height:22vh; font-size:min(18vw,14vh); }
+  #minus { background:var(--minus); width:min(60vw,320px); height:11vh; font-size:min(10vw,7vh); }
+  #reset { background:var(--reset); width:min(30vw,140px); height:5vh; min-height:36px; font-size:14px; }
+</style>
+</head>
+<body>
+  <div id="display" aria-live="polite">0</div>
+  <button id="plus" aria-label="Plus">+</button>
+  <button id="minus" aria-label="Minus">−</button>
+  <button id="reset">Reset</button>
+<script>
+  let n = 0;
+  try { n = parseInt(localStorage.getItem('counter'), 10) || 0; } catch (e) {}
+  const d = document.getElementById('display');
+  function render() {
+    d.textContent = n;
+    try { localStorage.setItem('counter', n); } catch (e) {}
+  }
+  document.getElementById('plus').onclick  = () => { n++; render(); };
+  document.getElementById('minus').onclick = () => { n--; render(); };
+  document.getElementById('reset').onclick = () => {
+    if (confirm('Reset the counter to zero?')) { n = 0; render(); }
+  };
+  render();
+</script>
+</body>
+</html>
