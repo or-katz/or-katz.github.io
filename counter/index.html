@@ -2,15 +2,15 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Counter</title>
 <style>
   :root { --bg:#111827; --fg:#f9fafb; --plus:#16a34a; --minus:#dc2626; --reset:#374151; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { height:100%; margin:0; }
+  html,body { min-height:100%; margin:0; }
   body { background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif;
          display:flex; flex-direction:column; align-items:center; justify-content:center;
-         gap:4vh; padding:16px; user-select:none; touch-action:none; overscroll-behavior:none; overflow:hidden; }
+         gap:4vh; padding:16px; user-select:none; touch-action:manipulation; overscroll-behavior:none; }
   h1 { margin:0; font-size:min(6.5vw,48px); white-space:nowrap; }
   #display { font-size:min(35vw,40vh); font-weight:700; line-height:1; font-variant-numeric:tabular-nums;
              font-family:ui-monospace,Menlo,Consolas,monospace; }
@@ -57,21 +57,12 @@
     if (confirm('Reset the counter to zero?')) { n = 0; render(); }
   };
   render();
-  // block pinch, double-tap and ctrl+wheel / keyboard zoom
+  // block pinch, double-tap and ctrl+wheel zoom (keyboard/browser-menu zoom stay available)
   const stop = e => e.preventDefault();
   ['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, stop));
   document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive:false });
   document.addEventListener('dblclick', stop);
-  let lastTouch = 0;
-  document.addEventListener('touchend', e => {
-    const now = Date.now();
-    if (now - lastTouch < 350) e.preventDefault();
-    lastTouch = now;
-  }, { passive:false });
   document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive:false });
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && ['+','-','=','0'].includes(e.key)) e.preventDefault();
-  });
 </script>
 </body>
 </html>
