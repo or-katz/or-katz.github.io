@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -11,16 +11,19 @@
   body { background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif;
          display:flex; flex-direction:column; align-items:center; justify-content:center;
          gap:4vh; padding:16px; user-select:none; touch-action:manipulation; }
+  h1 { margin:0; font-size:min(10vw,48px); }
   #display { font-size:min(35vw,40vh); font-weight:700; line-height:1; font-variant-numeric:tabular-nums;
              font-family:ui-monospace,Menlo,Consolas,monospace; }
   button { border:0; border-radius:16px; color:#fff; font-weight:700; cursor:pointer; }
-  button:active { transform:scale(.96); }
+  button:disabled { opacity:.35; cursor:not-allowed; }
+  button:active:not(:disabled) { transform:scale(.96); }
   #plus  { background:var(--plus);  width:min(90vw,520px); height:22vh; font-size:min(18vw,14vh); }
-  #minus { background:var(--minus); width:min(60vw,320px); height:11vh; font-size:min(10vw,7vh); }
+  #minus { background:var(--minus); width:min(50vw,260px); height:9vh; font-size:min(9vw,6vh); }
   #reset { background:var(--reset); width:min(30vw,140px); height:5vh; min-height:36px; font-size:14px; }
 </style>
 </head>
 <body>
+  <h1>סופר פתקים</h1>
   <div id="display" aria-live="polite">0</div>
   <button id="plus" aria-label="Plus">+</button>
   <button id="minus" aria-label="Minus">−</button>
@@ -28,6 +31,7 @@
 <script>
   let n = 0;
   try { n = parseInt(localStorage.getItem('counter'), 10) || 0; } catch (e) {}
+  const minus = document.getElementById('minus');
   const d = document.getElementById('display');
   let ctx;
   function beep(freq, vol) {
@@ -44,10 +48,11 @@
   }
   function render() {
     d.textContent = n;
+    minus.disabled = n <= 0;
     try { localStorage.setItem('counter', n); } catch (e) {}
   }
-  document.getElementById('plus').onclick  = () => { n++; beep(880, 0.1); render(); };
-  document.getElementById('minus').onclick = () => { n--; beep(330, 0.3); render(); };
+  document.getElementById('plus').onclick  = () => { n++; beep(330, 0.1); render(); };
+  minus.onclick = () => { if (n <= 0) return; n--; beep(880, 0.3); render(); };
   document.getElementById('reset').onclick = () => {
     if (confirm('Reset the counter to zero?')) { n = 0; render(); }
   };
