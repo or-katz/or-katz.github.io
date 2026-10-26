@@ -3,67 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Counter</title>
+<title>סופר פתקים</title>
 <style>
-  :root { --bg:#111827; --fg:#f9fafb; --plus:#16a34a; --minus:#dc2626; --reset:#374151; }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root { --bg:#111827; --fg:#f9fafb; }
   html,body { margin:0; }
-  body { min-height:100vh; }
-  body { background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif;
+  body { min-height:100vh; background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif;
          display:flex; flex-direction:column; align-items:center; justify-content:center;
-         gap:4vh; padding:16px; user-select:none; touch-action:manipulation; overscroll-behavior:none; }
+         gap:3vh; padding:16px; text-align:center; }
   h1 { margin:0; font-size:min(6.5vw,48px); white-space:nowrap; }
-  #display { font-size:min(35vw,40vh); font-weight:700; line-height:1; font-variant-numeric:tabular-nums;
-             font-family:ui-monospace,Menlo,Consolas,monospace; }
-  button { border:0; border-radius:16px; color:#fff; font-weight:700; cursor:pointer; }
-  button:disabled { opacity:.35; cursor:not-allowed; }
-  button:active:not(:disabled) { transform:scale(.96); }
-  #plus  { background:var(--plus);  width:min(90vw,520px); height:22vh; font-size:min(18vw,14vh); }
-  #minus { background:var(--minus); width:min(50vw,260px); height:9vh; font-size:min(9vw,6vh); }
-  #reset { background:var(--reset); width:min(30vw,140px); height:5vh; min-height:36px; font-size:14px; }
+  p { margin:0; font-size:min(5vw,28px); }
 </style>
 </head>
 <body>
   <h1>סופר פתקים 🗳️ בקלפי</h1>
-  <div id="display" aria-live="polite">0</div>
-  <button id="plus" aria-label="Plus">+</button>
-  <button id="minus" aria-label="Minus">−</button>
-  <button id="reset">Reset</button>
-<script>
-  let n = 0;
-  try { n = parseInt(localStorage.getItem('counter'), 10) || 0; } catch (e) {}
-  const minus = document.getElementById('minus');
-  const d = document.getElementById('display');
-  let ctx;
-  function beep(freq, vol) {
-    try {
-      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-      if (ctx.state === 'suspended') ctx.resume();
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(); o.stop(ctx.currentTime + 0.15);
-    } catch (e) {}
-  }
-  function render() {
-    d.textContent = n;
-    minus.disabled = n <= 0;
-    try { localStorage.setItem('counter', n); } catch (e) {}
-  }
-  document.getElementById('plus').onclick  = () => { n++; beep(330, 0.1); render(); };
-  minus.onclick = () => { if (n <= 0) return; n--; beep(880, 0.3); render(); };
-  document.getElementById('reset').onclick = () => {
-    if (confirm('Reset the counter to zero?')) { n = 0; render(); }
-  };
-  render();
-  // block pinch, double-tap and ctrl+wheel zoom (keyboard/browser-menu zoom stay available)
-  const stop = e => e.preventDefault();
-  ['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, stop));
-  document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive:false });
-  document.addEventListener('dblclick', stop);
-  document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive:false });
-</script>
+  <p>מסתבר שזה אסור אז כרגע זה מבוטל</p>
 </body>
 </html>
