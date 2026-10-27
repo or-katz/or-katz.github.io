@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Make Password</title>
 <style>
   :root {
@@ -13,6 +13,8 @@
     --text: #f1f5f9;
     --text-muted: #94a3b8;
     --success: #22c55e;
+    --digit: #60a5fa;
+    --symbol: #f472b6;
     --radius: 12px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,22 +27,15 @@
   .header {
     background: var(--surface);
     padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     border-bottom: 1px solid var(--surface2);
     position: sticky; top: 0; z-index: 100;
   }
   .header h1 {
     font-size: 18px; font-weight: 700;
     background: linear-gradient(135deg, #60a5fa, #a78bfa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
-  main {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
-  }
+  main { max-width: 480px; margin: 0 auto; padding: 24px 16px 48px; }
   .card {
     background: var(--surface);
     border: 1px solid var(--surface2);
@@ -48,21 +43,23 @@
     padding: 20px;
     margin-bottom: 16px;
   }
-
-  /* --- Placeholder password output --- */
   .password-output {
     font-family: 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 20px;
-    letter-spacing: 1px;
+    font-size: 22px;
+    letter-spacing: 0.5px;
     background: var(--bg);
     border: 1px solid var(--surface2);
     border-radius: var(--radius);
     padding: 16px;
+    min-height: 62px;
     text-align: center;
     word-break: break-all;
     color: var(--success);
     margin-bottom: 12px;
+    user-select: all;
   }
+  .password-output .d { color: var(--digit); }
+  .password-output .s { color: var(--symbol); }
   .actions { display: flex; gap: 8px; }
   button {
     flex: 1;
@@ -75,82 +72,499 @@
     font-weight: 600;
     cursor: pointer;
   }
-  button.secondary {
-    background: var(--surface2);
-    color: var(--text);
-  }
-
-  /* --- Placeholder options --- */
+  button:active { transform: scale(0.98); }
+  button.secondary { background: var(--surface2); color: var(--text); }
   .option-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid var(--surface2);
-    color: var(--text-muted);
+    cursor: pointer;
   }
   .option-row:last-child { border-bottom: none; }
-
-  .todo-note {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-align: center;
-    margin-top: 24px;
-    line-height: 1.5;
-  }
+  .option-row.slider { flex-direction: column; align-items: stretch; gap: 10px; cursor: default; }
+  .slider-label { display: flex; justify-content: space-between; }
+  .slider-label output { color: var(--digit); font-weight: 700; }
+  input[type=range] { width: 100%; accent-color: var(--primary); }
+  input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--primary); }
+  .qr-card { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  #qr { width: 200px; height: 200px; image-rendering: pixelated; border-radius: 8px; background: #fff; }
+  .hint { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; }
+  details summary { cursor: pointer; font-weight: 600; }
+  details p { margin-top: 10px; }
 </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Make Password</h1>
-  </div>
+  <div class="header"><h1>Make Password</h1></div>
 
   <main>
     <div class="card">
-      <!-- TODO: replace with real generated password -->
-      <div class="password-output" id="passwordOutput">P!aceh0lder-Pass</div>
+      <div class="password-output" id="pw" aria-live="polite"></div>
       <div class="actions">
         <button class="secondary" id="copyBtn">Copy</button>
-        <button id="generateBtn">Generate</button>
+        <button id="genBtn">Generate</button>
       </div>
     </div>
 
     <div class="card">
-      <!-- TODO: wire these options into actual generation logic -->
-      <div class="option-row">
-        <span>Length</span>
-        <span>16</span>
+      <div class="option-row slider">
+        <label class="slider-label" for="len">Length <output id="lenVal">16</output></label>
+        <input type="range" id="len" min="5" max="25" value="16">
       </div>
-      <div class="option-row">
-        <span>Uppercase</span>
-        <span>On</span>
-      </div>
-      <div class="option-row">
-        <span>Numbers</span>
-        <span>On</span>
-      </div>
-      <div class="option-row">
-        <span>Symbols</span>
-        <span>On</span>
-      </div>
+      <label class="option-row"><span>Include symbol</span><input type="checkbox" id="sym" checked></label>
+      <label class="option-row"><span>Include number</span><input type="checkbox" id="num" checked></label>
     </div>
 
-    <p class="todo-note">
-      Placeholder UI. Password generation, option controls, and copy-to-clipboard
-      logic still need to be implemented.
-    </p>
+    <div class="card qr-card">
+      <canvas id="qr" role="img" aria-label="QR code containing the password"></canvas>
+      <p class="hint">Scan to move the password to your phone.</p>
+    </div>
+
+    <details class="card hint">
+      <summary>How the words are made</summary>
+      <p>No word or syllable lists are used. Each word is built from English sounds: a vowel framed by
+        consonant clusters that English sound rules allow (like <i>str-</i>, <i>bl-</i>, <i>-nt</i>, <i>-sk</i>),
+        then spelled with English spelling rules (silent e, ck / tch / dge, doubled letters).
+        Words are combined into short sentences with grammar endings (-s, -ed, -y, -ly), so they are easy to say.
+        Randomness comes from your browser's secure random generator, and nothing leaves this page.</p>
+    </details>
   </main>
 
   <script>
-    // TODO: implement real password generation
-    document.getElementById('generateBtn').addEventListener('click', () => {
-      alert('TODO: generate a real password');
+    // ---------- Secure randomness ----------
+    const R = {
+      u32: () => crypto.getRandomValues(new Uint32Array(1))[0],
+      int(n) { const lim = 2 ** 32 - (2 ** 32 % n); let x; do x = R.u32(); while (x >= lim); return x % n; },
+      chance: p => R.u32() / 2 ** 32 < p,
+      pick: a => a[R.int(a.length)],
+      weighted(items, w) {
+        let t = 0; for (const it of items) t += w(it);
+        let x = R.u32() / 2 ** 32 * t;
+        for (const it of items) if ((x -= w(it)) < 0) return it;
+        return items[items.length - 1];
+      },
+      map: o => R.weighted(Object.keys(o), k => o[k]),
+    };
+    const wmap = s => Object.fromEntries(s.split(' ').map(t => [t.replace(/\d+$/, ''), +t.match(/\d+$/)[0]]));
+
+    // ---------- Phonology: English sounds and the rules for combining them ----------
+    // Consonant phonemes, named by their plainest spelling:
+    // [manner (S stop, A affricate, F fricative, N nasal, L liquid, G glide), place, voiced, onset freq, coda freq]
+    const CONS = {
+      p: ['S', 'lab', 0, 6, 4], b: ['S', 'lab', 1, 6, 2], t: ['S', 'alv', 0, 8, 9], d: ['S', 'alv', 1, 7, 6],
+      k: ['S', 'vel', 0, 7, 7], g: ['S', 'vel', 1, 5, 3], ch: ['A', 'pal', 0, 3, 2], j: ['A', 'pal', 1, 3, 1],
+      f: ['F', 'lab', 0, 6, 2], v: ['F', 'lab', 1, 2, 1], th: ['F', 'den', 0, 3, 1], s: ['F', 'alv', 0, 9, 5],
+      z: ['F', 'alv', 1, 1, 1], sh: ['F', 'pal', 0, 4, 3], h: ['F', 'glo', 0, 5, 0],
+      m: ['N', 'lab', 1, 7, 5], n: ['N', 'alv', 1, 7, 8], ng: ['N', 'vel', 1, 0, 3],
+      l: ['L', 'alv', 1, 6, 6], r: ['L', 'alv', 1, 6, 5], w: ['G', 'lab', 1, 5, 0], y: ['G', 'pal', 1, 2, 0],
+    };
+    const PH = Object.keys(CONS);
+    const manner = c => CONS[c][0], place = c => CONS[c][1], voiced = c => CONS[c][2] === 1;
+    const stop = c => manner(c) === 'S';
+
+    // Onsets: sonority rises toward the vowel (stop/fricative + l, r, w), plus the English s-cluster exception.
+    function onsetPair(a, b) {
+      if (b === 'l') return (stop(a) && place(a) !== 'alv') || a === 'f' || a === 's';
+      if (b === 'r') return stop(a) || a === 'f' || a === 'th' || a === 'sh';
+      if (b === 'w') return (stop(a) && place(a) === 'alv') || a === 'k' || a === 's';
+      return a === 's' && ((stop(b) && !voiced(b)) || b === 'm' || b === 'n');
+    }
+    const onsetTriple = (a, b, c) => a === 's' && stop(b) && !voiced(b) && onsetPair(b, c) &&
+      (c === 'r' || (c === 'l' && b === 'p') || (c === 'w' && b === 'k'));
+
+    // Codas: sonority falls away from the vowel (nasal + same-place stop, liquid + consonant), s + stop, stop/f + t, k + s.
+    function codaPair(a, b) {
+      if (manner(a) === 'N') return (place(a) === place(b) && stop(b) && !voiced(b)) || (a === 'n' && ['d', 'ch', 'j'].includes(b));
+      if (a === 'l') return (stop(b) && (!voiced(b) || b === 'd')) || b === 'f' || b === 'm';
+      if (a === 'r') return b !== 'r' && manner(b) !== 'G' && !['h', 'ng', 'z', 'v', 'g'].includes(b);
+      if (a === 's') return stop(b) && !voiced(b);
+      return (b === 't' && ['p', 'k', 'f'].includes(a)) || (a === 'k' && b === 's');
+    }
+
+    // Every legal onset and coda is derived from the rules above, weighted by how common its sounds are.
+    const ONSETS = [], CODAS = [];
+    for (const a of PH) {
+      if (a !== 'ng') ONSETS.push({ ph: [a], w: CONS[a][3] });
+      if (CONS[a][4]) CODAS.push({ ph: [a], w: CONS[a][4] });
+      for (const b of PH) {
+        if (onsetPair(a, b)) ONSETS.push({ ph: [a, b], w: CONS[a][3] * CONS[b][3] / 30 });
+        if (CONS[a][4] && CONS[b][4] && codaPair(a, b)) CODAS.push({ ph: [a, b], w: CONS[a][4] * CONS[b][4] / 40 });
+        for (const c of PH) if (onsetTriple(a, b, c)) ONSETS.push({ ph: [a, b, c], w: CONS[b][3] * CONS[c][3] / 50 });
+      }
+    }
+    for (const o of [...ONSETS, ...CODAS]) o.key = o.ph.join('');
+
+    // Vowels: short ones need a closing consonant; long ones and diphthongs have several English spellings.
+    const SHORT = { a: 9, e: 7, i: 9, o: 6, u: 6 };
+    const LONG = { A: 5, E: 5, I: 5, O: 5, U: 3, OW: 2, OY: 1, AW: 1 };
+    // end: word-final spelling, mid: open spelling inside a word (pa-per), closed: pattern -> codas it allows
+    // ('_' is the coda, 'M' = one consonant + silent e), r: spellings before r.
+    const LONG_SP = {
+      A: { end: 'ay1', mid: 'a', closed: { a_e: 'M', ai_: 't d m n l nt st' }, r: 'are2 air1' },
+      E: { end: 'ee3 ea2', mid: 'e', closed: { ee_: 't d k m n l p th f', ea_: 't d k m n l p ch st f' }, r: 'eer1 ear1' },
+      I: { end: 'y4 ie1', mid: 'i', closed: { i_e: 'M', igh_: 't' }, r: 'ire1' },
+      O: { end: 'ow3 o2 oe1', mid: 'o', closed: { o_e: 'M', oa_: 't d k m n l ch st f' }, r: 'ore2 oar1' },
+      U: { end: 'ew3 oo2', mid: 'u', closed: { oo_: 't d k m n l p th f', u_e: 'M' } },
+      OW: { end: 'ow1', mid: 'ow', closed: { ou_: 't d n nd nt ch th', ow_: 'n l' }, r: 'our1' },
+      OY: { end: 'oy1', mid: 'oy', closed: { oi_: 'l n nt st' } },
+      AW: { end: 'aw1', mid: 'aw', closed: { aw_: 'n l k', au_: 'l lt nch' } },
+    };
+    const MAGIC = 'p b t d k f v s z m n l j'.split(' ');
+    const fits = (rule, co) => rule === 'M' ? co.length === 1 && MAGIC.includes(co[0]) : rule.split(' ').includes(co.join(''));
+    const longCodaOK = (v, co) => co.join('') === 'r' ? !!LONG_SP[v].r : Object.values(LONG_SP[v].closed).some(r => fits(r, co));
+
+    // ---------- Spelling ----------
+    function spellOnset(on, rime) {   // k is c before a/o/u and consonants, kw is qu
+      let s = '';
+      for (let i = 0; i < on.length; i++) {
+        const c = on[i], next = on[i + 1];
+        if (c === 'k') s += next === 'w' ? (i++, 'qu') : next || !/^[eiy]/.test(rime) ? 'c' : 'k';
+        else if (c === 'w' && on.length === 1 && R.chance(0.12)) s += 'wh';
+        else s += c;
+      }
+      return s;
+    }
+    const SHORT_FINAL = { k: 'ck', ch: 'tch', j: 'dge', f: 'ff', s: 'ss', z: 'zz', l: 'll' };   // back, catch, edge, cliff...
+    const CLUSTER_SP = { ngk: 'nk', kt: 'ct', ks: 'x', nj: 'nge', rj: 'rge', rs: 'rse' };
+    const spellCoda = co => co.length === 1 ? SHORT_FINAL[co[0]] || co[0] : CLUSTER_SP[co.join('')] || co.join('');
+    function spellLong(v, co) {
+      const sp = LONG_SP[v];
+      if (!co.length) return R.map(wmap(sp.end));
+      if (co.join('') === 'r') return R.map(wmap(sp.r));
+      const pat = R.pick(Object.keys(sp.closed).filter(p => fits(sp.closed[p], co)));
+      const c = sp.closed[pat] === 'M' ? ({ s: v === 'O' ? 's' : 'c', j: 'g' }[co[0]] || co[0]) : co.join('');
+      return pat.replace('_', c);
+    }
+    const badStart = (on, rime) => (on.at(-1) === 'w' && /^(u|oo)/.test(rime)) || (on.at(-1) === 'y' && /^[iy]/.test(rime));
+
+    // ---------- Syllables and word shapes ----------
+    // Raising the weights to a power favours the most common sounds; "simple" (parts of compounds) favours them more.
+    const pickOnset = simple => R.weighted(ONSETS, o => o.w ** (simple ? 2 : 1.5)).ph;
+    const pickCoda = (ok, simple) => R.weighted(CODAS.filter(c => ok(c.ph)), c => c.w ** (simple ? 2 : 1.5)).ph;
+
+    function mono(simple) {   // one stressed syllable: onset + vowel + coda
+      for (let t = 0; t < 200; t++) {
+        const short = R.chance(0.62);
+        const on = short && R.chance(0.05) ? [] : pickOnset(simple);
+        let rime, co, dbl = false;
+        if (short) {
+          co = pickCoda(ph => !ph.includes('v'), simple);
+          const c = spellCoda(co);
+          rime = R.map(SHORT) + c;
+          dbl = c.length === 1 && 'bdgmnprtz'.includes(c);   // stop -> stopped
+        } else {
+          const v = R.map(LONG);
+          co = R.chance(0.4) ? [] : pickCoda(ph => longCodaOK(v, ph), simple);
+          rime = spellLong(v, co);
+        }
+        if (badStart(on, rime) || (!on.length && !co.length) || ['l', 'r'].some(x => on.includes(x) && co.includes(x))) continue;
+        return { txt: spellOnset(on, rime) + rime, dbl, on, mono: true };
+      }
+      return null;
+    }
+
+    // Unstressed endings: the reduced vowel is spelled by the coda after it (winter, kitten, basket, happy, table).
+    // Weights per word class: [noun, verb, adjective].
+    const REDUCED = { er: [9, 4, 0], le: [4, 4, 0], y: [4, 0, 6], en: [2, 2, 1], on: [2, 0, 0], et: [2, 0, 0],
+      it: [1, 0, 0], el: [1, 0, 0], al: [1, 0, 1], us: [1, 0, 0], ic: [1, 0, 1], o: [1, 0, 0], a: [1, 0, 0],
+      ish: [1, 0.5, 1], um: [1, 0, 0] };
+    const LE_OK = 'b d g k p t z f'.split(' ');
+    const DOUBLE = { k: 'ck', ch: 'tch', j: 'dg', v: 'v', th: 'th', sh: 'sh' };
+    const MIDS = ONSETS.filter(o => o.ph.length === 1 && !['h', 'w', 'y'].includes(o.key));
+
+    function di(cls) {   // stressed syllable + unstressed ending, the most common English word shape
+      for (let t = 0; t < 200; t++) {
+        const shape = R.map({ long: 3, dbl: 3.5, closed: 3.5 });
+        const on = shape !== 'long' && R.chance(0.06) ? [] : pickOnset();
+        const end = R.weighted(Object.keys(REDUCED), k => REDUCED[k][cls]);
+        const mid = R.weighted(MIDS.filter(o => end !== 'le' || LE_OK.includes(o.key)), o => o.w).key;
+        if (end.endsWith(mid) || (mid === 'k' && end === 'ic')) continue;
+        let first, midSp = mid;
+        if (shape === 'long') first = LONG_SP[R.map(LONG)].mid;                // open long vowel: pa-per, ti-ger
+        else if (shape === 'dbl') { first = R.map(SHORT); midSp = DOUBLE[mid] || mid + mid; }   // rab-bit, lit-tle
+        else {                                                                // closed short vowel: win-ter, bas-ket
+          const c1 = R.pick(['N', 'l', 'r', 's']);
+          const ok = c1 === 'N' ? !['N', 'L'].includes(manner(mid)) && !['sh', 'z', 'v', 'f'].includes(mid)
+            : c1 === 'r' ? manner(mid) !== 'L'
+            : end !== 'le' && (c1 === 'l' ? 'tdkpbmfv'.includes(mid) || mid === 'ch' : 'tkp'.includes(mid));
+          if (!ok) continue;
+          first = R.map(SHORT) + (c1 === 'N' ? (place(mid) === 'lab' ? 'm' : 'n') : c1);   // nasals match the next sound
+        }
+        if (midSp === 'k') midSp = /^[eiyl]/.test(end) ? 'k' : 'c';
+        const body = first + midSp + end;
+        if (badStart(on, body)) continue;
+        return { txt: spellOnset(on, body) + body, dbl: false };
+      }
+      return null;
+    }
+
+    function compound() {   // two one-syllable words joined, like sun+set or frost+bite
+      for (let t = 0; t < 200; t++) {
+        const a = mono(true), b = mono(true);
+        if (!a || !b || !b.on.length || a.txt === b.txt) continue;
+        const x = a.txt.slice(-1), y = b.txt[0];
+        const joint = a.txt.match(/[^aeiouy]*$/)[0].length + b.txt.match(/^[^aeiouy]*/)[0].length;
+        if (x === y || joint > 3 || (/[ck]/.test(x) && /[ckq]/.test(y))) continue;
+        return { txt: a.txt + b.txt, dbl: b.dbl };
+      }
+      return null;
+    }
+
+    // ---------- Morphology: English endings and their spelling rules ----------
+    const plural = w => /(s|x|z|sh|ch)$/.test(w) ? w + 'es' : /[^aeiou]y$/.test(w) ? w.slice(0, -1) + 'ies' : w + 's';
+    function vowelSuffix(s, suf) {   // carry -> carried, bake -> baked, stop -> stopped
+      const w = s.txt;
+      if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + 'i' + suf;
+      if (w.endsWith('e')) return w.slice(0, -1) + suf;
+      return s.dbl ? w + w.slice(-1) + suf : w + suf;
+    }
+    const adjective = s => s.mono && /([^aeiouwy]|[^aeiou]e)$/.test(s.txt) && R.chance(0.55) ? vowelSuffix(s, 'y') : s.txt;
+    const adverb = a => /ic$/.test(a) ? a + 'ally' : /[^aeiou]le$/.test(a) ? a.slice(0, -1) + 'y'
+      : /[^aeiou]y$/.test(a) ? a.slice(0, -1) + 'ily' : /ll$/.test(a) ? a + 'y' : a + 'ly';
+
+    // Rejects awkward spellings and offensive words (ROT13-encoded to keep the source clean).
+    const rot13 = s => s.replace(/[a-z]/g, c => String.fromCharCode((c.charCodeAt(0) - 84) % 26 + 97));
+    const BLOCK = ('shpx fuvg phag qvpx pbpx fyhg juber avt snt gjng cvff gvg phz encr cbea nany nahf qvyqb xvxr ' +
+      'fcvp puvax tbbx wvmm jnax ovgpu anmv frk qlxr ubzb pbba cnxv fcnm qntb wrj arteb jbt jbc wnc').split(' ').map(rot13);
+    const clean = w => !/(.)\1\1|[^aeiouy]{5}|[aeiou]{3}/.test(w) && !BLOCK.some(b => w.includes(b));
+
+    // ---------- Sentences ----------
+    // Roles: A adjective, N noun, P plural noun, VB verb, V3 verb+s, VD verb+ed, R adverb, # number.
+    const LEN = { N: [3, 9], A: [3, 9], P: [4, 10], VB: [3, 8], V3: [4, 9], VD: [5, 10], R: [6, 10] };
+    const SUF = { N: 0, A: 0.5, P: 1, VB: 0, V3: 1, VD: 2, R: 2.5 };
+    const PATTERNS = {
+      none: ['N', 'A N', 'N V3', 'N VD', 'VB P', 'A N V3', 'A N VD', 'N V3 P', 'N VD R', 'VB A P', 'A P VB',
+        'A N V3 P', 'A N VD R', 'N VD A P', 'A P VB R', 'A N VD A P'],
+      start: ['# P', '# A P', '# P VB', '# A P VB', '# P VB R', '# A P VB R'],        // 7 Brisk Frogs Jump
+      inside: ['VB # P', 'N VD # P', 'VB # A P', 'A N VD # P', 'N V3 # A P', 'A N V3 # A P'],   // Tom Ate 7 Frogs
+    };
+    PATTERNS.end = PATTERNS.none.map(p => p + ' #');
+    const SYMBOLS = '!@#$%&*-_+=?.';
+
+    function formWord(role, len) {
+      const base = len - SUF[role], verb = role[0] === 'V', adj = role === 'A' || role === 'R';
+      let kind = base < 5 ? R.map({ mono: 9, di: 1 }) : base < 6 ? R.map({ mono: 6, di: 4 })
+        : base < 7 ? R.map({ mono: 2, di: 5.5, comp: 2.5 }) : base < 8 ? R.map({ di: 5, comp: 5 }) : R.map({ di: 3.5, comp: 6.5 });
+      if (kind === 'comp' && (verb || adj)) kind = 'di';
+      const s = kind === 'mono' ? mono() : kind === 'di' ? di(verb ? 1 : adj ? 2 : 0) : compound();
+      if (!s) return null;
+      if (role === 'P' || role === 'V3') return plural(s.txt);
+      if (role === 'VD') return vowelSuffix(s, 'ed');
+      if (role === 'A') return adjective(s);
+      if (role === 'R') return adverb(adjective(s));
+      return s.txt;
+    }
+
+    function makeWord(role, len, used) {   // keep generating until a word of exactly this length comes out
+      for (let t = 0; t < 600; t++) {
+        const w = formWord(role, len);
+        if (w && w.length === len && !used.has(w) && clean(w)) return w;
+      }
+      return null;
+    }
+
+    function split(total, roles) {   // share the letter budget between the words
+      const lens = roles.map(r => LEN[r][0]);
+      for (let left = total - lens.reduce((a, b) => a + b, 0); left > 0; left--) {
+        const open = lens.map((_, i) => i).filter(i => lens[i] < LEN[roles[i]][1]);
+        if (!open.length) return null;
+        lens[R.pick(open)]++;
+      }
+      return lens;
+    }
+
+    function generatePassword(L, useSym, useNum) {
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const digits = useNum ? (L >= 10 && R.chance(0.6) ? 2 : 1) : 0;
+        const pos = useNum ? R.pick(['start', 'inside', 'end']) : 'none';
+        const symMode = useSym ? R.pick(['sep', 'start', 'end']) : '';
+        const options = [];
+        for (const p of PATTERNS[pos]) {
+          const slots = p.split(' '), roles = slots.filter(s => s !== '#');
+          if (symMode === 'sep' && slots.length < 2) continue;
+          const letters = L - digits - (symMode === 'sep' ? slots.length - 1 : symMode ? 1 : 0);
+          const [min, max] = roles.reduce(([a, b], r) => [a + LEN[r][0], b + LEN[r][1]], [0, 0]);
+          if (letters < min || letters > max) continue;
+          options.push({ slots, roles, letters, w: Math.exp(-((letters / roles.length - 5.5) ** 2) / 3) });
+        }
+        if (!options.length) continue;
+        const o = R.weighted(options, x => x.w), lens = split(o.letters, o.roles);
+        if (!lens) continue;
+        const used = new Set(), words = [];
+        for (let i = 0; i < o.roles.length; i++) {
+          const w = makeWord(o.roles[i], lens[i], used);
+          if (!w) break;
+          used.add(w);
+          words.push(w[0].toUpperCase() + w.slice(1));
+        }
+        if (words.length < o.roles.length) continue;
+        // A number in front of a plural noun is a count, so it is never 0 or 1.
+        const num = String(digits === 2 ? 10 + R.int(90) : pos === 'end' ? R.int(10) : 2 + R.int(8));
+        const sym = useSym ? R.pick([...SYMBOLS]) : '';
+        let wi = 0, pw = o.slots.map(s => s === '#' ? num : words[wi++]).join(symMode === 'sep' ? sym : '');
+        if (symMode === 'start') pw = sym + pw; else if (symMode === 'end') pw += sym;
+        if (pw.length === L) return pw;
+      }
+      return null;
+    }
+
+    // ---------- QR code: byte mode, error correction level M, versions 1-3 ----------
+    function qrMatrix(text) {
+      const bytes = [...new TextEncoder().encode(text)];
+      const CAP = [[16, 10], [28, 16], [44, 26]];   // [data, error-correction] codewords per version
+      let ver = 0;
+      while (ver < 2 && bytes.length > CAP[ver][0] - 2) ver++;
+      const [dc, ec] = CAP[ver], N = 21 + 4 * ver;
+
+      const bits = [];
+      const put = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push(v >>> i & 1); };
+      put(4, 4); put(bytes.length, 8); bytes.forEach(b => put(b, 8));
+      put(0, Math.min(4, dc * 8 - bits.length));
+      while (bits.length % 8) bits.push(0);
+      const data = [];
+      for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+      for (let pad = 0xEC; data.length < dc; pad ^= 0xFD) data.push(pad);
+
+      // Reed-Solomon error correction over GF(256)
+      const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= (y >>> i & 1) * x; } return z; };
+      const gen = new Array(ec).fill(0); gen[ec - 1] = 1;
+      for (let i = 0, root = 1; i < ec; i++, root = mul(root, 2))
+        for (let j = 0; j < ec; j++) { gen[j] = mul(gen[j], root); if (j + 1 < ec) gen[j] ^= gen[j + 1]; }
+      const rem = new Array(ec).fill(0);
+      for (const b of data) { const f = b ^ rem.shift(); rem.push(0); gen.forEach((c, i) => rem[i] ^= mul(c, f)); }
+      const cw = data.concat(rem);
+
+      // Function patterns: timing, finders, alignment, format info
+      const M = [], F = [];
+      for (let i = 0; i < N; i++) { M.push(new Array(N).fill(false)); F.push(new Array(N).fill(false)); }
+      const set = (x, y, dark) => { M[y][x] = dark; F[y][x] = true; };
+      for (let i = 0; i < N; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+      const finder = (cx, cy) => {
+        for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+          const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy));
+          if (x >= 0 && x < N && y >= 0 && y < N) set(x, y, d !== 2 && d !== 4);
+        }
+      };
+      finder(3, 3); finder(N - 4, 3); finder(3, N - 4);
+      if (ver > 0) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++)
+        set(N - 7 + dx, N - 7 + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      const format = mask => {
+        let r = mask;   // level M = 00, so the data is just the mask number
+        for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+        const b = ((mask << 10) | r) ^ 0x5412, bit = i => (b >>> i & 1) === 1;
+        for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+        set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+        for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+        for (let i = 0; i < 8; i++) set(N - 1 - i, 8, bit(i));
+        for (let i = 8; i < 15; i++) set(8, N - 15 + i, bit(i));
+        set(8, N - 8, true);
+      };
+      format(0);
+
+      // Data in the zig-zag column order
+      let k = 0;
+      for (let right = N - 1; right >= 1; right -= 2) {
+        if (right === 6) right = 5;
+        for (let vert = 0; vert < N; vert++) for (let j = 0; j < 2; j++) {
+          const x = right - j, y = ((right + 1) & 2) === 0 ? N - 1 - vert : vert;
+          if (!F[y][x] && k < cw.length * 8) { M[y][x] = (cw[k >>> 3] >>> (7 - (k & 7)) & 1) === 1; k++; }
+        }
+      }
+
+      // Try all 8 masks and keep the one with the lowest penalty
+      const masks = [(x, y) => (x + y) % 2 === 0, (x, y) => y % 2 === 0, x => x % 3 === 0, (x, y) => (x + y) % 3 === 0,
+        (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, (x, y) => x * y % 2 + x * y % 3 === 0,
+        (x, y) => (x * y % 2 + x * y % 3) % 2 === 0, (x, y) => ((x + y) % 2 + x * y % 3) % 2 === 0];
+      const apply = m => { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!F[y][x] && masks[m](x, y)) M[y][x] = !M[y][x]; };
+      let best = 0, bestScore = Infinity;
+      for (let m = 0; m < 8; m++) {
+        apply(m); format(m);
+        const s = qrPenalty(M);
+        if (s < bestScore) { bestScore = s; best = m; }
+        apply(m);
+      }
+      apply(best); format(best);
+      return M;
+    }
+
+    function qrPenalty(M) {
+      const N = M.length;
+      let p = 0, dark = 0;
+      const lines = [];
+      for (let i = 0; i < N; i++) {
+        let row = '', col = '';
+        for (let j = 0; j < N; j++) { row += +M[i][j]; col += +M[j][i]; dark += M[i][j]; }
+        lines.push(row, col);
+      }
+      for (const s of lines) {
+        for (const run of s.match(/0+|1+/g)) if (run.length >= 5) p += run.length - 2;
+        const padded = '0000' + s + '0000';
+        for (let i = 0; i + 11 <= padded.length; i++) {
+          const w = padded.substr(i, 11);
+          if (w === '00001011101' || w === '10111010000') p += 40;
+        }
+      }
+      for (let y = 0; y < N - 1; y++) for (let x = 0; x < N - 1; x++) {
+        const v = M[y][x];
+        if (v === M[y][x + 1] && v === M[y + 1][x] && v === M[y + 1][x + 1]) p += 3;
+      }
+      return p + Math.floor(Math.abs(dark * 20 / (N * N) - 10)) * 10;
+    }
+
+    // ---------- UI ----------
+    const $ = id => document.getElementById(id);
+    let current = '';
+
+    function render(pw) {
+      const out = $('pw');
+      out.textContent = '';
+      for (const ch of pw) {
+        const span = document.createElement('span');
+        span.textContent = ch;
+        if (/\d/.test(ch)) span.className = 'd';
+        else if (!/[a-z]/i.test(ch)) span.className = 's';
+        out.appendChild(span);
+      }
+    }
+
+    function drawQR(text) {
+      const M = qrMatrix(text), q = 4, scale = 8, cv = $('qr'), ctx = cv.getContext('2d');
+      cv.width = cv.height = (M.length + 2 * q) * scale;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = '#000';
+      M.forEach((row, y) => row.forEach((dark, x) => { if (dark) ctx.fillRect((x + q) * scale, (y + q) * scale, scale, scale); }));
+    }
+
+    function generate() {
+      const len = +$('len').value;
+      $('lenVal').textContent = len;
+      current = generatePassword(len, $('sym').checked, $('num').checked) || current;
+      render(current);
+      drawQR(current);
+    }
+
+    $('genBtn').addEventListener('click', generate);
+    $('len').addEventListener('input', generate);
+    $('sym').addEventListener('change', generate);
+    $('num').addEventListener('change', generate);
+    $('copyBtn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(current);
+      } catch {
+        const t = document.createElement('textarea');
+        t.value = current;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand('copy');
+        t.remove();
+      }
+      $('copyBtn').textContent = 'Copied!';
+      setTimeout(() => { $('copyBtn').textContent = 'Copy'; }, 1200);
     });
 
-    // TODO: implement clipboard copy
-    document.getElementById('copyBtn').addEventListener('click', () => {
-      alert('TODO: copy password to clipboard');
-    });
+    generate();
   </script>
 </body>
 </html>
