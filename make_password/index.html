@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Make Password</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap">
 <style>
   :root {
     --primary: #2563eb;
@@ -44,9 +45,10 @@
     margin-bottom: 16px;
   }
   .password-output {
-    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
     font-size: 22px;
-    letter-spacing: 0.5px;
+    font-weight: 500;
+    letter-spacing: 1px;
     background: var(--bg);
     border: 1px solid var(--surface2);
     border-radius: var(--radius);
@@ -92,6 +94,7 @@
   #qr { width: 200px; height: 200px; image-rendering: pixelated; border-radius: 8px; background: #fff; }
   .hint { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; }
   details summary { cursor: pointer; font-weight: 600; }
+  details.hint p { text-align: left; }
   details p { margin-top: 10px; }
 </style>
 </head>
@@ -99,13 +102,14 @@
   <div class="header"><h1>Make Password</h1></div>
 
   <main>
-    <div class="card">
-      <div class="password-output" id="pw" aria-live="polite"></div>
-      <div class="actions">
-        <button class="secondary" id="copyBtn">Copy</button>
-        <button id="genBtn">Generate</button>
-      </div>
-    </div>
+    <details class="card hint">
+      <summary>How the words are made</summary>
+      <p>No word or syllable lists are used. Each word is built from English sounds: a vowel framed by
+        consonant clusters that English sound rules allow (like <i>str-</i>, <i>bl-</i>, <i>-nt</i>, <i>-sk</i>),
+        then spelled with English spelling rules (silent e, ck / tch / dge, doubled letters).
+        Words are combined into short sentences with grammar endings (-s, -ed, -y, -ly), so they are easy to say.
+        Randomness comes from your browser's secure random generator, and nothing leaves this page.</p>
+    </details>
 
     <div class="card">
       <div class="option-row slider">
@@ -121,14 +125,13 @@
       <p class="hint">Scan to move the password to your phone.</p>
     </div>
 
-    <details class="card hint">
-      <summary>How the words are made</summary>
-      <p>No word or syllable lists are used. Each word is built from English sounds: a vowel framed by
-        consonant clusters that English sound rules allow (like <i>str-</i>, <i>bl-</i>, <i>-nt</i>, <i>-sk</i>),
-        then spelled with English spelling rules (silent e, ck / tch / dge, doubled letters).
-        Words are combined into short sentences with grammar endings (-s, -ed, -y, -ly), so they are easy to say.
-        Randomness comes from your browser's secure random generator, and nothing leaves this page.</p>
-    </details>
+    <div class="card">
+      <div class="password-output" id="pw" aria-live="polite"></div>
+      <div class="actions">
+        <button id="genBtn">🎲 Generate</button>
+        <button class="secondary" id="copyBtn">📋 Copy</button>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -564,8 +567,8 @@
         document.execCommand('copy');
         t.remove();
       }
-      $('copyBtn').textContent = 'Copied!';
-      setTimeout(() => { $('copyBtn').textContent = 'Copy'; }, 1200);
+      $('copyBtn').textContent = '✅ Copied!';
+      setTimeout(() => { $('copyBtn').textContent = '📋 Copy'; }, 1200);
     });
 
     generate();
