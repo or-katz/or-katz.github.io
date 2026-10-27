@@ -340,7 +340,9 @@
       inside: ['VB # P', 'N VD # P', 'VB # A P', 'A N VD # P', 'N V3 # A P', 'A N V3 # A P'],   // Tom Ate 7 Frogs
     };
     PATTERNS.end = PATTERNS.none.map(p => p + ' #');
-    const SYMBOLS = '!@#$%&*-_+=?.';
+    // Separators and leading symbols. ! and ? are punctuation: they only end a sentence (a pattern with a verb
+    // that doesn't end in a number), and a command like "Grab 7 Frogs" takes ! but not ?.
+    const SYMBOLS = '@#$%&*';
 
     function formWord(role, len) {
       const base = len - SUF[role], verb = role[0] === 'V', adj = role === 'A' || role === 'R';
@@ -401,7 +403,9 @@
         if (words.length < o.roles.length) continue;
         // A number in front of a plural noun is a count, so it is never 0 or 1.
         const num = String(digits === 2 ? 10 + R.int(90) : pos === 'end' ? R.int(10) : 2 + R.int(8));
-        const sym = useSym ? R.pick([...SYMBOLS]) : '';
+        const sentence = o.slots.some(s => s[0] === 'V') && o.slots.at(-1) !== '#';
+        const punct = symMode === 'end' && sentence ? (o.slots[0] === 'VB' ? '!' : '!?') : '';
+        const sym = useSym ? R.pick([...SYMBOLS + punct]) : '';
         let wi = 0, pw = o.slots.map(s => s === '#' ? num : words[wi++]).join(symMode === 'sep' ? sym : '');
         if (symMode === 'start') pw = sym + pw; else if (symMode === 'end') pw += sym;
         if (pw.length === L) return pw;
