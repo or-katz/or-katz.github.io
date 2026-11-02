@@ -131,6 +131,7 @@
         <button id="genBtn">🎲 Generate</button>
         <button class="secondary" id="copyBtn">📋 Copy</button>
       </div>
+      <p class="hint" id="saved" style="margin-top: 12px;"></p>
     </div>
   </main>
 
@@ -550,6 +551,61 @@
       current = generatePassword(len, $('sym').checked, $('num').checked) || current;
       render(current);
       drawQR(current);
+      if (current) savePassword(current);
+    }
+
+    // ---------- Encrypted local save: kept for a week after the last visit ----------
+    // AES-GCM with a browser-generated, non-extractable key kept in IndexedDB; localStorage only holds ciphertext.
+    const WEEK = 7 * 24 * 3600 * 1000, STORE = 'make-password-saved';
+    const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+    const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const expBytes = exp => new TextEncoder().encode(String(exp));   // binds the expiry to the ciphertext
+
+    async function getKey() {
+      const db = await new Promise((res, rej) => {
+        const r = indexedDB.open('make-password', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('keys');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+      const req = (mode, fn) => new Promise((res, rej) => {
+        const q = fn(db.transaction('keys', mode).objectStore('keys'));
+        q.onsuccess = () => res(q.result);
+        q.onerror = () => rej(q.error);
+      });
+      let key = await req('readonly', s => s.get('aes'));
+      if (!key) {
+        key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+        await req('readwrite', s => s.put(key, 'aes'));
+      }
+      return key;
+    }
+
+    async function savePassword(pw) {
+      try {
+        const exp = Date.now() + WEEK, iv = crypto.getRandomValues(new Uint8Array(12));
+        const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: expBytes(exp) },
+          await getKey(), new TextEncoder().encode(pw));
+        localStorage.setItem(STORE, JSON.stringify({ exp, iv: b64(iv), ct: b64(ct) }));
+        $('saved').textContent = '🔒 Saved encrypted on this device until ' +
+          new Date(exp).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) + ' (renews each visit)';
+      } catch {
+        $('saved').textContent = 'This browser does not allow saving the password.';
+      }
+    }
+
+    async function loadPassword() {
+      try {
+        const s = JSON.parse(localStorage.getItem(STORE));
+        if (!s) return null;
+        if (Date.now() > s.exp) { localStorage.removeItem(STORE); return null; }
+        const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(s.iv), additionalData: expBytes(s.exp) },
+          await getKey(), unb64(s.ct));
+        return new TextDecoder().decode(pt);
+      } catch {
+        try { localStorage.removeItem(STORE); } catch {}
+        return null;
+      }
     }
 
     $('genBtn').addEventListener('click', generate);
@@ -571,7 +627,17 @@
       setTimeout(() => { $('copyBtn').textContent = '📋 Copy'; }, 1200);
     });
 
-    generate();
+    (async () => {   // show the saved password if it's still valid, otherwise make a new one
+      const saved = await loadPassword();
+      if (!saved) return generate();
+      $('len').value = $('lenVal').textContent = saved.length;
+      $('sym').checked = /[^a-z0-9]/i.test(saved);
+      $('num').checked = /\d/.test(saved);
+      current = saved;
+      render(saved);
+      drawQR(saved);
+      savePassword(saved);
+    })();
   </script>
 </body>
 </html>
