@@ -344,7 +344,7 @@
       inside: ['VB # P', 'N VD # P', 'VB # A P', 'A N VD # P', 'N V3 # A P', 'A N V3 # A P'],   // Tom Ate 7 Frogs
     };
     PATTERNS.end = PATTERNS.none.map(p => p + ' #');
-    // Separators and leading symbols. ! and ? are punctuation: they only end a sentence (a pattern with a verb
+    // Separators and trailing symbols (never the first character). ! and ? are punctuation: they only end a sentence (a pattern with a verb
     // that doesn't end in a number), and a command like "Grab 7 Frogs" takes ! but not ?.
     const SYMBOLS = '@#$%&*';
 
@@ -384,7 +384,7 @@
       for (let attempt = 0; attempt < 200; attempt++) {
         const digits = useNum ? (L >= 10 && R.chance(0.6) ? 2 : 1) : 0;
         const pos = useNum ? R.pick(['start', 'inside', 'end']) : 'none';
-        const symMode = useSym ? R.pick(['sep', 'start', 'end']) : '';
+        const symMode = useSym ? R.pick(['sep', 'end']) : '';
         const options = [];
         for (const p of PATTERNS[pos]) {
           const slots = p.split(' '), roles = slots.filter(s => s !== '#');
@@ -411,7 +411,7 @@
         const punct = symMode === 'end' && sentence ? (o.slots[0] === 'VB' ? '!' : '!?') : '';
         const sym = useSym ? R.pick([...SYMBOLS + punct]) : '';
         let wi = 0, pw = o.slots.map(s => s === '#' ? num : words[wi++]).join(symMode === 'sep' ? sym : '');
-        if (symMode === 'start') pw = sym + pw; else if (symMode === 'end') pw += sym;
+        if (symMode === 'end') pw += sym;
         if (pw.length === L) return pw;
       }
       return null;
