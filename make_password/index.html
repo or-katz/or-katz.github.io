@@ -340,7 +340,6 @@
     const PATTERNS = {
       none: ['N', 'A N', 'N V3', 'N VD', 'VB P', 'A N V3', 'A N VD', 'N V3 P', 'N VD R', 'VB A P', 'A P VB',
         'A N V3 P', 'A N VD R', 'N VD A P', 'A P VB R', 'A N VD A P'],
-      start: ['# P', '# A P', '# P VB', '# A P VB', '# P VB R', '# A P VB R'],        // 7 Brisk Frogs Jump
       inside: ['VB # P', 'N VD # P', 'VB # A P', 'A N VD # P', 'N V3 # A P', 'A N V3 # A P'],   // Tom Ate 7 Frogs
     };
     PATTERNS.end = PATTERNS.none.map(p => p + ' #');
@@ -383,7 +382,7 @@
     function generatePassword(L, useSym, useNum) {
       for (let attempt = 0; attempt < 200; attempt++) {
         const digits = useNum ? (L >= 10 && R.chance(0.6) ? 2 : 1) : 0;
-        const pos = useNum ? R.pick(['start', 'inside', 'end']) : 'none';
+        const pos = useNum ? R.pick(['inside', 'end']) : 'none';
         const symMode = useSym ? R.pick(['sep', 'end']) : '';
         const options = [];
         for (const p of PATTERNS[pos]) {
